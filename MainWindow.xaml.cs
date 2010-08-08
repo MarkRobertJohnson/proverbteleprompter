@@ -31,9 +31,13 @@ namespace ProverbTeleprompter
     {
         private DispatcherTimer _scrollTimer;
 
+        private TalentWindow _talentWindow;
+
         private bool _configInitialized;
 
         private double _speed = 0;
+
+        private double _defaultSpeed = 1;
 
         private double _speedBoostAmount = 0;
 
@@ -93,6 +97,8 @@ namespace ProverbTeleprompter
             }
         }
 
+        public static FrameworkElement PromptView { get; set; }
+
         public MainWindow()
         {
             InitializeComponent();
@@ -105,6 +111,8 @@ namespace ProverbTeleprompter
 
             Loaded += new RoutedEventHandler(MainWindow_Loaded);
 
+            Closing += new System.ComponentModel.CancelEventHandler(MainWindow_Closing);
+
             //Main scroll loop timer
             _scrollTimer = new DispatcherTimer();
             _scrollTimer.Interval = new TimeSpan(0, 0, 0, 0, 10);
@@ -112,29 +120,40 @@ namespace ProverbTeleprompter
             _scrollTimer.Tick += new EventHandler(_scrollTimer_Tick);
             _scrollTimer.Start();
 
+            PromptView = MainScroller;
+
+ 
     
             RemoteHandler.RemoteButtonPressed += new EventHandler<RemoteButtonPressedEventArgs>(RemoteHandler_RemoteButtonPressed);
+        }
+
+        void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if(_talentWindow != null)
+            {
+                _talentWindow.Close();
+            }
         }
 
         void MainWindow_KeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Down)
             {
-                SpeedSlider.Value = 1;
+                SpeedSlider.Value = _defaultSpeed;
                 //SpeedSlider.Value -= TotalBoostAmount;
                 _speedBoostAmount = 0;
                 TotalBoostAmount = 0;
             }
             else if (e.Key == Key.Up)
             {
-                SpeedSlider.Value = 1;
+                SpeedSlider.Value = _defaultSpeed;
                // SpeedSlider.Value -= TotalBoostAmount;
                 _speedBoostAmount = 0;
                 TotalBoostAmount = 0;
             }
             else if (e.Key == Key.Next)
             {
-                SpeedSlider.Value = 1;
+                SpeedSlider.Value = _defaultSpeed;
                 //SpeedSlider.Value -= TotalBoostAmount;
                 _speedBoostAmount = 0;
                 TotalBoostAmount = 0;
@@ -142,7 +161,7 @@ namespace ProverbTeleprompter
             else if (e.Key == Key.Prior)
             {
                 //SpeedSlider.Value -= TotalBoostAmount;
-                SpeedSlider.Value = 1;
+                SpeedSlider.Value = _defaultSpeed;
                 _speedBoostAmount = 0;
                 TotalBoostAmount = 0;
             }
@@ -346,6 +365,7 @@ namespace ProverbTeleprompter
             if (speed != null)
             {
                 SpeedSlider.Value = Double.Parse(speed);
+                _defaultSpeed = SpeedSlider.Value;
             }
 
 
@@ -537,6 +557,83 @@ namespace ProverbTeleprompter
         private void PausedCheckbox_Unchecked(object sender, RoutedEventArgs e)
         {
             SpeedSlider.Value = DesiredSpeed;
+        }
+
+        private void SetDefaultSpeedButton_Click(object sender, RoutedEventArgs e)
+        {
+            AppConfigHelper.SetAppSetting("Speed", SpeedSlider.Value.ToString());
+            _defaultSpeed = SpeedSlider.Value;
+        }
+
+        private void ToggleTalentWindowButton_Click(object sender, RoutedEventArgs e)
+        {
+
+            ToggleTalentWindow();
+        }
+
+        private void ToggleTalentWindow()
+        {
+            if (_talentWindow == null)
+            {
+                _talentWindow = new TalentWindow();
+                //_talentWindow.Owner = this;
+                _talentWindow.Closed += new EventHandler(_talentWindow_Closed);
+                _talentWindow.Show();
+
+                FlipAndMirrorTalentWindow(FlipAndMirrorCheckBox.IsChecked.GetValueOrDefault());
+
+                ToggleTalentWindowButton.Content = "Hide Talent Window";
+
+            }
+            else
+            {
+                HideTalentWindow();
+            }
+        }
+
+        void _talentWindow_Closed(object sender, EventArgs e)
+        {
+            _talentWindow = null;
+            HideTalentWindow();
+        }
+
+        private void HideTalentWindow()
+        {
+            if(_talentWindow != null)
+            {
+                _talentWindow.Close();
+            }
+            ToggleTalentWindowButton.Content = "Show Talent Window";
+
+        }
+
+        private void FlipAndMirrorTalentWindow(bool isFlippedAndMirrored)
+        {
+            if (_talentWindow != null)
+            {
+                if (isFlippedAndMirrored)
+                {
+                    _talentWindow.TalentRotate.Angle = 180;
+                    _talentWindow.TalentScale.ScaleX = -1;
+                }
+                else
+                {
+                    _talentWindow.TalentRotate.Angle = 0;
+                    _talentWindow.TalentScale.ScaleX = 1;
+                }
+
+            }
+        }
+
+
+        private void FlipAndMirrorCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            FlipAndMirrorTalentWindow(FlipAndMirrorCheckBox.IsChecked.GetValueOrDefault());
+        }
+
+        private void FlipAndMirrorCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            FlipAndMirrorTalentWindow(FlipAndMirrorCheckBox.IsChecked.GetValueOrDefault());
         }
 
     }
