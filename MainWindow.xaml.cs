@@ -111,6 +111,10 @@ namespace ProverbTeleprompter
 
             Loaded += new RoutedEventHandler(MainWindow_Loaded);
 
+            PreviewKeyDown += new KeyEventHandler(MainWindow_PreviewKeyDown);
+
+            PreviewKeyUp += new KeyEventHandler(MainWindow_PreviewKeyUp);
+
             Closing += new System.ComponentModel.CancelEventHandler(MainWindow_Closing);
 
             //Main scroll loop timer
@@ -124,7 +128,17 @@ namespace ProverbTeleprompter
 
  
     
-            RemoteHandler.RemoteButtonPressed += new EventHandler<RemoteButtonPressedEventArgs>(RemoteHandler_RemoteButtonPressed);
+           // RemoteHandler.RemoteButtonPressed += new EventHandler<RemoteButtonPressedEventArgs>(RemoteHandler_RemoteButtonPressed);
+        }
+
+        void MainWindow_PreviewKeyUp(object sender, KeyEventArgs e)
+        {
+            
+        }
+
+        void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            
         }
 
         void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -204,8 +218,8 @@ namespace ProverbTeleprompter
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             //Setup event handler for remote control buttons (multi media buttons)
-            HwndSource source = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
-            source.AddHook(new HwndSourceHook(RemoteHandler.WndProc));
+            //HwndSource source = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
+            //source.AddHook(new HwndSourceHook(RemoteHandler.WndProc));
         }
 
         private void PageDown()
@@ -258,6 +272,7 @@ namespace ProverbTeleprompter
             {
                 ScrollToTop();
             }
+            
         }
 
         private void PauseScrolling()
@@ -373,6 +388,30 @@ namespace ProverbTeleprompter
             if(!string.IsNullOrWhiteSpace(_documentPath) && File.Exists(_documentPath))
             {
                 LoadDocument(_documentPath);
+            }
+
+            var value = ConfigurationManager.AppSettings["FlipTalentWindowVert"];
+            if(!string.IsNullOrWhiteSpace(value))
+            {
+                FlipTalentWindowVertCheckBox.IsChecked = bool.Parse(value);
+            }
+
+            value = ConfigurationManager.AppSettings["FlipTalentWindowHoriz"];
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                FlipTalentWindowHorizCheckBox.IsChecked = bool.Parse(value);
+            }
+
+            value = ConfigurationManager.AppSettings["FlipMainWindowVert"];
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                FlipMainWindowVertCheckBox.IsChecked = bool.Parse(value);
+            }
+
+            value = ConfigurationManager.AppSettings["FlipMainWindowHoriz"];
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                FlipMainWindowHorizCheckBox.IsChecked = bool.Parse(value);
             }
         }
 
@@ -576,11 +615,14 @@ namespace ProverbTeleprompter
             if (_talentWindow == null)
             {
                 _talentWindow = new TalentWindow();
-                //_talentWindow.Owner = this;
+                _talentWindow.Owner = this;
                 _talentWindow.Closed += new EventHandler(_talentWindow_Closed);
+                _talentWindow.KeyDown += MainWindow_KeyDown;
+                _talentWindow.KeyUp += MainWindow_KeyUp;
                 _talentWindow.Show();
 
-                FlipAndMirrorTalentWindow(FlipAndMirrorCheckBox.IsChecked.GetValueOrDefault());
+                FlipTalentWindowVert(FlipTalentWindowVertCheckBox.IsChecked.GetValueOrDefault());
+                FlipTalentWindowHoriz(FlipTalentWindowHorizCheckBox.IsChecked.GetValueOrDefault());
 
                 ToggleTalentWindowButton.Content = "Hide Talent Window";
 
@@ -606,34 +648,118 @@ namespace ProverbTeleprompter
             ToggleTalentWindowButton.Content = "Show Talent Window";
 
         }
-
-        private void FlipAndMirrorTalentWindow(bool isFlippedAndMirrored)
+        [PreEmptive.Attributes.Feature("FlipTalentWindowVert")]
+        private void FlipTalentWindowVert(bool isFlippedVert)
         {
             if (_talentWindow != null)
             {
-                if (isFlippedAndMirrored)
+                if (isFlippedVert)
                 {
-                    _talentWindow.TalentRotate.Angle = 180;
+                    _talentWindow.TalentScale.ScaleY = -1;
+                }
+                else
+                {
+                    _talentWindow.TalentScale.ScaleY = 1;
+                }
+
+            }
+
+            AppConfigHelper.SetAppSetting("FlipTalentWindowVert", isFlippedVert.ToString());
+        }
+
+        [PreEmptive.Attributes.Feature("FlipTalentWindowHoriz")]
+        private void FlipTalentWindowHoriz(bool isFlippedHoriz)
+        {
+            if (_talentWindow != null)
+            {
+                if (isFlippedHoriz)
+                {
                     _talentWindow.TalentScale.ScaleX = -1;
                 }
                 else
                 {
-                    _talentWindow.TalentRotate.Angle = 0;
                     _talentWindow.TalentScale.ScaleX = 1;
                 }
 
             }
+
+            AppConfigHelper.SetAppSetting("FlipTalentWindowHoriz", isFlippedHoriz.ToString());
         }
 
 
-        private void FlipAndMirrorCheckBox_Checked(object sender, RoutedEventArgs e)
+        [PreEmptive.Attributes.Feature("FlipMainWindowVert")]
+        private void FlipMainWindowVert(bool isFlippedVert)
         {
-            FlipAndMirrorTalentWindow(FlipAndMirrorCheckBox.IsChecked.GetValueOrDefault());
+
+            if (isFlippedVert)
+            {
+                MainScale.ScaleY = -1;
+            }
+            else
+            {
+                MainScale.ScaleY = 1;
+            }
+
+            AppConfigHelper.SetAppSetting("FlipMainWindowVert", isFlippedVert.ToString());
         }
 
-        private void FlipAndMirrorCheckBox_Unchecked(object sender, RoutedEventArgs e)
+
+        [PreEmptive.Attributes.Feature("FlipMainWindowHoriz")]
+        private void FlipMainWindowHoriz(bool isFlippedHoriz)
         {
-            FlipAndMirrorTalentWindow(FlipAndMirrorCheckBox.IsChecked.GetValueOrDefault());
+
+            if (isFlippedHoriz)
+            {
+                MainScale.ScaleX = -1;
+            }
+            else
+            {
+                MainScale.ScaleX = 1;
+            }
+
+            AppConfigHelper.SetAppSetting("FlipMainWindowHoriz", isFlippedHoriz.ToString());
+        }
+
+
+
+        private void FlipTalentWindowVertCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            FlipTalentWindowVert(FlipTalentWindowVertCheckBox.IsChecked.GetValueOrDefault());
+        }
+
+        private void FlipTalentWindowVertCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            FlipTalentWindowVert(FlipTalentWindowVertCheckBox.IsChecked.GetValueOrDefault());
+        }
+
+        private void FlipTalentWindowHorizCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            FlipTalentWindowHoriz(FlipTalentWindowHorizCheckBox.IsChecked.GetValueOrDefault());
+        }
+
+        private void FlipTalentWindowHorizCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            FlipTalentWindowHoriz(FlipTalentWindowHorizCheckBox.IsChecked.GetValueOrDefault());
+        }
+
+        private void FlipMainWindowVertCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            FlipMainWindowVert(FlipMainWindowVertCheckBox.IsChecked.GetValueOrDefault());
+        }
+
+        private void FlipMainWindowVertCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            FlipMainWindowVert(FlipMainWindowVertCheckBox.IsChecked.GetValueOrDefault());
+        }
+
+        private void FlipMainWindowHorizCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            FlipMainWindowHoriz(FlipMainWindowHorizCheckBox.IsChecked.GetValueOrDefault());
+        }
+
+        private void FlipMainWindowHorizCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            FlipMainWindowHoriz(FlipMainWindowHorizCheckBox.IsChecked.GetValueOrDefault());
         }
 
     }

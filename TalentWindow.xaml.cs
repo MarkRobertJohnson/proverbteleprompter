@@ -21,6 +21,10 @@ namespace ProverbTeleprompter
         public TalentWindow()
         {
             InitializeComponent();
+
+
         }
+
+
     }
 }
