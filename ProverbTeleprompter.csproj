@@ -80,14 +80,9 @@
     <Compile Include="TalentWindow.xaml.cs">
       <DependentUpon>TalentWindow.xaml</DependentUpon>
     </Compile>
-    <Page Include="CustomColorPicker.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="CustomColorSelector.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
+    <Compile Include="TalentWindow2.xaml.cs">
+      <DependentUpon>TalentWindow2.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -97,17 +92,15 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AppConfigHelper.cs" />
-    <Compile Include="CustomColorPicker.xaml.cs">
-      <DependentUpon>CustomColorPicker.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="CustomColorSelector.xaml.cs">
-      <DependentUpon>CustomColorSelector.xaml</DependentUpon>
-    </Compile>
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Page Include="TalentWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TalentWindow2.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -136,9 +129,9 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\image.png" />
+    <None Include="Resources\Proverbs 1.rtf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\MtOlivetLogo_Rotate_0006.png" />

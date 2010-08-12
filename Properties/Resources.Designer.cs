@@ -60,10 +60,14 @@ namespace ProverbTeleprompter.Properties {
             }
         }
         
-        internal static System.Drawing.Bitmap ColorSwatchCircle {
+        /// <summary>
+        ///   Looks up a localized string similar to {\rtf1\ansi\ansicpg1252\uc1\htmautsp\deff2{\fonttbl{\f0\fcharset0 Times New Roman;}{\f2\fcharset0 Segoe UI;}{\f3\fcharset0 Calibri;}}{\colortbl\red0\green0\blue0;\red255\green255\blue255;\red255\green192\blue0;\red0\green77\blue187;\red0\green0\blue255;\red109\green109\blue109;}\loch\hich\dbch\pard\plain\ltrpar\itap0{\lang1033\fs162\f2\cf0 \cf0\ql{\f0\b {\cf1\ltrch }\li0\ri0\sa100\sb100\fi0\ql\par}
+        ///{\f0\b {\cf1\ltrch }\li0\ri0\sa100\sb100\fi0\ql\par}
+        ///{\f0\b {\cf2\ltrch Proverbs 1}\li0\ri0\sa100\sb100\fi0\ [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string Proverbs_1 {
             get {
-                object obj = ResourceManager.GetObject("ColorSwatchCircle", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
+                return ResourceManager.GetString("Proverbs_1", resourceCulture);
             }
         }
     }

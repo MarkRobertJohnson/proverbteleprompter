@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -19,8 +20,11 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using Tools.API.Messages.lParam;
+using DataFormats = System.Windows.DataFormats;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using KeyEventHandler = System.Windows.Input.KeyEventHandler;
+using MessageBox = System.Windows.MessageBox;
+using Path = System.IO.Path;
 
 namespace ProverbTeleprompter
 {
@@ -124,7 +128,7 @@ namespace ProverbTeleprompter
             _scrollTimer.Tick += new EventHandler(_scrollTimer_Tick);
             _scrollTimer.Start();
 
-            PromptView = MainScroller;
+            PromptView = MainTextBox;
 
  
     
@@ -224,12 +228,12 @@ namespace ProverbTeleprompter
 
         private void PageDown()
         {
-            MainScroller.ScrollToVerticalOffset(MainScroller.VerticalOffset + (MainScroller.ActualHeight - MainScroller.ActualHeight * 0.5));
+            MainTextBox.ScrollToVerticalOffset(MainTextBox.VerticalOffset + (MainTextBox.ActualHeight - MainTextBox.ActualHeight * 0.5));
         }
 
         private void PageUp()
         {
-            MainScroller.ScrollToVerticalOffset(MainScroller.VerticalOffset - (MainScroller.ActualHeight - MainScroller.ActualHeight * 0.5));
+            MainTextBox.ScrollToVerticalOffset(MainTextBox.VerticalOffset - (MainTextBox.ActualHeight - MainTextBox.ActualHeight * 0.5));
         }
 
 
@@ -287,7 +291,7 @@ namespace ProverbTeleprompter
 
         private void ScrollToTop()
         {
-            MainScroller.ScrollToVerticalOffset(0);
+            MainTextBox.ScrollToVerticalOffset(0);
         }
 
         private void ShowTools()
@@ -335,14 +339,17 @@ namespace ProverbTeleprompter
 
             if (!PausedCheckbox.IsChecked.GetValueOrDefault())
             {
-                MainScroller.ScrollToVerticalOffset(MainScroller.VerticalOffset + SpeedSlider.Value);
+                MainTextBox.ScrollToVerticalOffset(MainTextBox.VerticalOffset + SpeedSlider.Value);
             }
             else
             {
-                MainScroller.ScrollToVerticalOffset(MainScroller.VerticalOffset + _totalBoostAmount);
+                MainTextBox.ScrollToVerticalOffset(MainTextBox.VerticalOffset + _totalBoostAmount);
             }
 
-            PercentComplete.Text = string.Format("{0:F}%", (MainScroller.VerticalOffset / MainScroller.ScrollableHeight) * 100);
+            PercentComplete.Text = string.Format("{0:F}%", (MainTextBox.VerticalOffset / MainTextBox.ExtentHeight) * 100);
+            LayoutRoot.UseLayoutRounding = true;
+            LayoutRoot.SnapsToDevicePixels = true;
+            RenderOptions.SetEdgeMode(LayoutRoot, EdgeMode.Aliased);
             
 
         }
@@ -373,7 +380,7 @@ namespace ProverbTeleprompter
             var fontSize = ConfigurationManager.AppSettings["FontSize"];
             if(fontSize != null)
             {
-                FontSizeSlider.Value = Double.Parse(fontSize);
+                SetFontSize(Double.Parse(fontSize));
             }
 
             var speed = ConfigurationManager.AppSettings["Speed"];
@@ -388,6 +395,15 @@ namespace ProverbTeleprompter
             if(!string.IsNullOrWhiteSpace(_documentPath) && File.Exists(_documentPath))
             {
                 LoadDocument(_documentPath);
+            }
+            else
+            {
+                //Load default text
+                using(MemoryStream ms = new MemoryStream(Encoding.Default.GetBytes(Properties.Resources.Proverbs_1)))
+                {
+                   
+                    LoadDocument(ms, DataFormats.Rtf);
+                }
             }
 
             var value = ConfigurationManager.AppSettings["FlipTalentWindowVert"];
@@ -417,18 +433,27 @@ namespace ProverbTeleprompter
 
         private void BlackOnWhiteButton_Checked(object sender, RoutedEventArgs e)
         {
-            MainFlowDocument.Background = Brushes.White;
-            TextRange range = new TextRange(MainTextBox.Document.ContentStart, MainTextBox.Document.ContentEnd);
-            //range.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.White);
-
-            //DocumentHelpers.ChangeTextColor(MainFlowDocument, Brushes.Black, Brushes.White);
-            DocumentHelpers.ChangePropertyValue(MainFlowDocument, TextElement.ForegroundProperty, Brushes.Black, Brushes.White);
-            DocumentHelpers.ChangePropertyValue(MainFlowDocument, TextElement.BackgroundProperty, Brushes.White, Brushes.Black);
-            if (_configInitialized)
-                AppConfigHelper.SetAppSetting("ColorScheme", "BlackOnWhite");
+            SetBlackOnWhite();
         }
 
         private void WhiteOnBlackButton_Checked(object sender, RoutedEventArgs e)
+        {
+            SetWhiteOnBlack();
+        }
+
+        private void SetColorScheme()
+        {
+            if(BlackOnWhiteButton.IsChecked.GetValueOrDefault())
+            {
+                SetBlackOnWhite();
+            }
+            else if(WhiteOnBlackButton.IsChecked.GetValueOrDefault())
+            {
+                SetWhiteOnBlack();
+            }
+        }
+
+        private void SetWhiteOnBlack()
         {
 
             MainFlowDocument.Background = Brushes.Black;
@@ -443,15 +468,35 @@ namespace ProverbTeleprompter
                 AppConfigHelper.SetAppSetting("ColorScheme", "WhiteOnBlack");
         }
 
+        private  void SetBlackOnWhite()
+        {
+            MainFlowDocument.Background = Brushes.White;
+            TextRange range = new TextRange(MainTextBox.Document.ContentStart, MainTextBox.Document.ContentEnd);
+            //range.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.White);
+
+            //DocumentHelpers.ChangeTextColor(MainFlowDocument, Brushes.Black, Brushes.White);
+            DocumentHelpers.ChangePropertyValue(MainFlowDocument, TextElement.ForegroundProperty, Brushes.Black, Brushes.White);
+            DocumentHelpers.ChangePropertyValue(MainFlowDocument, TextElement.BackgroundProperty, Brushes.White, Brushes.Black);
+            if (_configInitialized)
+                AppConfigHelper.SetAppSetting("ColorScheme", "BlackOnWhite");
+        }
+
 
         private void FontSizeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if(_configInitialized)
                 AppConfigHelper.SetAppSetting("FontSize", e.NewValue.ToString());
+            if(e.NewValue != e.OldValue)
+                SetFontSize(e.NewValue);
 
+        }
+
+        private void SetFontSize(double newSize)
+        {
             TextRange range = new TextRange(MainTextBox.Document.ContentStart, MainTextBox.Document.ContentEnd);
-            range.ApplyPropertyValue(TextElement.FontSizeProperty, e.NewValue);
+            range.ApplyPropertyValue(TextElement.FontSizeProperty, newSize);
 
+            FontSizeSlider.Value = newSize;
         }
 
         private void SpeedSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -480,7 +525,8 @@ namespace ProverbTeleprompter
             
             if(!string.IsNullOrWhiteSpace(documentPath))
             {
-                dlg.FileName = documentPath; 
+                dlg.FileName = Path.GetFileName(documentPath);
+                dlg.InitialDirectory = Path.GetDirectoryName(documentPath);
  
             }
             else
@@ -491,7 +537,7 @@ namespace ProverbTeleprompter
 
             dlg.DefaultExt = ".rtf"; // Default file extension 
 
-            dlg.Filter = "Rich Text Documents (.rtf)|*.rtf"; // Filter files by extension 
+            dlg.Filter = "Rich Text Documents|*.rtf"; // Filter files by extension 
 
             // Show save file dialog box 
 
@@ -542,21 +588,92 @@ namespace ProverbTeleprompter
         }
 
 
+
+        private void LoadDocumentDialog(string documentPath)
+        {
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+
+            if (!string.IsNullOrWhiteSpace(documentPath))
+            {
+                dlg.FileName = Path.GetFileName(documentPath);
+                dlg.InitialDirectory = Path.GetDirectoryName(documentPath);
+                dlg.Multiselect = false;
+                dlg.Title = "Load document for Proverb Teleprompter...";
+            }
+
+
+
+            dlg.DefaultExt = ".rtf"; // Default file extension 
+
+            dlg.Filter = "Rich Text Documents|*.rtf|XAML Documents|*.xaml|Text Documents|*.txt"; // Filter files by extension 
+
+            // Show save file dialog box 
+
+            Nullable<bool> result = dlg.ShowDialog();
+            // Process open file dialog box results 
+
+            if (result == true)
+            {
+
+                // Load document 
+
+                _documentPath = dlg.FileName;
+
+                if (!string.IsNullOrWhiteSpace(_documentPath))
+                {
+                    LoadDocument(_documentPath);
+                }
+
+                AppConfigHelper.SetAppSetting("DocumentPath", _documentPath);
+                InitializeConfig();
+                SetColorScheme();
+            }
+
+
+        }
+
+
+        private void LoadDocument(Stream fileStream, string dataFormat)
+        {
+            try
+            {
+                TextRange range = new TextRange(MainTextBox.Document.ContentStart, MainTextBox.Document.ContentEnd);
+
+                range.Load(fileStream, dataFormat);
+
+            }
+            catch (ArgumentException ex)
+            {
+                MessageBox.Show("Unsupported file type.");
+            }
+        }
+
+
         private void LoadDocument(string fullFilePath)
         {
             try
             {
-                TextRange range;
+                string ext = Path.GetExtension(fullFilePath).ToLowerInvariant();
+                string dataFormat = DataFormats.Rtf;
+                if (ext.EndsWith("xaml"))
+                {
+                    dataFormat = DataFormats.Xaml;
+                }
+                else if(ext.EndsWith("txt"))
+                {
+                    dataFormat = DataFormats.Text;
+                }
 
-                FileStream fStream;
+                using (FileStream fStream = new FileStream(fullFilePath, FileMode.Open))
+                {
+                    LoadDocument(fStream, dataFormat);
+                }
 
-                range = new TextRange(MainTextBox.Document.ContentStart, MainTextBox.Document.ContentEnd);
 
-                fStream = new FileStream(fullFilePath, FileMode.Open);
+                //SetColorScheme();
+                
 
-                range.Load(fStream, System.Windows.DataFormats.Rtf);
 
-                fStream.Close();
             }
             catch (Exception ex)
             {
@@ -761,6 +878,12 @@ namespace ProverbTeleprompter
         {
             FlipMainWindowHoriz(FlipMainWindowHorizCheckBox.IsChecked.GetValueOrDefault());
         }
+
+        private void LoadFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            LoadDocumentDialog(_documentPath);
+        }
+
 
     }
 }
