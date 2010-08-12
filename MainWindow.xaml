@@ -1,9 +1,9 @@
-﻿<Window xmlns:my="clr-namespace:DropDownCustomColorPicker"  x:Class="ProverbTeleprompter.MainWindow"
+﻿<Window   x:Class="ProverbTeleprompter.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Name="LayoutRoot"
         Title="Proverb Teleprompter" Height="716" Width="1032" WindowStyle="None" 
-        AllowsTransparency="True" Background="Transparent"
-        WindowState="Maximized" Foreground="Black" ResizeMode="CanResizeWithGrip">
+        WindowState="Maximized" Foreground="Black" ResizeMode="CanResize">
     <Window.Resources>
         <Storyboard x:Key="ToolFlyout" Storyboard.Target="{Binding ElementName=ToolBorder}"
                                                         Storyboard.TargetProperty="Width">
@@ -28,21 +28,19 @@
         </Storyboard>
         <ImageBrush x:Key="Brush1" Opacity="0.1"  ImageSource="Resources/MtOlivetLogo_Rotate_0006.png" Stretch="UniformToFill" />
     </Window.Resources>
-    <Grid Margin="6">
+    <Grid >
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <Border RenderTransformOrigin="0.5,0.5">
-            <ScrollViewer x:Name="MainScroller" CanContentScroll="False" BorderBrush="Transparent" 
-                      VerticalScrollBarVisibility="Hidden"  Focusable="False" BorderThickness="0" >
-                <RichTextBox  Name="MainTextBox" BorderThickness="0" BorderBrush="Transparent"
-                          FontSize="{Binding ElementName=FontSizeSlider, Path=Value}"  Focusable="False" >
-                    <FlowDocument Name="MainFlowDocument">
+           
+            <RichTextBox  Name="MainTextBox" BorderThickness="0" BorderBrush="Transparent"
+                        FontSize="{Binding ElementName=FontSizeSlider, Path=Value}"  Focusable="False" >
+                <FlowDocument Name="MainFlowDocument">
 
-                    </FlowDocument>
-                </RichTextBox>
-            </ScrollViewer>
+                </FlowDocument>
+            </RichTextBox>
             <Border.RenderTransform>
                 <TransformGroup>
                     <RotateTransform x:Name="MainRotate" Angle="0" CenterX="0" CenterY="0"/>
@@ -78,6 +76,7 @@
                           Unchecked="PausedCheckbox_Unchecked" />
                     <CheckBox Content="Editable" Height="16" Name="EditableCheckbox" Focusable="False"
                       Checked="EditableCheckbox_Checked" Unchecked="EditableCheckbox_Unchecked" />
+                    <Button Content="Load Document" Height="23" Margin="5"  Name="LoadFileButton" Width="98" Click="LoadFileButton_Click" />
                     <Button Content="Save Text" Height="23" Name="SaveButton" Width="75" 
                         Margin="5" Click="SaveButton_Click" Focusable="False" />
                     <Button Content="Save Text As..." Height="23" Name="SaveAsButton" Width="90" Focusable="False"
