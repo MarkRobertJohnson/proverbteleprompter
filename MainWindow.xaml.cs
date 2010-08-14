@@ -443,6 +443,30 @@ namespace ProverbTeleprompter
             {
                 FlipMainWindowHorizCheckBox.IsChecked = bool.Parse(value);
             }
+
+            value = ConfigurationManager.AppSettings["TalentWindowLeft"];
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                _talentWindowLeft = double.Parse(value);
+            }
+
+            value = ConfigurationManager.AppSettings["TalentWindowTop"];
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                _talentWindowTop = double.Parse(value);
+            }
+
+            value = ConfigurationManager.AppSettings["TalentWindowWidth"];
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                _talentWindowWidth = double.Parse(value);
+            }
+
+            value = ConfigurationManager.AppSettings["TalentWindowHeight"];
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                _talentWindowHeight = double.Parse(value);
+            }
         }
 
         private void BlackOnWhiteButton_Checked(object sender, RoutedEventArgs e)
@@ -750,22 +774,34 @@ namespace ProverbTeleprompter
                 _talentWindow.Closed += new EventHandler(_talentWindow_Closed);
                 _talentWindow.KeyDown += MainWindow_KeyDown;
                 _talentWindow.KeyUp += MainWindow_KeyUp;
+                _talentWindow.SizeChanged += new SizeChangedEventHandler(_talentWindow_SizeChanged);
+                _talentWindow.LocationChanged += new EventHandler(_talentWindow_LocationChanged);
 
                 //If a secondary monitor is attached, display the talent windows maximized on it
-                if(SystemInformation.MonitorCount > 1)
-                {
-                    System.Drawing.Rectangle workingArea = Screen.AllScreens[1].WorkingArea;
+                //if(SystemInformation.MonitorCount > 1)
+                //{
+                //    System.Drawing.Rectangle workingArea = Screen.AllScreens[1].WorkingArea;
 
-                    _talentWindow.Left = workingArea.Left;
-                    _talentWindow.Top = workingArea.Top;
-                    _talentWindow.Width = workingArea.Width;
-                    _talentWindow.Height = workingArea.Height;
+                //    _talentWindow.Left = workingArea.Left;
+                //    _talentWindow.Top = workingArea.Top;
+                //    _talentWindow.Width = workingArea.Width;
+                //    _talentWindow.Height = workingArea.Height;
        
-                    _talentWindow.WindowStyle = WindowStyle.None;
+                //    _talentWindow.WindowStyle = WindowStyle.None;
 
 
-                }
-                _talentWindow.Loaded += new RoutedEventHandler(_talentWindow_Loaded);
+                //}
+
+                _talentWindow.Left = _talentWindowLeft;
+                _talentWindow.Top = _talentWindowTop;
+                _talentWindow.Width = _talentWindowWidth;
+                _talentWindow.Height = _talentWindowHeight;
+
+
+                _talentWindow.MouseDoubleClick += _talentWindow_MouseDoubleClick;
+                _talentWindow.MouseLeftButtonDown += _talentWindow_MouseLeftButtonDown;
+                _talentWindow.Loaded += _talentWindow_Loaded;
+
                 _talentWindow.Show();
                 
 
@@ -781,9 +817,51 @@ namespace ProverbTeleprompter
             }
         }
 
+        private double _talentWindowLeft = 100;
+        private double _talentWindowTop = 100;
+        private double _talentWindowWidth = 300;
+        private double _talentWindowHeight = 200;
+
+        void _talentWindow_LocationChanged(object sender, EventArgs e)
+        {
+            _talentWindowLeft = _talentWindow.Left;
+            _talentWindowTop = _talentWindow.Top;
+            AppConfigHelper.SetAppSetting("TalentWindowLeft", _talentWindow.Left.ToString());
+            AppConfigHelper.SetAppSetting("TalentWindowTop", _talentWindow.Top.ToString());
+        }
+
+        void _talentWindow_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            _talentWindowWidth = e.NewSize.Width;
+            _talentWindowHeight = e.NewSize.Height;
+            AppConfigHelper.SetAppSetting("TalentWindowWidth", e.NewSize.Width.ToString());
+            AppConfigHelper.SetAppSetting("TalentWindowHeight", e.NewSize.Height.ToString());
+
+        }
+
+        void _talentWindow_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            _talentWindow.DragMove();
+        }
+
+        void _talentWindow_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if(_talentWindow.WindowState != WindowState.Maximized)
+            {
+                _talentWindow.WindowState = WindowState.Maximized;
+            }
+            else
+            {
+                _talentWindow.WindowState = WindowState.Normal;
+            }
+        }
+
         void _talentWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            _talentWindow.WindowState = WindowState.Maximized;
+            if (SystemInformation.MonitorCount > 1)
+            {
+                _talentWindow.WindowState = WindowState.Maximized;
+            }
         }
 
 
