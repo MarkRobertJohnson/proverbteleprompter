@@ -751,6 +751,7 @@ namespace ProverbTeleprompter
                 _talentWindow.KeyDown += MainWindow_KeyDown;
                 _talentWindow.KeyUp += MainWindow_KeyUp;
 
+                //If a secondary monitor is attached, display the talent windows maximized on it
                 if(SystemInformation.MonitorCount > 1)
                 {
                     System.Drawing.Rectangle workingArea = Screen.AllScreens[1].WorkingArea;
