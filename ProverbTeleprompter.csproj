@@ -37,9 +37,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PreEmptive.Attributes">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio 10.0\PreEmptive Solutions\Dotfuscator Community Edition\PreEmptive.Attributes.dll</HintPath>
-    </Reference>
     <Reference Include="PresentationFramework.Royale" />
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -80,9 +77,6 @@
     <Compile Include="TalentWindow.xaml.cs">
       <DependentUpon>TalentWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="TalentWindow2.xaml.cs">
-      <DependentUpon>TalentWindow2.xaml</DependentUpon>
-    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -97,10 +91,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="TalentWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="TalentWindow2.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -129,9 +119,7 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
-    <None Include="Resources\Proverbs 1.rtf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Include="Resources\Proverbs 1.rtf" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\MtOlivetLogo_Rotate_0006.png" />
