@@ -255,27 +255,41 @@ namespace ProverbTeleprompter
             {
                 ShowTools();
             }
+            //Slide forward / page down button To work with Logitech PowerPoint remote
             else if(e.Key == Key.Next)
             {
                 
                 //PageDown();
                 SpeedForward();
             }
-
+            //Slid back button / page up To work with Logitech PowerPoint remote
             else if(e.Key == Key.Prior)
             {
                 
                 //PageUp();
                 SpeedReverse();
             }
-            else if(e.Key == Key.F5)
+            //F5 To work with Logitech PowerPoint remote
+            else if(e.Key == Key.F5 || 
+                e.Key == Key.MediaStop ||
+                e.Key == Key.MediaPlayPause)
             {
                 PauseScrolling();
             }
+            //Period To work with Logitech PowerPoint remote
             else if(e.Key == Key.OemPeriod)
             {
                 ScrollToTop();
             }
+            else if(e.Key == Key.MediaPreviousTrack)
+            {
+                PageUp();
+            }
+            else if(e.Key == Key.MediaNextTrack)
+            {
+                PageDown();
+            }
+     
             
         }
 
@@ -736,7 +750,23 @@ namespace ProverbTeleprompter
                 _talentWindow.Closed += new EventHandler(_talentWindow_Closed);
                 _talentWindow.KeyDown += MainWindow_KeyDown;
                 _talentWindow.KeyUp += MainWindow_KeyUp;
+
+                if(SystemInformation.MonitorCount > 1)
+                {
+                    System.Drawing.Rectangle workingArea = Screen.AllScreens[1].WorkingArea;
+
+                    _talentWindow.Left = workingArea.Left;
+                    _talentWindow.Top = workingArea.Top;
+                    _talentWindow.Width = workingArea.Width;
+                    _talentWindow.Height = workingArea.Height;
+       
+                    _talentWindow.WindowStyle = WindowStyle.None;
+
+
+                }
+                _talentWindow.Loaded += new RoutedEventHandler(_talentWindow_Loaded);
                 _talentWindow.Show();
+                
 
                 FlipTalentWindowVert(FlipTalentWindowVertCheckBox.IsChecked.GetValueOrDefault());
                 FlipTalentWindowHoriz(FlipTalentWindowHorizCheckBox.IsChecked.GetValueOrDefault());
@@ -749,6 +779,12 @@ namespace ProverbTeleprompter
                 HideTalentWindow();
             }
         }
+
+        void _talentWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            _talentWindow.WindowState = WindowState.Maximized;
+        }
+
 
         void _talentWindow_Closed(object sender, EventArgs e)
         {
