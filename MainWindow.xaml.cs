@@ -765,7 +765,6 @@ namespace ProverbTeleprompter
             ToggleTalentWindowButton.Content = "Show Talent Window";
 
         }
-        [PreEmptive.Attributes.Feature("FlipTalentWindowVert")]
         private void FlipTalentWindowVert(bool isFlippedVert)
         {
             if (_talentWindow != null)
@@ -784,7 +783,6 @@ namespace ProverbTeleprompter
             AppConfigHelper.SetAppSetting("FlipTalentWindowVert", isFlippedVert.ToString());
         }
 
-        [PreEmptive.Attributes.Feature("FlipTalentWindowHoriz")]
         private void FlipTalentWindowHoriz(bool isFlippedHoriz)
         {
             if (_talentWindow != null)
@@ -804,7 +802,6 @@ namespace ProverbTeleprompter
         }
 
 
-        [PreEmptive.Attributes.Feature("FlipMainWindowVert")]
         private void FlipMainWindowVert(bool isFlippedVert)
         {
 
@@ -821,7 +818,6 @@ namespace ProverbTeleprompter
         }
 
 
-        [PreEmptive.Attributes.Feature("FlipMainWindowHoriz")]
         private void FlipMainWindowHoriz(bool isFlippedHoriz)
         {
 

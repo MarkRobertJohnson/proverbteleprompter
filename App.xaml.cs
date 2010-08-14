@@ -12,14 +12,14 @@ namespace ProverbTeleprompter
     /// </summary>
     public partial class App : Application
     {
-        [PreEmptive.Attributes.Setup(CustomEndpoint = "so-s.info/PreEmptive.Web.Services.Messaging/MessagingServiceV2.asmx")]
+   //     [PreEmptive.Attributes.Setup(CustomEndpoint = "so-s.info/PreEmptive.Web.Services.Messaging/MessagingServiceV2.asmx")]
         protected override void OnStartup(StartupEventArgs e)
         {
             this.DispatcherUnhandledException += new System.Windows.Threading.DispatcherUnhandledExceptionEventHandler(App_DispatcherUnhandledException);
             base.OnStartup(e);
         }
 
-        [PreEmptive.Attributes.Teardown]
+  //      [PreEmptive.Attributes.Teardown]
         protected override void OnExit(ExitEventArgs e)
         {
             base.OnExit(e);
