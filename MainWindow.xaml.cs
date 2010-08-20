@@ -19,8 +19,10 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using Microsoft.Expression.Shapes;
 using Tools.API.Messages.lParam;
 using DataFormats = System.Windows.DataFormats;
+using DragDropEffects = System.Windows.DragDropEffects;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using KeyEventHandler = System.Windows.Input.KeyEventHandler;
 using MessageBox = System.Windows.MessageBox;
@@ -128,7 +130,7 @@ namespace ProverbTeleprompter
             _scrollTimer.Tick += new EventHandler(_scrollTimer_Tick);
             _scrollTimer.Start();
 
-            PromptView = MainTextBox;
+            PromptView = MainTextGrid;
 
  
     
@@ -360,10 +362,19 @@ namespace ProverbTeleprompter
                 MainTextBox.ScrollToVerticalOffset(MainTextBox.VerticalOffset + _totalBoostAmount);
             }
 
-            PercentComplete.Text = string.Format("{0:F}%", (MainTextBox.VerticalOffset / MainTextBox.ExtentHeight) * 100);
-            LayoutRoot.UseLayoutRounding = true;
-            LayoutRoot.SnapsToDevicePixels = true;
-            RenderOptions.SetEdgeMode(LayoutRoot, EdgeMode.Aliased);
+            var pos = MainTextBox.GetPositionFromPoint(
+                new Point(EyelineRightTriangle.Margin.Left, EyelineLeftTriangle.Margin.Top), true);
+
+            //at top of document:
+            //The eye line may not line up with the top of the document
+            //1)  Padd the beginning of the document with white space
+            //2)  
+
+
+            PercentComplete.Text = string.Format("{0:F}%", ((MainTextBox.VerticalOffset + MainTextBox.ViewportHeight) / MainTextBox.ExtentHeight) * 100);
+           // LayoutRoot.UseLayoutRounding = true;
+         //   LayoutRoot.SnapsToDevicePixels = true;
+       //     RenderOptions.SetEdgeMode(LayoutRoot, EdgeMode.Aliased);
             
 
         }
@@ -466,6 +477,12 @@ namespace ProverbTeleprompter
             if (!string.IsNullOrWhiteSpace(value))
             {
                 _talentWindowHeight = double.Parse(value);
+            }
+
+            value = ConfigurationManager.AppSettings["EyeLinePosition"];
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                SetEyeLinePosition(double.Parse(value));
             }
         }
 
@@ -776,22 +793,7 @@ namespace ProverbTeleprompter
                 _talentWindow.KeyUp += MainWindow_KeyUp;
                 _talentWindow.SizeChanged += new SizeChangedEventHandler(_talentWindow_SizeChanged);
                 _talentWindow.LocationChanged += new EventHandler(_talentWindow_LocationChanged);
-
-                //If a secondary monitor is attached, display the talent windows maximized on it
-                //if(SystemInformation.MonitorCount > 1)
-                //{
-                //    System.Drawing.Rectangle workingArea = Screen.AllScreens[1].WorkingArea;
-
-                //    _talentWindow.Left = workingArea.Left;
-                //    _talentWindow.Top = workingArea.Top;
-                //    _talentWindow.Width = workingArea.Width;
-                //    _talentWindow.Height = workingArea.Height;
-       
-                //    _talentWindow.WindowStyle = WindowStyle.None;
-
-
-                //}
-
+              
                 _talentWindow.Left = _talentWindowLeft;
                 _talentWindow.Top = _talentWindowTop;
                 _talentWindow.Width = _talentWindowWidth;
@@ -800,6 +802,7 @@ namespace ProverbTeleprompter
 
                 _talentWindow.MouseDoubleClick += _talentWindow_MouseDoubleClick;
                 _talentWindow.MouseLeftButtonDown += _talentWindow_MouseLeftButtonDown;
+                _talentWindow.MouseLeftButtonUp += new MouseButtonEventHandler(_talentWindow_MouseLeftButtonUp);
                 _talentWindow.Loaded += _talentWindow_Loaded;
 
                 _talentWindow.Show();
@@ -817,6 +820,13 @@ namespace ProverbTeleprompter
             }
         }
 
+        void _talentWindow_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            AppConfigHelper.SetAppSetting("TalentWindowLeft", _talentWindow.Left.ToString());
+            AppConfigHelper.SetAppSetting("TalentWindowTop", _talentWindow.Top.ToString());
+
+        }
+
         private double _talentWindowLeft = 100;
         private double _talentWindowTop = 100;
         private double _talentWindowWidth = 300;
@@ -826,17 +836,16 @@ namespace ProverbTeleprompter
         {
             _talentWindowLeft = _talentWindow.Left;
             _talentWindowTop = _talentWindow.Top;
-            AppConfigHelper.SetAppSetting("TalentWindowLeft", _talentWindow.Left.ToString());
-            AppConfigHelper.SetAppSetting("TalentWindowTop", _talentWindow.Top.ToString());
+
         }
 
         void _talentWindow_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             _talentWindowWidth = e.NewSize.Width;
             _talentWindowHeight = e.NewSize.Height;
-            AppConfigHelper.SetAppSetting("TalentWindowWidth", e.NewSize.Width.ToString());
-            AppConfigHelper.SetAppSetting("TalentWindowHeight", e.NewSize.Height.ToString());
-
+            AppConfigHelper.SetAppSetting("TalentWindowWidth", _talentWindow.Width.ToString());
+            AppConfigHelper.SetAppSetting("TalentWindowHeight", _talentWindow.Height.ToString());
+            
         }
 
         void _talentWindow_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -993,6 +1002,41 @@ namespace ProverbTeleprompter
         private void LoadFileButton_Click(object sender, RoutedEventArgs e)
         {
             LoadDocumentDialog(_documentPath);
+        }
+
+        private bool _isDraggingEyeline;
+
+        private void EyelineLeftTriangle_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            _isDraggingEyeline = true;
+        }
+
+        private void Grid_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if(_isDraggingEyeline && e.LeftButton == MouseButtonState.Pressed)
+            {
+                Point mousePos = e.GetPosition(null);
+
+                var newPos = mousePos.Y - (EyelineLeftTriangle.Height/2);
+
+                SetEyeLinePosition(newPos);
+                
+            }
+            else if(_isDraggingEyeline && e.LeftButton == MouseButtonState.Released)
+            {
+                AppConfigHelper.SetAppSetting("EyeLinePosition", EyelineLeftTriangle.Margin.Top.ToString());
+                _isDraggingEyeline = false;
+            }
+            else
+            {
+              //  _isDraggingEyeline = false;
+            }
+        }
+
+        private void SetEyeLinePosition(double position)
+        {
+            Thickness loc = new Thickness(0, position, 0, 0);
+            EyelineLeftTriangle.Margin = loc;
         }
 
 
