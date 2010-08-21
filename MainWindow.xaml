@@ -4,10 +4,10 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.m
  xmlns:ed="http://schemas.microsoft.com/expression/2010/drawing" xmlns:local="clr-namespace:ProverbTeleprompter" xmlns:Microsoft_Windows_Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero" mc:Ignorable="d"   
  x:Class="ProverbTeleprompter.MainWindow"
         x:Name="LayoutRoot"
-        Title="Proverb Teleprompter" Height="843" Width="1040" WindowStyle="None" 
+        Title="Proverb Teleprompter" Height="1887.128" Width="1096.847" WindowStyle="None" 
         WindowState="Maximized" Foreground="Black" ResizeMode="CanResize">
     <Window.Resources>
-    	<Storyboard x:Key="ToolFlyout" Storyboard.Target="{Binding ElementName=ToolBorder}"
+    	<Storyboard x:Key="ToolFlyout" Storyboard.Target="{Binding ElementName=ToolsGrid}"
     		Storyboard.TargetProperty="Height">
     		<DoubleAnimation  To="0" Duration="00:00:0.3" >
     			<DoubleAnimation.EasingFunction>
@@ -18,7 +18,7 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.m
     		</DoubleAnimation>
     	</Storyboard>
 
-    	<Storyboard x:Key="ToolFlyin" Storyboard.Target="{Binding ElementName=ToolBorder}"
+    	<Storyboard x:Key="ToolFlyin" Storyboard.Target="{Binding ElementName=ToolsGrid}"
     		Storyboard.TargetProperty="Height">
     		<DoubleAnimation  To="158" Duration="00:00:0.3" >
     			<DoubleAnimation.EasingFunction>
@@ -127,96 +127,120 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.m
                 </local:EyelineTriangleControl>
             </Grid>
         </Border>
+        <Grid x:Name="ToolsGrid" Height="170" VerticalAlignment="Bottom">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+			</Grid.RowDefinitions>
+			<Polygon  HorizontalAlignment="Stretch" 
+                     VerticalAlignment="Bottom" Stretch="Fill" Width="200" Height="30" Fill="#5035BC2E">
+                <Polygon.Points>
+                    <PointCollection>
+                        <Point X="0" Y="1" />
+                        <Point X="0.1" Y="0" />
+                        <Point X="0.9" Y="0" />
+                        <Point X="1" Y="1" />
+                        <Point X="0" Y="1" />
+                    </PointCollection>
 
-        <Border Grid.Column="0" x:Name="ToolBorder" Height="158" Background="White" VerticalAlignment="Bottom">
-            <Border  BorderThickness="0" Background="{DynamicResource Brush1}">
-                <WrapPanel x:Name="ToolsPanel"  Margin="5" Orientation="Horizontal">
-                    <WrapPanel  Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
-                    	<RadioButton x:Name="BlackOnWhiteButton" GroupName="Color" Content="Black on White" 
-                    		IsChecked="False" Checked="BlackOnWhiteButton_Checked" Focusable="False" Margin="2"/>
-                    	<RadioButton x:Name="WhiteOnBlackButton" GroupName="Color" Content="White on Black" 
-                    		Checked="WhiteOnBlackButton_Checked"  Focusable="False" Margin="3" />
-                    	<CheckBox Content="Pause" Height="16" x:Name="PausedCheckbox" Checked="PausedCheckbox_Checked" Focusable="False"
-                    		Unchecked="PausedCheckbox_Unchecked" Margin="2" />
-                    	<CheckBox Content="Editable" Height="16" x:Name="EditableCheckbox" Focusable="False"
-                    		Checked="EditableCheckbox_Checked" Unchecked="EditableCheckbox_Unchecked" Margin="2" />
-                    </WrapPanel>
-                    <WrapPanel Orientation="Vertical" Style="{StaticResource ResourceKey=ToolSection}">
-                    	<Label Content="Font Size"  />
-                    	<Grid Width="88.417" >
-                    		<Slider x:Name="FontSizeSlider" Value="24" Maximum="192" Minimum="12" 
-                    			LargeChange="12" TickPlacement="BottomRight" 
-                    			TickFrequency="12" SmallChange="12" IsSnapToTickEnabled="True" 
-                    			ValueChanged="FontSizeSlider_ValueChanged" Focusable="False" Margin="0,0,0,21.96" d:LayoutOverrides="Height" />
-                    		<TextBox  x:Name="FontSizeTextBox" Margin="13,25,13,0" HorizontalContentAlignment="Center"
-                    			Text="{Binding Value, ElementName=FontSizeSlider}" Focusable="False"  
-                                     Background="Transparent" BorderBrush="Transparent"
-                                     VerticalAlignment="Top" HorizontalAlignment="Center" Width="32"  />
+                </Polygon.Points>
+            </Polygon>
+        	<Label Grid.Row="0" Content="Proverb Teleprompter"  FontSize="16" 
+				FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="177.14" >
+        		<Label.Effect>
+        			<DropShadowEffect Color="White" BlurRadius="2" ShadowDepth="2"/>
+        		</Label.Effect>
+        	</Label>
 
-                    	</Grid>
+        	<Border Grid.Row="2" Grid.Column="0" x:Name="ToolBorder" Background="White" >
+        		<ScrollViewer  Margin="5" Height="148" VerticalScrollBarVisibility="Auto">
+        			<WrapPanel x:Name="ToolsPanel" Orientation="Horizontal" UseLayoutRounding="False"  
+        				ScrollViewer.CanContentScroll="True">
+        				<WrapPanel  Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
+        					<RadioButton x:Name="BlackOnWhiteButton" GroupName="Color" Content="Black on White" 
+        						IsChecked="False" Checked="BlackOnWhiteButton_Checked" Focusable="False" Margin="2"/>
+        					<RadioButton x:Name="WhiteOnBlackButton" GroupName="Color" Content="White on Black" 
+        						Checked="WhiteOnBlackButton_Checked"  Focusable="False" Margin="3" />
+        					<CheckBox Content="Pause" Height="16" x:Name="PausedCheckbox" Checked="PausedCheckbox_Checked" Focusable="False"
+        						Unchecked="PausedCheckbox_Unchecked" Margin="2" />
+        					<CheckBox Content="Editable" Height="16" x:Name="EditableCheckbox" Focusable="False"
+        						Checked="EditableCheckbox_Checked" Unchecked="EditableCheckbox_Unchecked" Margin="2" />
+        				</WrapPanel>
+        				<WrapPanel Orientation="Vertical" Style="{StaticResource ResourceKey=ToolSection}">
+        					<Label Content="Font Size"  />
+        					<Grid Width="88.417" >
+        						<Slider x:Name="FontSizeSlider" Value="24" Maximum="192" Minimum="12" 
+        							LargeChange="12" TickPlacement="BottomRight" 
+        							TickFrequency="12" SmallChange="12" IsSnapToTickEnabled="True" 
+        							ValueChanged="FontSizeSlider_ValueChanged" Focusable="False" Margin="0,0,0,21.96" d:LayoutOverrides="Height" />
+        						<TextBox  x:Name="FontSizeTextBox" Margin="13,25,13,0" HorizontalContentAlignment="Center"
+        							Text="{Binding Value, ElementName=FontSizeSlider}" Focusable="False"  
+        							Background="Transparent" BorderBrush="Transparent"
+        							VerticalAlignment="Top" HorizontalAlignment="Center" Width="32"  />
 
-                    </WrapPanel>
-                    <WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
+        					</Grid>
 
-                    	<Label Content="Scroll Speed" d:LayoutOverrides="Height" />
-                        <Slider x:Name="SpeedSlider"  Value="1" Maximum="8" Minimum="-8" LargeChange="1" Focusable="False"
-                    			TickPlacement="BottomRight" TickFrequency="1" SmallChange="0.2"  
-                                ValueChanged="SpeedSlider_ValueChanged" VerticalAlignment="Top" d:LayoutOverrides="Width" />
-                        <WrapPanel>
-                            <TextBox x:Name="SpeedTextBox" BorderBrush="Transparent" Background="Transparent" 
-                                     HorizontalAlignment="Center"  HorizontalContentAlignment="Center"
-                    			Text="{Binding Value, ElementName=SpeedSlider, StringFormat=\{0:F\}}" 
-                                     Focusable="False" VerticalAlignment="Bottom" d:LayoutOverrides="Width" />
+        				</WrapPanel>
+        				<WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
+
+        					<Label Content="Scroll Speed" d:LayoutOverrides="Height" />
+        					<Slider x:Name="SpeedSlider"  Value="1" Maximum="8" Minimum="-8" LargeChange="1" Focusable="False"
+        						TickPlacement="BottomRight" TickFrequency="1" SmallChange="0.2"  
+        						ValueChanged="SpeedSlider_ValueChanged" VerticalAlignment="Top" d:LayoutOverrides="Width" />
+        					<WrapPanel>
+        						<TextBox x:Name="SpeedTextBox" BorderBrush="Transparent" Background="Transparent" 
+        							HorizontalAlignment="Center"  HorizontalContentAlignment="Center"
+        							Text="{Binding Value, ElementName=SpeedSlider, StringFormat=\{0:F\}}" 
+        							Focusable="False" VerticalAlignment="Bottom" d:LayoutOverrides="Width" />
 
 
 
-                            <Button Content="Set as Default" Height="20" Focusable="False" 
-                                    x:Name="SetDefaultSpeedButton" Width="55" Click="SetDefaultSpeedButton_Click" Margin="2" Style="{DynamicResource ToolButtonStyle}" />
-                        </WrapPanel>
+        						<Button Content="Set as Default" Height="20" Focusable="False" 
+        							x:Name="SetDefaultSpeedButton" Width="55" Click="SetDefaultSpeedButton_Click" Margin="2" Style="{DynamicResource ToolButtonStyle}" />
+        					</WrapPanel>
 
-                    </WrapPanel>
-                    <WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
-                    	<WrapPanel/>
-                    	<Button Content="Load Document" Margin="5"  x:Name="LoadFileButton"  Focusable="False"
-                                Click="LoadFileButton_Click" Style="{DynamicResource ToolButtonStyle}" />
-                    	<Button Content="Save Text" x:Name="SaveButton" 
-                    		Margin="5" Click="SaveButton_Click" Focusable="False" Style="{DynamicResource ToolButtonStyle}" />
-                    	<Button Content="Save Text As..." x:Name="SaveAsButton" Focusable="False"
-                    		Margin="5" Click="SaveAsButton_Click" Style="{DynamicResource ToolButtonStyle}" RenderTransformOrigin="0.696,0.483" />
+        				</WrapPanel>
+        				<WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
+        					<WrapPanel/>
+        					<Button Content="Load Document" Margin="5"  x:Name="LoadFileButton"  Focusable="False"
+        						Click="LoadFileButton_Click" Style="{DynamicResource ToolButtonStyle}" />
+        					<Button Content="Save Text" x:Name="SaveButton" 
+        						Margin="5" Click="SaveButton_Click" Focusable="False" Style="{DynamicResource ToolButtonStyle}" />
+        					<Button Content="Save Text As..." x:Name="SaveAsButton" Focusable="False"
+        						Margin="5" Click="SaveAsButton_Click" Style="{DynamicResource ToolButtonStyle}" RenderTransformOrigin="0.696,0.483" />
 
-                    </WrapPanel>
-                    <WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
-                    	<WrapPanel/>
-                    	<Button Content="Show Talent Window" x:Name="ToggleTalentWindowButton" Focusable="False"
-                    		Margin="5" Click="ToggleTalentWindowButton_Click" Style="{DynamicResource ToolButtonStyle}" />
-                    	<CheckBox Content="Flip Talent Window Vertically" Height="16" x:Name="FlipTalentWindowVertCheckBox" Focusable="False"
-                    		Checked="FlipTalentWindowVertCheckBox_Checked" Unchecked="FlipTalentWindowVertCheckBox_Unchecked" />
-                    	<CheckBox Content="Flip Talent Window Horizontally" Height="16" x:Name="FlipTalentWindowHorizCheckBox" Focusable="False"
-                    		Unchecked="FlipTalentWindowHorizCheckBox_Unchecked" Checked="FlipTalentWindowHorizCheckBox_Checked" />
-                    	<CheckBox Content="Flip Main Window Vertically" Height="16" x:Name="FlipMainWindowVertCheckBox" Focusable="False"
-                    		Checked="FlipMainWindowVertCheckBox_Checked" Unchecked="FlipMainWindowVertCheckBox_Unchecked" />
-                    	<CheckBox Content="Flip Main Window Horizontally" Height="16" x:Name="FlipMainWindowHorizCheckBox" Focusable="False"
-                    		Unchecked="FlipMainWindowHorizCheckBox_Unchecked" Checked="FlipMainWindowHorizCheckBox_Checked" />
+        				</WrapPanel>
+        				<WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
+        					<WrapPanel/>
+        					<Button Content="Show Talent Window" x:Name="ToggleTalentWindowButton" Focusable="False"
+        						Margin="5" Click="ToggleTalentWindowButton_Click" Style="{DynamicResource ToolButtonStyle}" />
+        					<CheckBox Content="Flip Talent Window Vertically" Height="16" x:Name="FlipTalentWindowVertCheckBox" Focusable="False"
+        						Checked="FlipTalentWindowVertCheckBox_Checked" Unchecked="FlipTalentWindowVertCheckBox_Unchecked" />
+        					<CheckBox Content="Flip Talent Window Horizontally" Height="16" x:Name="FlipTalentWindowHorizCheckBox" Focusable="False"
+        						Unchecked="FlipTalentWindowHorizCheckBox_Unchecked" Checked="FlipTalentWindowHorizCheckBox_Checked" />
+        					<CheckBox Content="Flip Main Window Vertically" Height="16" x:Name="FlipMainWindowVertCheckBox" Focusable="False"
+        						Checked="FlipMainWindowVertCheckBox_Checked" Unchecked="FlipMainWindowVertCheckBox_Unchecked" />
+        					<CheckBox Content="Flip Main Window Horizontally" Height="16" x:Name="FlipMainWindowHorizCheckBox" Focusable="False"
+        						Unchecked="FlipMainWindowHorizCheckBox_Unchecked" Checked="FlipMainWindowHorizCheckBox_Checked" />
 
-                    </WrapPanel>
-                    <WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
-                    	<RichTextBox Background="Transparent" BorderBrush="Transparent" IsReadOnly="True" Focusable="False" FontSize="8" Width="142.175">
-                    		<FlowDocument>
-                    			<Paragraph><Run FontWeight="Bold" Text="Keys:"/><LineBreak />
-                                    <Run Text="↑ = quick scroll up"/><LineBreak /><Run Text="↓ = quick scroll down"/><LineBreak />
-                                    <Run Text="TAB = Toggle tools"/><LineBreak />
-                                    
-                                    <Run Text="►► (Fast Forward) = Speed +"/><LineBreak /><Run Text="◄◄ (Rewind) = Speed -"/><LineBreak /><Run Text="|| (Pause) = Play/Pause toggle"/><LineBreak /><Run Text="► (Play) = Play"/><LineBreak /><Run Text="CH+ (Channel Up) = Page up"/><LineBreak /><Run Text="CH- (Channel Down) = Page down"/><LineBreak /><Run Text="|◄ (Prev Track) = Restart"/><LineBreak /></Paragraph>
-                    		</FlowDocument>
-                    	</RichTextBox>
-                    </WrapPanel>
-                    <WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
-                    	<Label Content="Percent Complete" HorizontalAlignment="Center" />
-                    	<TextBox Height="33" x:Name="PercentComplete" Width="90" IsReadOnly="True" FontSize="18" FontWeight="Bold" Focusable="False" />
-                    </WrapPanel>
-                </WrapPanel>
-            </Border>
-        </Border>
+        				</WrapPanel>
+        				<WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
+        					<RichTextBox Background="Transparent" BorderBrush="Transparent" IsReadOnly="True" Focusable="False" FontSize="8" Width="142.175">
+        						<FlowDocument>
+        							<Paragraph><Run FontWeight="Bold" Text="Keys:"/><LineBreak /><Run Text="↑ = quick scroll up"/><LineBreak /><Run Text="↓ = quick scroll down"/><LineBreak /><Run Text="TAB = Toggle tools"/><LineBreak /><Run Text="►► (Fast Forward) = Speed +"/><LineBreak /><Run Text="◄◄ (Rewind) = Speed -"/><LineBreak /><Run Text="|| (Pause) = Play/Pause toggle"/><LineBreak /><Run Text="► (Play) = Play"/><LineBreak /><Run Text="CH+ (Channel Up) = Page up"/><LineBreak /><Run Text="CH- (Channel Down) = Page down"/><LineBreak /><Run Text="|◄ (Prev Track) = Restart"/><LineBreak /></Paragraph>
+        						</FlowDocument>
+        					</RichTextBox>
+        				</WrapPanel>
+        				<WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
+        					<Label Content="Percent Complete" HorizontalAlignment="Center" />
+        					<TextBox Height="33" x:Name="PercentComplete" Width="90" IsReadOnly="True" FontSize="18" FontWeight="Bold" Focusable="False" />
+        				</WrapPanel>
+        			</WrapPanel>
+        		</ScrollViewer>
+        	</Border>
+       
+        </Grid>
        
     </Grid>
 </Window>

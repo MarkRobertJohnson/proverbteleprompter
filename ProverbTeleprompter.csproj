@@ -165,7 +165,6 @@
     <None Include="Resources\Proverbs 1.rtf" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\MtOlivetLogo_Rotate_0006.png" />
     <None Include="Tools.dll" />
     <None Include="Tools.Win.dll" />
   </ItemGroup>
