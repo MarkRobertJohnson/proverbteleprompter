@@ -249,14 +249,11 @@ namespace ProverbTeleprompter
             {
                 SpeedReverse();
             }
-            else if(e.Key == Key.Right)
+            else if(e.Key == Key.Tab)
             {
-                HideTools();
+                ToggleTools();
             }
-            else if (e.Key == Key.Left)
-            {
-                ShowTools();
-            }
+
             //Slide forward / page down button To work with Logitech PowerPoint remote
             else if(e.Key == Key.Next)
             {
@@ -310,14 +307,31 @@ namespace ProverbTeleprompter
             MainTextBox.ScrollToVerticalOffset(0);
         }
 
+        private bool _toolsVisible = true;
+
+        private void ToggleTools()
+        {
+            if(_toolsVisible)
+            {
+                HideTools();
+            }
+            else
+            {
+                ShowTools();
+            }
+        }
+
         private void ShowTools()
         {
+            _toolsVisible = true;
             Storyboard sb = (Storyboard)this.FindResource("ToolFlyin");
             sb.Begin();  
         }
 
         private void HideTools()
         {
+
+            _toolsVisible = false;
             Storyboard sb = (Storyboard)this.FindResource("ToolFlyout");
             sb.Begin();
 
