@@ -226,6 +226,15 @@ namespace ProverbTeleprompter
             //Setup event handler for remote control buttons (multi media buttons)
             //HwndSource source = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
             //source.AddHook(new HwndSourceHook(RemoteHandler.WndProc));
+
+            //NOTE: Programmatically set the fly in distance
+            var sb = FindResource("ToolFlyin") as Storyboard;
+            var anim = sb.Children[0];
+            if(anim is DoubleAnimation)
+            {
+                (anim as DoubleAnimation).To = ToolsGrid.Height;
+            }
+            
         }
 
         private void PageDown()
