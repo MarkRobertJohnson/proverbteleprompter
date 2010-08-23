@@ -4,7 +4,7 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.m
  xmlns:ed="http://schemas.microsoft.com/expression/2010/drawing" xmlns:local="clr-namespace:ProverbTeleprompter" xmlns:Microsoft_Windows_Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero" mc:Ignorable="d"   
  x:Class="ProverbTeleprompter.MainWindow"
         x:Name="LayoutRoot"
-        Title="Proverb Teleprompter" Height="1887.128" Width="1096.847" WindowStyle="None" 
+        Title="Proverb Teleprompter" Height="755.595" Width="1329.38" WindowStyle="None" 
         WindowState="Maximized" Foreground="Black" ResizeMode="CanResize">
     <Window.Resources>
     	<Storyboard x:Key="ToolFlyout" Storyboard.Target="{Binding ElementName=ToolsGrid}"
@@ -34,7 +34,6 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.m
             <Setter Property="VerticalAlignment" Value="Stretch" />
 
         </Style>
-    	<ImageBrush x:Key="Brush1" Opacity="0.1"  ImageSource="Resources/MtOlivetLogo_Rotate_0006.png" Stretch="UniformToFill" />
     	<Style x:Key="ButtonFocusVisual">
     		<Setter Property="Control.Template">
     			<Setter.Value>
@@ -87,7 +86,7 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.m
     				</ControlTemplate>
     			</Setter.Value>
     		</Setter>
-    		<Setter Property="FontSize" Value="8"/>
+    		<Setter Property="FontSize" Value="12"/>
     		<Setter Property="Margin" Value="2"/>
     		<Setter Property="Height" Value="20"/>
     	</Style>
@@ -107,11 +106,16 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.m
             </Border.RenderTransform>
            
         	<Grid x:Name="MainTextGrid" PreviewMouseMove="Grid_PreviewMouseMove"  >
+
+                <ScrollViewer Name="MainScroller" Template="{DynamicResource ScrollViewerControlTemplate1}" Focusable="False">
            
-        		<RichTextBox  x:Name="MainTextBox" BorderThickness="0" BorderBrush="Transparent"
-        			FontSize="{Binding Value, ElementName=FontSizeSlider}"  Focusable="False" d:IsLocked="True" >
-        			<FlowDocument x:Name="MainFlowDocument"/>
-        		</RichTextBox>
+        			<RichTextBox  x:Name="MainTextBox" BorderThickness="0" BorderBrush="Transparent"
+        				FontSize="{Binding Value, ElementName=FontSizeSlider}"  Focusable="False"
+        				ScrollViewer.VerticalScrollBarVisibility="Auto">
+        				<FlowDocument x:Name="MainFlowDocument"/>
+        			</RichTextBox>
+
+        		</ScrollViewer>
 
                 <local:EyelineTriangleControl x:Name="EyelineLeftTriangle"  
                                               PreviewMouseLeftButtonDown="EyelineLeftTriangle_PreviewMouseLeftButtonDown" 
@@ -119,22 +123,22 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.m
                                               VerticalAlignment="Top" Width="42"/>
                 <local:EyelineTriangleControl x:Name="EyelineRightTriangle"  
                                               PreviewMouseLeftButtonDown="EyelineLeftTriangle_PreviewMouseLeftButtonDown" 
-                                              HorizontalAlignment="Right" Height="70" Margin="{Binding Margin, ElementName=EyelineLeftTriangle}" 
-                                              VerticalAlignment="Top" Width="42" RenderTransformOrigin="0.5,0.5">
+                                              HorizontalAlignment="Right" Height="70" Margin="0,200,17.195,0" 
+                                              VerticalAlignment="Top" Width="42.002" RenderTransformOrigin="0.5,0.5">
                     <local:EyelineTriangleControl.RenderTransform>
                         <ScaleTransform ScaleX="-1" />
                     </local:EyelineTriangleControl.RenderTransform>
                 </local:EyelineTriangleControl>
             </Grid>
         </Border>
-        <Grid x:Name="ToolsGrid" Height="170" VerticalAlignment="Bottom">
+        <Grid x:Name="ToolsGrid" Height="211.599" VerticalAlignment="Bottom">
 			<Grid.RowDefinitions>
 				<RowDefinition Height="Auto"/>
 				<RowDefinition Height="Auto"/>
 				<RowDefinition Height="Auto"/>
 			</Grid.RowDefinitions>
 			<Polygon  HorizontalAlignment="Stretch" 
-                     VerticalAlignment="Bottom" Stretch="Fill" Width="200" Height="30" Fill="#5035BC2E">
+                     VerticalAlignment="Bottom" Stretch="Fill" Width="280" Height="30" Fill="#5035BC2E">
                 <Polygon.Points>
                     <PointCollection>
                         <Point X="0" Y="1" />
@@ -146,15 +150,15 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.m
 
                 </Polygon.Points>
             </Polygon>
-        	<Label Grid.Row="0" Content="Proverb Teleprompter"  FontSize="16" 
-				FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="177.14" >
+        	<Label Grid.Row="0" Content="Proverb Teleprompter"  FontSize="21.333" 
+				FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Bottom" >
         		<Label.Effect>
-        			<DropShadowEffect Color="White" BlurRadius="2" ShadowDepth="2"/>
+        			<DropShadowEffect Color="White" BlurRadius="2" ShadowDepth="1"/>
         		</Label.Effect>
         	</Label>
 
-        	<Border Grid.Row="2" Grid.Column="0" x:Name="ToolBorder" Background="White" >
-        		<ScrollViewer  Margin="5" Height="148" VerticalScrollBarVisibility="Auto">
+        	<Border Grid.Row="2" x:Name="ToolBorder" Background="White" Margin="0,0,18,0">
+        		<ScrollViewer  Margin="5" Height="170" Focusable="False" VerticalScrollBarVisibility="Auto">
         			<WrapPanel x:Name="ToolsPanel" Orientation="Horizontal" UseLayoutRounding="False"  
         				ScrollViewer.CanContentScroll="True">
         				<WrapPanel  Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
@@ -188,17 +192,12 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.m
         					<Slider x:Name="SpeedSlider"  Value="1" Maximum="8" Minimum="-8" LargeChange="1" Focusable="False"
         						TickPlacement="BottomRight" TickFrequency="1" SmallChange="0.2"  
         						ValueChanged="SpeedSlider_ValueChanged" VerticalAlignment="Top" d:LayoutOverrides="Width" />
-        					<WrapPanel>
-        						<TextBox x:Name="SpeedTextBox" BorderBrush="Transparent" Background="Transparent" 
-        							HorizontalAlignment="Center"  HorizontalContentAlignment="Center"
-        							Text="{Binding Value, ElementName=SpeedSlider, StringFormat=\{0:F\}}" 
-        							Focusable="False" VerticalAlignment="Bottom" d:LayoutOverrides="Width" />
-
-
-
-        						<Button Content="Set as Default" Height="20" Focusable="False" 
-        							x:Name="SetDefaultSpeedButton" Width="55" Click="SetDefaultSpeedButton_Click" Margin="2" Style="{DynamicResource ToolButtonStyle}" />
-        					</WrapPanel>
+        					<TextBox x:Name="SpeedTextBox" BorderBrush="Transparent" Background="Transparent" 
+        						HorizontalAlignment="Center"  HorizontalContentAlignment="Center"
+        						Text="{Binding Value, ElementName=SpeedSlider, StringFormat=\{0:F\}}" 
+        						Focusable="False" VerticalAlignment="Bottom" />
+        					<Button Content="Set as Default" Height="20" Focusable="False" 
+        						x:Name="SetDefaultSpeedButton" Width="87" Click="SetDefaultSpeedButton_Click" Margin="2" Style="{DynamicResource ToolButtonStyle}" />
 
         				</WrapPanel>
         				<WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
@@ -216,25 +215,32 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.m
         					<Button Content="Show Talent Window" x:Name="ToggleTalentWindowButton" Focusable="False"
         						Margin="5" Click="ToggleTalentWindowButton_Click" Style="{DynamicResource ToolButtonStyle}" />
         					<CheckBox Content="Flip Talent Window Vertically" Height="16" x:Name="FlipTalentWindowVertCheckBox" Focusable="False"
-        						Checked="FlipTalentWindowVertCheckBox_Checked" Unchecked="FlipTalentWindowVertCheckBox_Unchecked" />
+        						Checked="FlipTalentWindowVertCheckBox_Checked" Unchecked="FlipTalentWindowVertCheckBox_Unchecked" Margin="5,2" />
         					<CheckBox Content="Flip Talent Window Horizontally" Height="16" x:Name="FlipTalentWindowHorizCheckBox" Focusable="False"
-        						Unchecked="FlipTalentWindowHorizCheckBox_Unchecked" Checked="FlipTalentWindowHorizCheckBox_Checked" />
+        						Unchecked="FlipTalentWindowHorizCheckBox_Unchecked" Checked="FlipTalentWindowHorizCheckBox_Checked" Margin="5,2" />
         					<CheckBox Content="Flip Main Window Vertically" Height="16" x:Name="FlipMainWindowVertCheckBox" Focusable="False"
-        						Checked="FlipMainWindowVertCheckBox_Checked" Unchecked="FlipMainWindowVertCheckBox_Unchecked" />
+        						Checked="FlipMainWindowVertCheckBox_Checked" Unchecked="FlipMainWindowVertCheckBox_Unchecked" Margin="5,2" />
         					<CheckBox Content="Flip Main Window Horizontally" Height="16" x:Name="FlipMainWindowHorizCheckBox" Focusable="False"
-        						Unchecked="FlipMainWindowHorizCheckBox_Unchecked" Checked="FlipMainWindowHorizCheckBox_Checked" />
+        						Unchecked="FlipMainWindowHorizCheckBox_Unchecked" Checked="FlipMainWindowHorizCheckBox_Checked" Margin="5,2" />
 
         				</WrapPanel>
+        				<WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
+        					<Label Content="Percent Complete" HorizontalAlignment="Center" FontSize="16" FontWeight="Bold" />
+        					<TextBox x:Name="PercentComplete" IsReadOnly="True" FontSize="26.667" 
+							FontWeight="Bold" Focusable="False" Margin="5" MaxLength="7" 
+							HorizontalContentAlignment="Center" />
+        					<Label Content="Time Left" HorizontalAlignment="Center" FontSize="16" FontWeight="Bold" />
+        					<TextBox x:Name="Eta" IsReadOnly="True" FontSize="26.667" 
+							FontWeight="Bold" Focusable="False" Margin="5" 
+							HorizontalContentAlignment="Center" MaxLength="8" />
+        				</WrapPanel>
+        				<WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}"/>
         				<WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
         					<RichTextBox Background="Transparent" BorderBrush="Transparent" IsReadOnly="True" Focusable="False" FontSize="8" Width="142.175">
         						<FlowDocument>
         							<Paragraph><Run FontWeight="Bold" Text="Keys:"/><LineBreak /><Run Text="↑ = quick scroll up"/><LineBreak /><Run Text="↓ = quick scroll down"/><LineBreak /><Run Text="TAB = Toggle tools"/><LineBreak /><Run Text="►► (Fast Forward) = Speed +"/><LineBreak /><Run Text="◄◄ (Rewind) = Speed -"/><LineBreak /><Run Text="|| (Pause) = Play/Pause toggle"/><LineBreak /><Run Text="► (Play) = Play"/><LineBreak /><Run Text="CH+ (Channel Up) = Page up"/><LineBreak /><Run Text="CH- (Channel Down) = Page down"/><LineBreak /><Run Text="|◄ (Prev Track) = Restart"/><LineBreak /></Paragraph>
         						</FlowDocument>
         					</RichTextBox>
-        				</WrapPanel>
-        				<WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
-        					<Label Content="Percent Complete" HorizontalAlignment="Center" />
-        					<TextBox Height="33" x:Name="PercentComplete" Width="90" IsReadOnly="True" FontSize="18" FontWeight="Bold" Focusable="False" />
         				</WrapPanel>
         			</WrapPanel>
         		</ScrollViewer>
