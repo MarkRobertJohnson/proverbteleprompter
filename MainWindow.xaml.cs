@@ -123,6 +123,8 @@ namespace ProverbTeleprompter
 
             Closing += new System.ComponentModel.CancelEventHandler(MainWindow_Closing);
 
+
+            MainScroller.ScrollChanged += new ScrollChangedEventHandler(MainScroller_ScrollChanged);
             //Main scroll loop timer
             _scrollTimer = new DispatcherTimer();
             _scrollTimer.Interval = new TimeSpan(0, 0, 0, 0, 10);
@@ -132,9 +134,17 @@ namespace ProverbTeleprompter
 
             PromptView = MainTextGrid;
 
- 
-    
+
+            //LayoutRoot.UseLayoutRounding = true;
+            //LayoutRoot.SnapsToDevicePixels = true;
+            //RenderOptions.SetEdgeMode(LayoutRoot, EdgeMode.Aliased);
+            
+
            // RemoteHandler.RemoteButtonPressed += new EventHandler<RemoteButtonPressedEventArgs>(RemoteHandler_RemoteButtonPressed);
+        }
+
+        void MainScroller_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
         }
 
         void MainWindow_PreviewKeyUp(object sender, KeyEventArgs e)
@@ -185,6 +195,7 @@ namespace ProverbTeleprompter
                 _speedBoostAmount = 0;
                 TotalBoostAmount = 0;
             }
+            
         }
 
         void RemoteHandler_RemoteButtonPressed(object sender, RemoteButtonPressedEventArgs e)
@@ -239,12 +250,12 @@ namespace ProverbTeleprompter
 
         private void PageDown()
         {
-            MainTextBox.ScrollToVerticalOffset(MainTextBox.VerticalOffset + (MainTextBox.ActualHeight - MainTextBox.ActualHeight * 0.5));
+            MainScroller.ScrollToVerticalOffset(MainScroller.VerticalOffset + (MainScroller.ActualHeight - MainScroller.ActualHeight * 0.5));
         }
 
         private void PageUp()
         {
-            MainTextBox.ScrollToVerticalOffset(MainTextBox.VerticalOffset - (MainTextBox.ActualHeight - MainTextBox.ActualHeight * 0.5));
+            MainScroller.ScrollToVerticalOffset(MainScroller.VerticalOffset - (MainScroller.ActualHeight - MainScroller.ActualHeight * 0.5));
         }
 
 
@@ -280,9 +291,11 @@ namespace ProverbTeleprompter
             //F5 To work with Logitech PowerPoint remote
             else if(e.Key == Key.F5 || 
                 e.Key == Key.MediaStop ||
-                e.Key == Key.MediaPlayPause)
+                e.Key == Key.MediaPlayPause || 
+                e.Key == Key.Escape)
             {
                 PauseScrolling();
+                
             }
             //Period To work with Logitech PowerPoint remote
             else if(e.Key == Key.OemPeriod)
@@ -299,7 +312,10 @@ namespace ProverbTeleprompter
             }
      
             
-        }
+
+            }
+
+
 
         private void PauseScrolling()
         {
@@ -313,7 +329,7 @@ namespace ProverbTeleprompter
 
         private void ScrollToTop()
         {
-            MainTextBox.ScrollToVerticalOffset(0);
+            MainScroller.ScrollToVerticalOffset(0);
         }
 
         private bool _toolsVisible = true;
@@ -373,16 +389,30 @@ namespace ProverbTeleprompter
             SpeedSlider.Value += _speedBoostAmount;
         }
 
+
+        private double _pixelsPerSecond;
+        private DateTime _prevTime = DateTime.Now;
+        private double _prevScrollOffset;
+        private TimeSpan _eta;
+
         void _scrollTimer_Tick(object sender, EventArgs e)
         {
 
             if (!PausedCheckbox.IsChecked.GetValueOrDefault())
             {
-                MainTextBox.ScrollToVerticalOffset(MainTextBox.VerticalOffset + SpeedSlider.Value);
+                MainScroller.ScrollToVerticalOffset(MainScroller.VerticalOffset + SpeedSlider.Value);
             }
             else
             {
-                MainTextBox.ScrollToVerticalOffset(MainTextBox.VerticalOffset + _totalBoostAmount);
+                MainScroller.ScrollToVerticalOffset(MainScroller.VerticalOffset + _totalBoostAmount);
+            }
+
+            
+            //Calculate pixels per second (velocity)
+            if (DateTime.Now - _prevTime >  TimeSpan.FromSeconds(1))
+            {
+                CalcEta();
+
             }
 
             var pos = MainTextBox.GetPositionFromPoint(
@@ -394,14 +424,37 @@ namespace ProverbTeleprompter
             //2)  
 
 
-            PercentComplete.Text = string.Format("{0:F}%", ((MainTextBox.VerticalOffset + MainTextBox.ViewportHeight) / MainTextBox.ExtentHeight) * 100);
-           // LayoutRoot.UseLayoutRounding = true;
-         //   LayoutRoot.SnapsToDevicePixels = true;
-       //     RenderOptions.SetEdgeMode(LayoutRoot, EdgeMode.Aliased);
-            
+            PercentComplete.Text = string.Format("{0:F}%", ((MainScroller.VerticalOffset + MainScroller.ViewportHeight) / MainScroller.ExtentHeight) * 100);
 
         }
 
+
+        private void CalcEta()
+        {
+            var diff = DateTime.Now - _prevTime;
+            var pixelChange = (MainScroller.VerticalOffset - _prevScrollOffset);
+            _pixelsPerSecond = pixelChange  / diff.TotalSeconds;
+
+            var pixelsToGo = MainScroller.ScrollableHeight - MainScroller.VerticalOffset;
+
+
+            if(pixelsToGo == 0)
+            {
+                Eta.Text = TimeSpan.FromSeconds(0).ToString();
+                return;
+            }
+
+            var secondsToDone = pixelsToGo / _pixelsPerSecond;
+
+            _eta = new TimeSpan(0, 0, (int)secondsToDone);
+
+            Eta.Text = _eta >= TimeSpan.FromSeconds(0) ? _eta.ToString() : "N/A";
+
+            
+
+            _prevTime = DateTime.Now;
+            _prevScrollOffset = MainScroller.VerticalOffset;
+        }
 
         private void InitializeConfig()
         {
@@ -544,6 +597,8 @@ namespace ProverbTeleprompter
 
             if (_configInitialized)
                 AppConfigHelper.SetAppSetting("ColorScheme", "WhiteOnBlack");
+
+            MainTextBox.CaretBrush = Brushes.White;
         }
 
         private  void SetBlackOnWhite()
@@ -557,6 +612,8 @@ namespace ProverbTeleprompter
             DocumentHelpers.ChangePropertyValue(MainFlowDocument, TextElement.BackgroundProperty, Brushes.White, Brushes.Black);
             if (_configInitialized)
                 AppConfigHelper.SetAppSetting("ColorScheme", "BlackOnWhite");
+
+            MainTextBox.CaretBrush = Brushes.Black;
         }
 
 
@@ -1060,6 +1117,8 @@ namespace ProverbTeleprompter
         {
             Thickness loc = new Thickness(0, position, 0, 0);
             EyelineLeftTriangle.Margin = loc;
+            EyelineRightTriangle.Margin = new Thickness(EyelineRightTriangle.Margin.Left,
+                position, EyelineRightTriangle.Margin.Right, EyelineRightTriangle.Margin.Bottom);
         }
 
 
