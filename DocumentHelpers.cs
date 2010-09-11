@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -21,31 +22,47 @@ namespace ProverbTeleprompter
         public static void ChangePropertyValue(FlowDocument document,DependencyProperty propertyToChange, object newValue, object priorValue = null)
         {
             //If no prior value provided, just apply color change to all text
-            if (priorValue == null)
+            //if (priorValue == null)
+            //{
+            //    TextRange range = new TextRange(document.ContentStart, document.ContentEnd);
+            //    range.ApplyPropertyValue(propertyToChange, newValue);
+            //}
+            //else
             {
-                TextRange range = new TextRange(document.ContentStart, document.ContentEnd);
-                range.ApplyPropertyValue(propertyToChange, newValue);
+                ChangePropertyValueRecursive(document.Blocks, propertyToChange, newValue, priorValue);
+
             }
-            else
+        }
+
+        private static void ChangePropertyValueRecursive(BlockCollection blocks,
+            DependencyProperty propertyToChange, object newValue, object priorValue = null)
+        {
+            foreach (var block in blocks)
             {
-                foreach (var block in document.Blocks)
+                var currentValue = block.GetValue(propertyToChange);
+
+                if (priorValue == null || priorValue.ValuesAreEqual(currentValue))
                 {
-                    var currentValue = block.GetValue(propertyToChange);
+                    block.SetValue(propertyToChange, newValue);
+                }
+                if (block is Paragraph)
+                {
+                    var para = block as Paragraph;
+                    ChangePropertyValueRecursive(para.Inlines, propertyToChange, newValue, priorValue);
+                }
+                else if (block is List)
+                {
+                    var list = block as List;
 
-                    if (priorValue.Equals(currentValue) )
+                    foreach (var listItem in list.ListItems)
                     {
-                        block.SetValue(propertyToChange, newValue);
+                        ChangePropertyValueRecursive(listItem.Blocks, propertyToChange, newValue, priorValue);
                     }
-                    if (block is Paragraph)
-                    {
-                        var para = block as Paragraph;
-                        ChangePropertyValueRecursive(para.Inlines,propertyToChange, newValue, priorValue);
-                    }
-
                 }
 
             }
         }
+
         private static void ChangePropertyValueRecursive(InlineCollection inlines, DependencyProperty propertyToChange, object newValue, object priorValue = null)
         {
 
@@ -87,5 +104,58 @@ namespace ProverbTeleprompter
 
             return  item1.ToString() == item2.ToString();
         }
+
+
+        public static void SaveDocument(Stream documentStream, FlowDocument document, string dataFormat)
+        {
+            TextRange range = new TextRange(document.ContentStart, document.ContentEnd);
+
+            range.Save(documentStream, dataFormat, true);
+            
+            
+
+
+        }
+
+        public static void LoadDocument(Stream fileStream, FlowDocument document, string dataFormat)
+        {
+            try
+            {
+                TextRange range = new TextRange(document.ContentStart, document.ContentEnd);
+
+                range.Load(fileStream, dataFormat);
+
+            }
+            catch (ArgumentException ex)
+            {
+                MessageBox.Show("Unsupported file type.");
+            }
+        }
+        /// <summary>
+        /// NOTE: This method is slow and inneficient.  DO not yet know a better way...
+        /// </summary>
+        /// <param name="position"></param>
+        /// <returns></returns>
+        public static int GetLineNumberFromSelection(TextPointer position)
+        {
+            if (position == null)
+            {
+                return 0;
+            }
+
+            int lineNumber = 0;
+            int linesMoved;
+            do
+            {
+                position = position.GetLineStartPosition(-1, out linesMoved);
+                lineNumber++;
+            }
+            while (position != null && linesMoved != 0);
+
+            return lineNumber;
+        }
+
+
+
     }
 }
