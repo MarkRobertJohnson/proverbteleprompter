@@ -32,7 +32,7 @@
     <InstallUrl>http://proverbteleprompter.codeplex.com/releases/clickonce/</InstallUrl>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>5</ApplicationRevision>
+    <ApplicationRevision>6</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -70,9 +70,17 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Adastra.RichEditorLibrary, Version=1.0.3899.31116, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>ExternalDependencies\Adastra.RichEditorLibrary.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Expression.Drawing" />
     <Reference Include="PresentationFramework.Aero" />
     <Reference Include="PresentationFramework.Royale" />
+    <Reference Include="RibbonControlsLibrary, Version=3.5.31016.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>ExternalDependencies\RibbonControlsLibrary.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Data" />
@@ -91,30 +99,58 @@
     </Reference>
     <Reference Include="Tools, Version=1.5.2.0, Culture=neutral, PublicKeyToken=373c02ac923768e6, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\Tools.dll</HintPath>
+      <HintPath>ExternalDependencies\Tools.dll</HintPath>
     </Reference>
     <Reference Include="Tools.Win, Version=1.5.2.0, Culture=neutral, PublicKeyToken=373c02ac923768e6, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\Tools.Win.dll</HintPath>
+      <HintPath>ExternalDependencies\Tools.Win.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="XAMLConverter, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <ExecutableExtension>.exe</ExecutableExtension>
+      <HintPath>ExternalDependencies\XAMLConverter.exe</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BibleHelpers.cs" />
+    <Compile Include="Bookmark.cs" />
+    <Compile Include="DependsUponAttribute.cs" />
     <Compile Include="DocumentHelpers.cs" />
+    <Compile Include="DocumentUpdatedEventArgs.cs" />
+    <Compile Include="EditWindow.xaml.cs">
+      <DependentUpon>EditWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="EyelineTriangleControl.xaml.cs">
       <DependentUpon>EyelineTriangleControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="HtmlConverter\HtmlCssParser.cs" />
+    <Compile Include="HtmlConverter\HtmlFromXamlConverter.cs" />
+    <Compile Include="HtmlConverter\HtmlLexicalAnalyzer.cs" />
+    <Compile Include="HtmlConverter\HtmlParser.cs" />
+    <Compile Include="HtmlConverter\HtmlSchema.cs" />
+    <Compile Include="HtmlConverter\HtmlTokenType.cs" />
+    <Compile Include="HtmlConverter\HtmlToXamlConverter.cs" />
+    <Compile Include="HtmlConverter\TableColumnInfo.cs" />
+    <Compile Include="NotifyPropertyChangedBase.cs" />
+    <Compile Include="RelayCommand.cs" />
     <Compile Include="RemoteButtonPressedEventArgs.cs" />
     <Compile Include="RemoteHandler.cs" />
     <Compile Include="TalentWindow.xaml.cs">
       <DependentUpon>TalentWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UIHelpers.cs" />
+    <Compile Include="WebHelpers.cs" />
+    <Page Include="EditWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="EyelineTriangleControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -132,6 +168,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Resources\Bookmark.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Styles.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -169,8 +209,8 @@
     <None Include="Resources\Proverbs 1.rtf" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Tools.dll" />
-    <None Include="Tools.Win.dll" />
+    <None Include="ExternalDependencies\Tools.dll" />
+    <None Include="ExternalDependencies\Tools.Win.dll" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">
@@ -193,6 +233,19 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ExternalDependencies\Adastra.RichEditorLibrary.dll" />
+    <Content Include="ExternalDependencies\Adastra.RichEditorLibrary.pdb" />
+    <Content Include="ExternalDependencies\en-US\Adastra.RichEditorLibrary.resources.dll" />
+    <Content Include="ExternalDependencies\RibbonControlsLibrary.dll" />
+    <Content Include="ExternalDependencies\WPFControlsLibrary.dll" />
+    <Content Include="ExternalDependencies\WPFControlsLibraryInterface.dll" />
+    <Content Include="ExternalDependencies\XAMLConverter.exe" />
+    <Content Include="ExternalDependencies\XAMLConverter.pdb" />
+    <Resource Include="Resources\ClearBookMark.png" />
+    <Resource Include="Resources\WhiteBookmark.png" />
+    <Resource Include="Resources\BlackBookmark.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

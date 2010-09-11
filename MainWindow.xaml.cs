@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
@@ -13,13 +14,16 @@ using System.Windows.Documents;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using System.Xml;
 using Microsoft.Expression.Shapes;
+using ProverbTeleprompter.HtmlConverter;
 using Tools.API.Messages.lParam;
 using DataFormats = System.Windows.DataFormats;
 using DragDropEffects = System.Windows.DragDropEffects;
@@ -27,6 +31,7 @@ using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using KeyEventHandler = System.Windows.Input.KeyEventHandler;
 using MessageBox = System.Windows.MessageBox;
 using Path = System.IO.Path;
+using TextBox = System.Windows.Controls.TextBox;
 
 namespace ProverbTeleprompter
 {
@@ -50,8 +55,29 @@ namespace ProverbTeleprompter
         private double _totalBoostAmount = 0;
 
         private string _documentPath;
+        private string _tempDocumentPath;
 
+        Dictionary<string, FileSystemWatcher> _watchedFiles = new Dictionary<string, FileSystemWatcher>();
 
+        private Process _wordpadProcess;
+
+        private bool _toolsVisible = true;
+
+        private double _pixelsPerSecond;
+        private DateTime _prevTime = DateTime.Now;
+        private double _prevScrollOffset;
+        private TimeSpan _eta;
+
+        private double _talentWindowLeft = 100;
+        private double _talentWindowTop = 100;
+        private double _talentWindowWidth = 300;
+        private double _talentWindowHeight = 200;
+
+        private bool _isDraggingEyeline;
+
+        EditWindow _editWindow = null;
+
+        private static SemaphoreSlim _changeSemaphore = new SemaphoreSlim(1);
 
         private double CurrentSpeed
         {
@@ -159,6 +185,13 @@ namespace ProverbTeleprompter
 
         void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+
+            if (_wordpadProcess != null  &&!_wordpadProcess.HasExited)
+            {
+                _wordpadProcess.CloseMainWindow();
+                _wordpadProcess.Close();
+
+            }
             if(_talentWindow != null)
             {
                 _talentWindow.Close();
@@ -310,10 +343,35 @@ namespace ProverbTeleprompter
             {
                 PageDown();
             }
-     
-            
+            //Numbers 1-9 should jump to the corresponding bookmark
+            else if( (e.Key >= Key.D0 && e.Key <= Key.D9) ||
+                (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9) )
+            {
+                KeyConverter converter = new KeyConverter();
+                string val = converter.ConvertToString(e.Key);
 
+               JumpToBookmarkByOrdinal(int.Parse(val)); 
             }
+            else if(e.Key == Key.F1)
+            {
+                LoadRandomBibleChapter();
+                
+            }
+         
+   
+
+        }
+
+        private void LoadRandomBibleChapter()
+        {
+
+            MainTextBox.Document = HtmlToXamlConverter.ConvertHtmlToXaml(BibleHelpers.GetRandomBibleChapterHtml());
+            MainTextBox.Document.ContentStart.InsertLineBreak();
+            MainTextBox.Document.ContentStart.InsertLineBreak();
+            MainTextBox.Document.ContentStart.InsertLineBreak();
+            MainScroller.ScrollToTop();
+            SetDocumentConfig();
+        }
 
 
 
@@ -331,8 +389,6 @@ namespace ProverbTeleprompter
         {
             MainScroller.ScrollToVerticalOffset(0);
         }
-
-        private bool _toolsVisible = true;
 
         private void ToggleTools()
         {
@@ -389,15 +445,10 @@ namespace ProverbTeleprompter
             SpeedSlider.Value += _speedBoostAmount;
         }
 
-
-        private double _pixelsPerSecond;
-        private DateTime _prevTime = DateTime.Now;
-        private double _prevScrollOffset;
-        private TimeSpan _eta;
-
+        private int _ticksElapsed;
         void _scrollTimer_Tick(object sender, EventArgs e)
         {
-
+            _ticksElapsed++;
             if (!PausedCheckbox.IsChecked.GetValueOrDefault())
             {
                 MainScroller.ScrollToVerticalOffset(MainScroller.VerticalOffset + SpeedSlider.Value);
@@ -408,23 +459,44 @@ namespace ProverbTeleprompter
             }
 
             
-            //Calculate pixels per second (velocity)
-            if (DateTime.Now - _prevTime >  TimeSpan.FromSeconds(1))
+
+            //Only update calculations every 10 timer ticks (100 ms)
+            if(_ticksElapsed % 10 == 0)
             {
-                CalcEta();
+                //Calculate pixels per second (velocity)
+                if (DateTime.Now - _prevTime > TimeSpan.FromSeconds(1))
+                {
+                    CalcEta();
+
+                }
+
+                var pos = MainTextBox.GetPositionFromPoint(new Point(0, MainScroller.VerticalOffset + EyelineLeftTriangle.Margin.Top + EyelineRightTriangle.Height / 2), true);
+             //   var num = DocumentHelpers.GetLineNumberFromSelection(pos);
+
+              //  CurrentLine.Text = num.ToString();
+
+
+
+
+
+
+                //at top of document:
+                //The eye line may not line up with the top of the document
+                //1)  Padd the beginning of the document with white space
+                //2)  
+                var eyeLineOffset = MainScroller.ViewportHeight - EyelineLeftTriangle.Margin.Top;
+
+                PercentComplete.Text = string.Format("{0:F}%", ((MainScroller.VerticalOffset + MainScroller.ViewportHeight - eyeLineOffset) / MainScroller.ExtentHeight) * 100);
 
             }
 
-            var pos = MainTextBox.GetPositionFromPoint(
-                new Point(EyelineRightTriangle.Margin.Left, EyelineLeftTriangle.Margin.Top), true);
+            //if(_ticksElapsed % 50 == 0)
+            //{
+            //    var endPos = MainTextBox.GetPositionFromPoint(new Point(0, MainScroller.ExtentHeight), true);
 
-            //at top of document:
-            //The eye line may not line up with the top of the document
-            //1)  Padd the beginning of the document with white space
-            //2)  
-
-
-            PercentComplete.Text = string.Format("{0:F}%", ((MainScroller.VerticalOffset + MainScroller.ViewportHeight) / MainScroller.ExtentHeight) * 100);
+            //    var totalLines = DocumentHelpers.GetLineNumberFromSelection(endPos);
+            //    TotalLines.Text = totalLines.ToString();
+            //}
 
         }
 
@@ -468,21 +540,8 @@ namespace ProverbTeleprompter
                     WhiteOnBlackButton.IsChecked == true ? "WhiteOnBlack" : "BlackOnWhite", config);
 
             }
-            var colorScheme = ConfigurationManager.AppSettings["ColorScheme"];
-            if (colorScheme != null && colorScheme.ToLowerInvariant() == "whiteonblack")
-            {
-                WhiteOnBlackButton.IsChecked = true;
-            }
-            else
-            {
-                BlackOnWhiteButton.IsChecked = true;
-            }
 
-            var fontSize = ConfigurationManager.AppSettings["FontSize"];
-            if(fontSize != null)
-            {
-                SetFontSize(Double.Parse(fontSize));
-            }
+            
 
             var speed = ConfigurationManager.AppSettings["Speed"];
             if (speed != null)
@@ -496,16 +555,19 @@ namespace ProverbTeleprompter
             if(!string.IsNullOrWhiteSpace(_documentPath) && File.Exists(_documentPath))
             {
                 LoadDocument(_documentPath);
+                
             }
             else
             {
                 //Load default text
                 using(MemoryStream ms = new MemoryStream(Encoding.Default.GetBytes(Properties.Resources.Proverbs_1)))
                 {
-                   
-                    LoadDocument(ms, DataFormats.Rtf);
+                    DocumentHelpers.LoadDocument(ms, MainTextBox.Document, DataFormats.Rtf);
                 }
             }
+
+
+            SetDocumentConfig();
 
             var value = ConfigurationManager.AppSettings["FlipTalentWindowVert"];
             if(!string.IsNullOrWhiteSpace(value))
@@ -562,6 +624,76 @@ namespace ProverbTeleprompter
             }
         }
 
+        private void SetDocumentConfig()
+        {
+            var colorScheme = ConfigurationManager.AppSettings["ColorScheme"];
+            if (colorScheme != null && colorScheme.ToLowerInvariant() == "whiteonblack")
+            {
+                if (WhiteOnBlackButton.IsChecked == true)
+                {
+                    SetWhiteOnBlack();
+                }
+                WhiteOnBlackButton.IsChecked = true;
+            }
+            else
+            {
+                if (BlackOnWhiteButton.IsChecked == true)
+                {
+                    SetBlackOnWhite();
+                }
+                BlackOnWhiteButton.IsChecked = true;
+            }
+
+            var lineHeight = ConfigurationManager.AppSettings["LineHeight"];
+            if (lineHeight != null)
+            {
+                SetLineHeight(Double.Parse(lineHeight), FontSizeSlider.Value);
+            }
+
+            var fontSize = ConfigurationManager.AppSettings["FontSize"];
+            if (fontSize != null)
+            {
+                SetFontSize(Double.Parse(fontSize));
+            }
+
+
+            LoadBookmarks(MainTextBox.Document);
+        }
+
+
+
+        private void WatchDocumentForChanges(string fullFilePath, Action<object, FileSystemEventArgs> onChangedAction)
+        {
+            if(!_watchedFiles.ContainsKey(fullFilePath))
+            {
+                var fsw = new FileSystemWatcher();
+                _watchedFiles.Add(fullFilePath, fsw);
+                
+                fsw = new FileSystemWatcher();
+                fsw.BeginInit();
+                fsw.Path = Path.GetDirectoryName(fullFilePath);
+                fsw.Filter = Path.GetFileName(fullFilePath);
+                fsw.IncludeSubdirectories = false;
+                fsw.NotifyFilter = NotifyFilters.LastWrite;
+
+
+                fsw.Changed += onChangedAction.Invoke;
+                fsw.EnableRaisingEvents = true;
+                fsw.EndInit();
+            }
+            
+        }
+
+        private void UnWatchDocumentForChanges(string fullFilePath, Action<object, FileSystemEventArgs> onChangedAction)
+        {
+            if (_watchedFiles.ContainsKey(fullFilePath))
+            {
+                _watchedFiles[fullFilePath].Changed -= onChangedAction.Invoke;
+                _watchedFiles[fullFilePath].Dispose();
+                _watchedFiles.Remove(fullFilePath);
+            }
+        }
+
         private void BlackOnWhiteButton_Checked(object sender, RoutedEventArgs e)
         {
             SetBlackOnWhite();
@@ -587,13 +719,19 @@ namespace ProverbTeleprompter
         private void SetWhiteOnBlack()
         {
 
-            MainFlowDocument.Background = Brushes.Black;
+            MainTextBox.Document.Background = Brushes.Black;
+            try
+            {
+                DocumentHelpers.ChangePropertyValue(MainTextBox.Document, TextElement.ForegroundProperty, Brushes.White, Brushes.Black);
+                DocumentHelpers.ChangePropertyValue(MainTextBox.Document, TextElement.BackgroundProperty, Brushes.Black, Brushes.White);
 
-            TextRange range = new TextRange(MainTextBox.Document.ContentStart, MainTextBox.Document.ContentEnd);
-            //DocumentHelpers.ChangeTextColor(MainFlowDocument, Brushes.White, Brushes.Black);
-            DocumentHelpers.ChangePropertyValue(MainFlowDocument, TextElement.ForegroundProperty, Brushes.White, Brushes.Black);
-            DocumentHelpers.ChangePropertyValue(MainFlowDocument, TextElement.BackgroundProperty, Brushes.Black, Brushes.White);
-            //range.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.Black);
+            }
+            catch (Exception ex)
+            {
+                
+                throw;
+            }
+
 
             if (_configInitialized)
                 AppConfigHelper.SetAppSetting("ColorScheme", "WhiteOnBlack");
@@ -603,13 +741,10 @@ namespace ProverbTeleprompter
 
         private  void SetBlackOnWhite()
         {
-            MainFlowDocument.Background = Brushes.White;
-            TextRange range = new TextRange(MainTextBox.Document.ContentStart, MainTextBox.Document.ContentEnd);
-            //range.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.White);
+            MainTextBox.Document.Background = Brushes.White;
 
-            //DocumentHelpers.ChangeTextColor(MainFlowDocument, Brushes.Black, Brushes.White);
-            DocumentHelpers.ChangePropertyValue(MainFlowDocument, TextElement.ForegroundProperty, Brushes.Black, Brushes.White);
-            DocumentHelpers.ChangePropertyValue(MainFlowDocument, TextElement.BackgroundProperty, Brushes.White, Brushes.Black);
+            DocumentHelpers.ChangePropertyValue(MainTextBox.Document, TextElement.ForegroundProperty, Brushes.Black, Brushes.White);
+            DocumentHelpers.ChangePropertyValue(MainTextBox.Document, TextElement.BackgroundProperty, Brushes.White, Brushes.Black);
             if (_configInitialized)
                 AppConfigHelper.SetAppSetting("ColorScheme", "BlackOnWhite");
 
@@ -628,15 +763,23 @@ namespace ProverbTeleprompter
 
         private void SetFontSize(double newSize)
         {
-            TextRange range = new TextRange(MainTextBox.Document.ContentStart, MainTextBox.Document.ContentEnd);
-            range.ApplyPropertyValue(TextElement.FontSizeProperty, newSize);
+          //  TextRange range = new TextRange(MainTextBox.Document.ContentStart, MainTextBox.Document.ContentEnd);
+          //  range.ApplyPropertyValue(TextElement.FontSizeProperty, newSize);
+            DocumentHelpers.ChangePropertyValue(MainTextBox.Document, TextElement.FontSizeProperty, newSize);
 
             FontSizeSlider.Value = newSize;
+
+            if (LineHeightSlider != null)
+            {
+                SetLineHeight(LineHeightSlider.Value, FontSizeSlider.Value);
+            }
+            
+
         }
 
         private void SpeedSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (_configInitialized)
+            if (_configInitialized && e.NewValue != 0)
                 AppConfigHelper.SetAppSetting("Speed", e.NewValue.ToString());
 
             CurrentSpeed = e.NewValue;
@@ -656,44 +799,60 @@ namespace ProverbTeleprompter
 
         private void SaveDocumentAs(string documentPath)
         {
-            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-            
-            if(!string.IsNullOrWhiteSpace(documentPath))
+            try
             {
-                dlg.FileName = Path.GetFileName(documentPath);
-                dlg.InitialDirectory = Path.GetDirectoryName(documentPath);
- 
-            }
-            else
-            {
-                dlg.FileName = "untitled"; // Default file name
-            }
-            
+                
 
-            dlg.DefaultExt = ".rtf"; // Default file extension 
+                Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
 
-            dlg.Filter = "Rich Text Documents|*.rtf"; // Filter files by extension 
-
-            // Show save file dialog box 
-
-            Nullable<bool> result = dlg.ShowDialog();
-            // Process save file dialog box results 
-
-            if (result == true)
-            {
-
-                // Save document 
-
-                _documentPath = dlg.FileName;
-
-                if (!string.IsNullOrWhiteSpace(_documentPath))
+                if (!string.IsNullOrWhiteSpace(documentPath))
                 {
-                    SaveDocument(_documentPath);
+                    dlg.FileName = Path.GetFileName(documentPath);
+                    dlg.InitialDirectory = Path.GetDirectoryName(documentPath);
+
+                }
+                else
+                {
+                    dlg.FileName = "untitled"; // Default file name
                 }
 
-                AppConfigHelper.SetAppSetting("DocumentPath", _documentPath);
 
+                dlg.DefaultExt = ".rtf"; // Default file extension 
+
+                dlg.Filter = "Rich Text Documents|*.rtf"; // Filter files by extension 
+
+                // Show save file dialog box 
+
+                Nullable<bool> result = dlg.ShowDialog();
+                // Process save file dialog box results 
+
+                if (result == true)
+                {
+                    //No longer watch the old document
+                    if(dlg.FileName != documentPath)
+                    {
+                        UnWatchDocumentForChanges(_documentPath, Document_Changed);
+                    }
+
+                    // Save document 
+                    
+                    _documentPath = dlg.FileName;
+
+                    if (!string.IsNullOrWhiteSpace(_documentPath))
+                    {
+                        SaveDocument(_documentPath);
+                    }
+
+                    AppConfigHelper.SetAppSetting("DocumentPath", _documentPath);
+
+                }
             }
+            finally
+            {
+
+                
+            }
+            
 
 
         }
@@ -704,24 +863,34 @@ namespace ProverbTeleprompter
 
             FileStream fStream;
 
-            range = new TextRange(MainTextBox.Document.ContentStart, MainTextBox.Document.ContentEnd);
-
-            using(fStream = new FileStream(fullFilePath, FileMode.Create))
+            try
             {
-                range.Save(fStream, System.Windows.DataFormats.Rtf);
-            }
-            ;
-            string xamlPath =System.IO.Path.Combine(System.IO.Path.GetDirectoryName(fullFilePath),
-                                   System.IO.Path.GetFileNameWithoutExtension(fullFilePath) + ".xaml");
+                UnWatchDocumentForChanges(fullFilePath, Document_Changed);
 
-            using (fStream = new FileStream(xamlPath, FileMode.Create))
-            {
-                range.Save(fStream, System.Windows.DataFormats.Xaml);
+                range = new TextRange(MainTextBox.Document.ContentStart, MainTextBox.Document.ContentEnd);
+
+                using (fStream = new FileStream(fullFilePath, FileMode.Create))
+                {
+                    DocumentHelpers.SaveDocument(fStream, MainTextBox.Document, DataFormats.Rtf);
+                }
+                ;
+                string xamlPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(fullFilePath),
+                                       System.IO.Path.GetFileNameWithoutExtension(fullFilePath) + ".xaml");
+
+                using (fStream = new FileStream(xamlPath, FileMode.Create))
+                {
+                    DocumentHelpers.SaveDocument(fStream, MainTextBox.Document, DataFormats.Xaml);
+                }
+
             }
+            finally
+            {
+                WatchDocumentForChanges(fullFilePath, Document_Changed);
+            }
+
 
        
         }
-
 
 
         private void LoadDocumentDialog(string documentPath)
@@ -760,7 +929,7 @@ namespace ProverbTeleprompter
                 }
 
                 AppConfigHelper.SetAppSetting("DocumentPath", _documentPath);
-                InitializeConfig();
+                SetDocumentConfig();
                 SetColorScheme();
             }
 
@@ -768,20 +937,6 @@ namespace ProverbTeleprompter
         }
 
 
-        private void LoadDocument(Stream fileStream, string dataFormat)
-        {
-            try
-            {
-                TextRange range = new TextRange(MainTextBox.Document.ContentStart, MainTextBox.Document.ContentEnd);
-
-                range.Load(fileStream, dataFormat);
-
-            }
-            catch (ArgumentException ex)
-            {
-                MessageBox.Show("Unsupported file type.");
-            }
-        }
 
 
         private void LoadDocument(string fullFilePath)
@@ -801,10 +956,15 @@ namespace ProverbTeleprompter
 
                 using (FileStream fStream = new FileStream(fullFilePath, FileMode.Open))
                 {
-                    LoadDocument(fStream, dataFormat);
+                    DocumentHelpers.LoadDocument(fStream,MainTextBox.Document, dataFormat);
+                    fStream.Close();
+
+                    
                 }
 
+                WatchDocumentForChanges(_documentPath, Document_Changed);
 
+                
                 //SetColorScheme();
                 
 
@@ -856,6 +1016,8 @@ namespace ProverbTeleprompter
             _defaultSpeed = SpeedSlider.Value;
         }
 
+        #region Talent Window Methods
+
         private void ToggleTalentWindowButton_Click(object sender, RoutedEventArgs e)
         {
 
@@ -906,11 +1068,6 @@ namespace ProverbTeleprompter
             AppConfigHelper.SetAppSetting("TalentWindowTop", _talentWindow.Top.ToString());
 
         }
-
-        private double _talentWindowLeft = 100;
-        private double _talentWindowTop = 100;
-        private double _talentWindowWidth = 300;
-        private double _talentWindowHeight = 200;
 
         void _talentWindow_LocationChanged(object sender, EventArgs e)
         {
@@ -1006,6 +1163,38 @@ namespace ProverbTeleprompter
         }
 
 
+        private void FlipTalentWindowVertCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            FlipTalentWindowVert(FlipTalentWindowVertCheckBox.IsChecked.GetValueOrDefault());
+        }
+
+        private void FlipTalentWindowVertCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            FlipTalentWindowVert(FlipTalentWindowVertCheckBox.IsChecked.GetValueOrDefault());
+        }
+
+        private void FlipTalentWindowHorizCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            FlipTalentWindowHoriz(FlipTalentWindowHorizCheckBox.IsChecked.GetValueOrDefault());
+        }
+
+        private void FlipTalentWindowHorizCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            FlipTalentWindowHoriz(FlipTalentWindowHorizCheckBox.IsChecked.GetValueOrDefault());
+        }
+
+        #endregion
+
+        private void FlipMainWindowVertCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            FlipMainWindowVert(FlipMainWindowVertCheckBox.IsChecked.GetValueOrDefault());
+        }
+
+        private void FlipMainWindowVertCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            FlipMainWindowVert(FlipMainWindowVertCheckBox.IsChecked.GetValueOrDefault());
+        }
+
         private void FlipMainWindowVert(bool isFlippedVert)
         {
 
@@ -1037,38 +1226,6 @@ namespace ProverbTeleprompter
             AppConfigHelper.SetAppSetting("FlipMainWindowHoriz", isFlippedHoriz.ToString());
         }
 
-
-
-        private void FlipTalentWindowVertCheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            FlipTalentWindowVert(FlipTalentWindowVertCheckBox.IsChecked.GetValueOrDefault());
-        }
-
-        private void FlipTalentWindowVertCheckBox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            FlipTalentWindowVert(FlipTalentWindowVertCheckBox.IsChecked.GetValueOrDefault());
-        }
-
-        private void FlipTalentWindowHorizCheckBox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            FlipTalentWindowHoriz(FlipTalentWindowHorizCheckBox.IsChecked.GetValueOrDefault());
-        }
-
-        private void FlipTalentWindowHorizCheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            FlipTalentWindowHoriz(FlipTalentWindowHorizCheckBox.IsChecked.GetValueOrDefault());
-        }
-
-        private void FlipMainWindowVertCheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            FlipMainWindowVert(FlipMainWindowVertCheckBox.IsChecked.GetValueOrDefault());
-        }
-
-        private void FlipMainWindowVertCheckBox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            FlipMainWindowVert(FlipMainWindowVertCheckBox.IsChecked.GetValueOrDefault());
-        }
-
         private void FlipMainWindowHorizCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
             FlipMainWindowHoriz(FlipMainWindowHorizCheckBox.IsChecked.GetValueOrDefault());
@@ -1083,8 +1240,6 @@ namespace ProverbTeleprompter
         {
             LoadDocumentDialog(_documentPath);
         }
-
-        private bool _isDraggingEyeline;
 
         private void EyelineLeftTriangle_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -1115,12 +1270,360 @@ namespace ProverbTeleprompter
 
         private void SetEyeLinePosition(double position)
         {
+            if(position < 0)
+            {
+                position = 0;
+            }
             Thickness loc = new Thickness(0, position, 0, 0);
             EyelineLeftTriangle.Margin = loc;
             EyelineRightTriangle.Margin = new Thickness(EyelineRightTriangle.Margin.Left,
                 position, EyelineRightTriangle.Margin.Right, EyelineRightTriangle.Margin.Bottom);
         }
 
+
+        private void EditButton_Click(object sender, RoutedEventArgs e)
+        {
+            //EditWindow editWindow = new EditWindow();
+            //editWindow.Owner = this;
+            //editWindow.Show();
+
+            MemoryStream ms = new MemoryStream();
+            DocumentHelpers.SaveDocument(ms,MainTextBox.Document, DataFormats.Rtf);
+            
+
+            if(_editWindow != null)
+            {
+                
+                _editWindow.Dispatcher.Invoke((Action)(() =>
+                {
+                    UpdateEditWindowDocument(ms);
+                    _editWindow.Activate();
+                    _editWindow.Visibility = Visibility.Visible;
+                    _editWindow.Show();
+                }));
+
+            }
+            else
+            {
+                //So the edit window doesn't interfere with the scrolling of the prompter window
+                //Spawn the edit window on a separate thread.
+                //The down side of doing this is that we cannot set the child window's owner to the MainWindow
+                //due to thread ownership
+                Thread thread = new Thread(() =>
+                {
+                    _editWindow = new EditWindow();
+
+                    _editWindow.ShowActivated = true;
+
+                    _editWindow.DocumentUpdated += new EventHandler<DocumentUpdatedEventArgs>(_editWindow_DocumentUpdated);
+                    
+
+                    _editWindow.Loaded += (sender2, e2) =>
+                    {
+                        UpdateEditWindowDocument(ms);
+                    };
+
+                    _editWindow.Show();
+                    _editWindow.Closed += (sender2, e2) =>
+                     _editWindow.Dispatcher.InvokeShutdown();
+
+
+                    Dispatcher.Run();
+                });
+
+                thread.IsBackground = true;
+                thread.SetApartmentState(ApartmentState.STA);
+                thread.Start();
+     
+            }
+           
+        }
+
+        private void UpdateEditWindowDocument(MemoryStream ms)
+        {
+            _editWindow.RichTextEditor.RichTextBox.VerifyAccess();
+            _editWindow.RichTextEditor.LoadDocument(ms, DataFormats.Rtf);
+            ms.Dispose();
+
+            ConvertDocumentToEditableFormat(_editWindow.RichTextEditor.RichTextBox.Document);
+            _editWindow.RichTextEditor.RichTextBox.CaretBrush = Brushes.Black;
+        }
+
+        private void ConvertDocumentToEditableFormat(FlowDocument document)
+        {
+            DocumentHelpers.ChangePropertyValue(document, TextElement.FontSizeProperty, (double)12);
+
+            DocumentHelpers.ChangePropertyValue(document, TextElement.ForegroundProperty, Brushes.Black, Brushes.White);
+            DocumentHelpers.ChangePropertyValue(document, TextElement.BackgroundProperty, Brushes.White, Brushes.Black);
+        }
+
+        void _editWindow_DocumentUpdated(object sender, DocumentUpdatedEventArgs e)
+        {
+            Dispatcher.Invoke((Action) (() =>
+            {
+            
+                DocumentHelpers.LoadDocument(e.DocumentData,MainTextBox.Document, e.DataFormat);
+
+                SetDocumentConfig();
+            }));
+        }
+        
+        
+        
+        private void EditInWordpadButton_Click(object sender, RoutedEventArgs e)
+        {
+            if(string.IsNullOrWhiteSpace(_documentPath))
+            {
+                SaveDocumentAs(_documentPath);
+            }
+           
+            //Cancelled from saving document
+            if(string.IsNullOrWhiteSpace(_documentPath))
+            {
+                return;
+            }
+
+            _tempDocumentPath = Path.Combine(Path.GetTempPath(), Path.GetFileName(_documentPath));
+
+            
+
+            using(var ms = new MemoryStream())
+            {
+                DocumentHelpers.SaveDocument(ms, MainTextBox.Document, DataFormats.Rtf); 
+
+               // SaveDocument(_tempDocumentPath);
+                
+
+                FlowDocument tempDoc = new FlowDocument();
+                DocumentHelpers.LoadDocument(ms,tempDoc, DataFormats.Rtf );
+                ConvertDocumentToEditableFormat(tempDoc);
+                using (var tempFileStream = File.OpenWrite(_tempDocumentPath))
+                {
+                    DocumentHelpers.SaveDocument(tempFileStream, tempDoc, DataFormats.Rtf);
+                }
+            }
+
+
+
+            WatchDocumentForChanges(_tempDocumentPath, Document_Changed);
+
+            ProcessStartInfo info = new ProcessStartInfo();
+            info.Arguments = string.Format("\"{0}\"", _tempDocumentPath);
+            info.FileName = "wordpad.exe";
+            _wordpadProcess = Process.Start(info);
+        }
+
+
+        void Document_Changed(object sender, FileSystemEventArgs e)
+        {
+
+        
+            try
+            {
+                _changeSemaphore.Wait();
+                var storeStream = new MemoryStream();
+
+                using (var filestream = File.OpenRead(e.FullPath))
+                {
+                    storeStream.SetLength(filestream.Length);
+                    filestream.Read(storeStream.GetBuffer(), 0, (int)filestream.Length);
+                    storeStream.Flush();
+                }
+
+                Dispatcher.Invoke((Action)(() =>
+                {
+
+                    DocumentHelpers.LoadDocument(storeStream, MainTextBox.Document, DataFormats.Rtf);
+                    storeStream.Dispose();
+                    SetDocumentConfig();
+                }));
+            }
+            catch (Exception)
+            {
+
+            }
+            finally
+            {
+                _changeSemaphore.Release();
+            }
+
+
+
+            
+
+
+        }
+
+        private void LineHeightSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            SetLineHeight(e.NewValue, FontSizeSlider.Value);
+        }
+
+        private void SetLineHeight(double height, double fontSize)
+        {
+            LineHeightSlider.Value = height;
+            MainTextBox.Document.SetValue(Paragraph.LineHeightProperty, height * fontSize);
+            if (_configInitialized)
+                AppConfigHelper.SetAppSetting("LineHeight", height.ToString());
+        }
+
+        private void AddBookmarkButton_Click(object sender, RoutedEventArgs e)
+        {
+            var bookmarkOffset = MainScroller.VerticalOffset + EyelineLeftTriangle.Margin.Top;
+
+            var pos = MainTextBox.GetPositionFromPoint(new Point(0, bookmarkOffset), true);
+            
+
+            var num = DocumentHelpers.GetLineNumberFromSelection(pos);
+
+            Hyperlink hyperlink = new Hyperlink(pos, pos);
+            
+
+            Image img = new Image();
+
+            img.Source = Resources["ClearBookmarkImage"] as ImageSource;
+
+            
+
+ 
+            img.Visibility = Visibility.Collapsed;
+            Bookmark bm = new Bookmark();
+            bm.Name = string.Format("Boomark {0}", BookmarksListbox.Items.Count + 1);
+            bm.Line = num;
+            bm.TopOffset = bookmarkOffset;
+
+            bm.Image = img;
+
+            hyperlink.NavigateUri = new Uri(String.Format("http://bookmark/{0}",  bm.Name));
+            hyperlink.Inlines.Add(img);
+            bm.Hyperlink = hyperlink;
+            bm.Position = pos;
+            
+            BookmarksListbox.Items.Add(bm);
+            bm.Ordinal = BookmarksListbox.Items.Count;
+            
+
+
+             
+        }
+
+        private void BookmarksListbox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            JumpToBookmark(e.AddedItems[0] as Bookmark);
+        }
+
+        private  void JumpToBookmark(Bookmark bookmark)
+        {
+            bookmark.Hyperlink.BringIntoView();
+
+            BookmarksListbox.SelectedItem = bookmark;
+        }
+
+        private  void JumpToBookmarkByOrdinal(int ordinal)
+        {
+            foreach (var bookmark in BookmarksListbox.Items)
+            {
+                if(bookmark is Bookmark)
+                {
+                    if((bookmark as Bookmark).Ordinal == ordinal)
+                    {
+                        JumpToBookmark(bookmark as Bookmark);
+                    }
+                }
+            }
+        }
+
+        void BookmarkItemClicked(object sender, MouseButtonEventArgs e)
+        {
+            var bookmark = (sender as ContentControl).Content as Bookmark; 
+            JumpToBookmark(bookmark);
+        }
+
+
+        private ICommand _renameBookmarkCommand;
+        public ICommand RenameBookmarkCommand
+        {
+            get
+            {
+                if(_renameBookmarkCommand == null)
+                {
+                    _renameBookmarkCommand = new RelayCommand(x =>
+                    {
+                        var listItem = x as DependencyObject;
+                        var children = listItem.FindChildren<TextBox>();
+
+                        foreach (var textBox in children)
+                        {
+                            textBox.Focusable = true;
+                            textBox.IsEnabled = true;
+                            textBox.SelectionStart = 0;
+                            textBox.SelectionLength = textBox.Text.Length;
+                            
+                            textBox.Focus();
+
+
+                        }
+                    });
+                }
+                return _renameBookmarkCommand;
+            }
+        }
+
+        private ICommand _deleteBookmarkCommand;
+        public ICommand DeleteBookmarkCommand
+        {
+            get
+            {
+                if (_deleteBookmarkCommand == null)
+                {
+                    _deleteBookmarkCommand = new RelayCommand(x =>
+                    {
+                        var bookmark = (x as ContentControl).Content as Bookmark;
+                        bookmark.Hyperlink.Inlines.Clear();
+                       BookmarksListbox.Items.Remove((x as ContentControl).Content);
+
+
+                    });
+                }
+                return _deleteBookmarkCommand;
+            }
+        }
+
+
+        private void LoadBookmarks(FlowDocument document)
+        {
+            BookmarksListbox.Items.Clear();
+            var hyperlinks = document.GetLogicalChildren<Hyperlink>(true);
+            foreach (var hyperlink in hyperlinks)
+            {
+                AddBookmarkFromHyperlink(hyperlink);
+            }
+        }
+
+        private void AddBookmarkFromHyperlink(Hyperlink hyperlink)
+        {
+
+
+            if (hyperlink.NavigateUri.IsAbsoluteUri && hyperlink.NavigateUri.Host.StartsWith("bookmark"))
+            {
+                
+                Bookmark bm = new Bookmark();
+
+                bm.Name = Uri.UnescapeDataString(hyperlink.NavigateUri.Segments[1]);
+                bm.Hyperlink = hyperlink;
+                
+               
+                
+                BookmarksListbox.Items.Add(bm);
+
+                bm.Ordinal = BookmarksListbox.Items.Count;
+                bm.Image = (hyperlink.Inlines.FirstInline as InlineUIContainer).Child as Image;
+                bm.Image.Height = FontSizeSlider.Value;
+                
+            }
+
+
+        }
 
     }
 }
