@@ -10,7 +10,7 @@
 
 	<Grid x:Name="LayoutRoot">
 		<Polygon Stretch="Fill" Fill="#FFF2F205" Stroke="Transparent"
-			 Opacity="0.5"
+			
 			VerticalAlignment="Top" 
 			 >
 			<Polygon.Points>

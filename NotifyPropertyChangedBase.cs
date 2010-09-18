@@ -5,11 +5,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.Serialization;
+using System.Windows;
 
 namespace ProverbTeleprompter
 {
     
-	public abstract class NotifyPropertyChangedBase : INotifyPropertyChanged
+	public abstract class NotifyPropertyChangedBase : DependencyObject, INotifyPropertyChanged
 	{
         
 		public event PropertyChangedEventHandler PropertyChanged;

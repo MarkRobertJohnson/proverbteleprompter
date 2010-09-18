@@ -1,0 +1,68 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Converters="clr-namespace:ProverbTeleprompter.Converters">
+
+    <BitmapImage x:Key="BlackBookmarkImage" UriSource="/Resources/BlackBookmark.png" />
+    <BitmapImage x:Key="WhiteBookmarkImage" UriSource="/Resources/WhiteBookmark.png" />
+    <BitmapImage x:Key="ClearBookmarkImage" UriSource="/Resources/ClearBookmark.png" />
+
+    <Converters:TopMarginConverter x:Key="TopMarginConverter" />
+
+
+
+    <Style x:Key="ToolSection" TargetType="{x:Type WrapPanel}">
+        <Setter Property="Margin" Value="2" />
+        <Setter Property="Background" Value="#5035BC2E" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+
+    </Style>
+
+
+
+    <Style x:Key="FlyInOutGrid" TargetType="{x:Type Grid}">
+
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding ToolsVisible, Mode=TwoWay}" Value="True">
+                <DataTrigger.EnterActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation  To="250" Duration="00:00:0.3" Storyboard.TargetProperty="Height">
+                                <DoubleAnimation.EasingFunction>
+                                    <!-- Ease in and out -->
+                                    <ExponentialEase EasingMode="EaseInOut"/>
+                                </DoubleAnimation.EasingFunction>
+
+                            </DoubleAnimation>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </DataTrigger.EnterActions>
+                <DataTrigger.ExitActions>
+                    <BeginStoryboard>
+                        <Storyboard >
+                            <DoubleAnimation  To="0" Duration="00:00:0.3" Storyboard.TargetProperty="Height">
+                                <DoubleAnimation.EasingFunction>
+                                    <!-- Ease in and out -->
+                                    <ExponentialEase EasingMode="EaseInOut"/>
+                                </DoubleAnimation.EasingFunction>
+
+                            </DoubleAnimation>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </DataTrigger.ExitActions>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+    <DataTemplate x:Key="DataTemplate1">
+        <StackPanel Orientation="Horizontal">
+            <Button Content="X" Foreground="Red" ToolTip="Delete Bookmark" Style="{DynamicResource ToolButtonStyle}" 
+                        Command="{Binding RelativeSource={RelativeSource AncestorType=Window},Path=DataContext.DeleteBookmarkCommand}" Focusable="False" 
+                        
+                        CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBoxItem}}}"/>
+            <Button Content="R" Style="{DynamicResource ToolButtonStyle}"  Focusable="False"
+                        Command="{Binding RelativeSource={RelativeSource AncestorType=Window},Path=DataContext.RenameBookmarkCommand}" ToolTip="Rename Bookmark" 
+                        CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBoxItem}}}"/>
+            <TextBox Text="{Binding Name}" IsEnabled="False" Focusable="False" />
+        </StackPanel>
+
+    </DataTemplate>
+
+</ResourceDictionary>

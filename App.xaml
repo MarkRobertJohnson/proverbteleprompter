@@ -8,8 +8,10 @@
     		<ResourceDictionary.MergedDictionaries>
     			<ResourceDictionary Source="Styles.xaml"/>
     			<ResourceDictionary Source="Resources/Bookmark.xaml"/>
+                <ResourceDictionary Source="Resources/Resources.xaml"/>
     		</ResourceDictionary.MergedDictionaries>
     	</ResourceDictionary>
          
+        
     </Application.Resources>
 </Application>
