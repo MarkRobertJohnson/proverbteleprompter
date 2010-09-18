@@ -23,16 +23,20 @@
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
+    <UpdateMode>Background</UpdateMode>
     <UpdateInterval>7</UpdateInterval>
     <UpdateIntervalUnits>Days</UpdateIntervalUnits>
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <InstallUrl>http://proverbteleprompter.codeplex.com/releases/clickonce/</InstallUrl>
+    <SupportUrl>http://proverbteleprompter.codeplex.com</SupportUrl>
+    <ErrorReportUrl>http://proverbteleprompter.codeplex.com</ErrorReportUrl>
+    <ProductName>Proverb Teleprompter</ProductName>
+    <PublisherName>Mark Johnson</PublisherName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>6</ApplicationRevision>
+    <ApplicationRevision>18</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -75,6 +79,14 @@
       <HintPath>ExternalDependencies\Adastra.RichEditorLibrary.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Expression.Drawing" />
+    <Reference Include="Microsoft.Practices.Composite, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>ExternalDependencies\Microsoft.Practices.Composite.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Composite.Presentation, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>ExternalDependencies\Microsoft.Practices.Composite.Presentation.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationFramework.Aero" />
     <Reference Include="PresentationFramework.Royale" />
     <Reference Include="RibbonControlsLibrary, Version=3.5.31016.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -121,6 +133,10 @@
     </ApplicationDefinition>
     <Compile Include="BibleHelpers.cs" />
     <Compile Include="Bookmark.cs" />
+    <Compile Include="Controls\ScrollViewerExt.cs" />
+    <Compile Include="Controls\SelectorSelectedCommandBehavior.cs" />
+    <Compile Include="Converters\TopMarginConverter.cs" />
+    <Compile Include="ScrollViewerAssistant.cs" />
     <Compile Include="DependsUponAttribute.cs" />
     <Compile Include="DocumentHelpers.cs" />
     <Compile Include="DocumentUpdatedEventArgs.cs" />
@@ -138,12 +154,17 @@
     <Compile Include="HtmlConverter\HtmlTokenType.cs" />
     <Compile Include="HtmlConverter\HtmlToXamlConverter.cs" />
     <Compile Include="HtmlConverter\TableColumnInfo.cs" />
+    <Compile Include="MainWindowViewModel.cs" />
     <Compile Include="NotifyPropertyChangedBase.cs" />
     <Compile Include="RelayCommand.cs" />
     <Compile Include="RemoteButtonPressedEventArgs.cs" />
     <Compile Include="RemoteHandler.cs" />
+    <Compile Include="RichTextBoxAssistant.cs" />
     <Compile Include="TalentWindow.xaml.cs">
       <DependentUpon>TalentWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ToolsWindow.xaml.cs">
+      <DependentUpon>ToolsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="UIHelpers.cs" />
     <Compile Include="WebHelpers.cs" />
@@ -172,11 +193,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Resources\Resources.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Styles.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
     <Page Include="TalentWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ToolsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -235,17 +264,19 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ExternalDependencies\Adastra.RichEditorLibrary.dll" />
-    <Content Include="ExternalDependencies\Adastra.RichEditorLibrary.pdb" />
-    <Content Include="ExternalDependencies\en-US\Adastra.RichEditorLibrary.resources.dll" />
-    <Content Include="ExternalDependencies\RibbonControlsLibrary.dll" />
-    <Content Include="ExternalDependencies\WPFControlsLibrary.dll" />
-    <Content Include="ExternalDependencies\WPFControlsLibraryInterface.dll" />
-    <Content Include="ExternalDependencies\XAMLConverter.exe" />
-    <Content Include="ExternalDependencies\XAMLConverter.pdb" />
+    <None Include="ExternalDependencies\Adastra.RichEditorLibrary.dll" />
+    <None Include="ExternalDependencies\en-US\Adastra.RichEditorLibrary.resources.dll" />
+    <None Include="ExternalDependencies\RibbonControlsLibrary.dll" />
+    <None Include="ExternalDependencies\WPFControlsLibrary.dll" />
+    <None Include="ExternalDependencies\WPFControlsLibraryInterface.dll" />
+    <None Include="ExternalDependencies\XAMLConverter.exe" />
     <Resource Include="Resources\ClearBookMark.png" />
     <Resource Include="Resources\WhiteBookmark.png" />
     <Resource Include="Resources\BlackBookmark.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ExternalDependencies\Microsoft.Practices.Composite.dll" />
+    <None Include="ExternalDependencies\Microsoft.Practices.Composite.Presentation.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

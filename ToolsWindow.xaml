@@ -1,92 +1,32 @@
-﻿<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-         xmlns:ed="http://schemas.microsoft.com/expression/2010/drawing" xmlns:local="clr-namespace:ProverbTeleprompter" 
-        xmlns:Microsoft_Windows_Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero" 
-        xmlns:Controls="clr-namespace:ProverbTeleprompter.Controls" mc:Ignorable="d"   
- x:Class="ProverbTeleprompter.MainWindow"
-        x:Name="LayoutRoot"
-        Title="Proverb Teleprompter" 
-                Height="{Binding Path=DataContext.MainWindowHeight,ElementName=LayoutRoot,Mode=OneWayToSource}" 
-        Width="{Binding Path=DataContext.MainWindowWidth,ElementName=LayoutRoot,Mode=OneWayToSource}"
-        Top="{Binding Path=DataContext.MainWindowTop,ElementName=LayoutRoot,Mode=OneWayToSource}" 
-        Left="{Binding Path=DataContext.MainWindowLeft,ElementName=LayoutRoot,Mode=OneWayToSource}"
-        WindowStyle="None" 
-        WindowState="Maximized" Foreground="Black" ResizeMode="CanResize"
-        d:DesignHeight="900" d:DesignWidth="900"
-        >
+﻿<Window x:Class="ProverbTeleprompter.ToolsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+ xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:Controls="clr-namespace:ProverbTeleprompter.Controls" mc:Ignorable="d"
+        AllowsTransparency="True"
+       
+            WindowStyle="None" WindowState="Normal" WindowStartupLocation="Manual"
+        Title="ToolsWindow" d:DesignHeight="250" d:DesignWidth="1331" SizeToContent="Manual" Background="Transparent">
     <Window.Resources>
-
 
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/Resources.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
-
-
     </Window.Resources>
-    <Grid >
-        <Grid.ColumnDefinitions>
-        	<ColumnDefinition />
-        	<ColumnDefinition Width="Auto"/>
-        </Grid.ColumnDefinitions>
-        <Border RenderTransformOrigin="0.5,0.5">
-           
-            <Border.RenderTransform>
-                <TransformGroup>
-                    <RotateTransform x:Name="MainRotate" Angle="0" CenterX="0" CenterY="0"/>
-                    <ScaleTransform x:Name="MainScale" ScaleX="{Binding MainWindowScaleX}" 
-                                    ScaleY="{Binding MainWindowScaleY}" CenterX="0" CenterY="0" />
-                </TransformGroup>
-            </Border.RenderTransform>
-           
-        	<Grid x:Name="MainTextGrid" PreviewMouseMove="Grid_PreviewMouseMove"  >
-                <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-             
-                <Controls:ScrollViewerExt x:Name="MainScroller" Template="{DynamicResource ScrollViewerControlTemplate1}" 
-                                          VerticalOffsetExt="{Binding MainScrollerVerticalOffset, Mode=TwoWay}"
-                              Focusable="False" ExtentHeightExt="{Binding MainScrollerExtentHeight, Mode=TwoWay}" 
-                                          ViewportHeightExt="{Binding MainScrollerViewportHeight, Mode=TwoWay}"
-                              VerticalScrollBarVisibility="Visible">
-
-                    <RichTextBox  x:Name="MainTextBox" BorderThickness="0" BorderBrush="Transparent" 
-                                  CaretBrush="{Binding MainDocumentCaretBrush}" 
-        				FontSize="{Binding Value, ElementName=FontSizeSlider}"  Focusable="{Binding Editable}"
-        				  local:RichTextboxAssistant.Document="{Binding MainDocument, Mode=TwoWay}">
-
-                    </RichTextBox>
-
-                </Controls:ScrollViewerExt>
-
-                <local:EyelineTriangleControl x:Name="EyelineLeftTriangle"  
-                                              PreviewMouseLeftButtonDown="EyelineLeftTriangle_PreviewMouseLeftButtonDown" 
-                                              HorizontalAlignment="Left" Height="70" 
-                                              Margin="{Binding Path=EyelinePosition, Converter={StaticResource TopMarginConverter}}" 
-                                              VerticalAlignment="Top" Width="42"/>
-                <local:EyelineTriangleControl x:Name="EyelineRightTriangle"  
-                                              PreviewMouseLeftButtonDown="EyelineLeftTriangle_PreviewMouseLeftButtonDown" 
-                                              HorizontalAlignment="Right" Height="70" 
-                                              Margin="{Binding Path=EyelinePosition, Converter={StaticResource TopMarginConverter}}"
-                                              VerticalAlignment="Top" Width="42.002" RenderTransformOrigin="0.5,0.5">
-                    <local:EyelineTriangleControl.RenderTransform>
-                        <ScaleTransform ScaleX="-1" />
-                    </local:EyelineTriangleControl.RenderTransform>
-                </local:EyelineTriangleControl>
-
-               
-            </Grid>
-        </Border>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
         <Grid x:Name="ToolsGrid" Height="250" VerticalAlignment="Bottom" Style="{StaticResource ResourceKey=FlyInOutGrid}" Background="White" Margin="0,0,0,-42">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-      
+
             <Polygon  HorizontalAlignment="Stretch" 
                      VerticalAlignment="Bottom" Stretch="Fill" Width="280" Height="30" Fill="#5035BC2E">
                 <Polygon.Points>
@@ -225,6 +165,7 @@
                                      Controls:Selected.Command="{Binding BookmarkSelectedCommand}"
                                      Focusable="False"
                                      >
+
                             </ListBox>
                         </WrapPanel>
 
@@ -296,5 +237,7 @@
 
         </Grid>
 
+
     </Grid>
+    
 </Window>

@@ -9,7 +9,7 @@ using System.Windows.Documents;
 
 namespace ProverbTeleprompter
 {
-    internal class Bookmark : NotifyPropertyChangedBase
+    public class Bookmark : NotifyPropertyChangedBase
     {
         private string _name;
         public string Name

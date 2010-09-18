@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -22,8 +23,37 @@ namespace ProverbTeleprompter
         {
             InitializeComponent();
 
+            MouseLeftButtonDown +=TalentWindow_MouseLeftButtonDown;
+            MouseDoubleClick +=TalentWindow_MouseDoubleClick;
+            Loaded += TalentWindow_Loaded;
 
         }
+
+        void TalentWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (SystemInformation.MonitorCount > 1)
+            {
+                WindowState = WindowState.Maximized;
+            }
+        }
+
+        void TalentWindow_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            DragMove();
+        }
+
+        void TalentWindow_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (WindowState != WindowState.Maximized)
+            {
+                WindowState = WindowState.Maximized;
+            }
+            else
+            {
+                WindowState = WindowState.Normal;
+            }
+        }
+
 
 
     }
