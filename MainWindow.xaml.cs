@@ -1,46 +1,16 @@
 ﻿
 using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Forms;
 using System.Windows.Input;
-using System.Windows.Interop;
-using System.Windows.Markup;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Threading;
-using System.Xml;
-using Microsoft.Expression.Shapes;
-using ProverbTeleprompter.HtmlConverter;
-using Tools.API.Messages.lParam;
-using Binding = System.Windows.Data.Binding;
-using DataFormats = System.Windows.DataFormats;
-using DragDropEffects = System.Windows.DragDropEffects;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
-using KeyEventHandler = System.Windows.Input.KeyEventHandler;
-using MessageBox = System.Windows.MessageBox;
-using Path = System.IO.Path;
-using TextBox = System.Windows.Controls.TextBox;
 
 namespace ProverbTeleprompter
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
         
 
@@ -55,33 +25,69 @@ namespace ProverbTeleprompter
         {
             
             InitializeComponent();
-            MainWindowViewModel = new MainWindowViewModel(MainTextBox);
-
-
-            MainWindowViewModel.BookmarkImage = Resources["ClearBookmarkImage"] as ImageSource;
+            MainWindowViewModel = new MainWindowViewModel(MainTextBox)
+                                      {
+                                          BookmarkImage = Resources["ClearBookmarkImage"] as ImageSource
+                                      };
 
 
             DataContext = MainWindowViewModel;
-            MainWindowViewModel.InitializeConfig();
+           // MainWindowViewModel.ToolsVisible = true;
+            
+            
 
             PreviewKeyDown += MainWindow_PreviewKeyDown;
-            PreviewKeyUp += MainWindow_PreviewKeyUp;    
-
-            KeyDown += MainWindow_KeyDown;
-
-            KeyUp += MainWindow_KeyUp;
-
+            PreviewKeyUp += MainWindow_PreviewKeyUp;
+            LocationChanged += MainWindow_LocationChanged;
+            SizeChanged += MainWindow_SizeChanged;
             Loaded += MainWindow_Loaded;
+
+            MouseDoubleClick += new MouseButtonEventHandler(MainWindow_MouseDoubleClick);
+            
+            MouseLeftButtonDown += MainWindow_MouseLeftButtonDown;
 
 
             Closing += MainWindow_Closing;
 
-            PromptView = MainScroller;
+            PromptView = MainTextGrid;
 
-            //LayoutRoot.UseLayoutRounding = true;
-            //LayoutRoot.SnapsToDevicePixels = true;
-            //RenderOptions.SetEdgeMode(LayoutRoot, EdgeMode.Aliased);
-            
+        }
+
+
+
+        void MainWindow_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (WindowState != WindowState.Maximized)
+            {
+                WindowState = WindowState.Maximized;
+            }
+            else
+            {
+                WindowState = WindowState.Normal;
+            }
+        }
+
+        void MainWindow_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            DragMove();
+        }
+
+        void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            SetToolSizeAndPos();
+        }
+
+        void MainWindow_LocationChanged(object sender, EventArgs e)
+        {
+            SetToolSizeAndPos();
+        }
+
+        private void SetToolSizeAndPos()
+        {
+            MainWindowViewModel.ToolWindowHeight = 250;
+            MainWindowViewModel.ToolWindowLeft = Left;
+            MainWindowViewModel.ToolWindowWidth = ActualWidth;
+            MainWindowViewModel.ToolWindowTop = Top + ActualHeight - MainWindowViewModel.ToolWindowHeight;
         }
 
         void MainWindow_PreviewKeyUp(object sender, KeyEventArgs e)
@@ -97,20 +103,8 @@ namespace ProverbTeleprompter
 
         void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            Properties.Settings.Default.Save();
             MainWindowViewModel.Dispose();
-        }
-
-        void MainWindow_KeyUp(object sender, KeyEventArgs e)
-        {
-            //MainWindowViewModel.KeyUp(sender, e);
-            
-        }
-
-
-        void MainWindow_KeyDown(object sender, KeyEventArgs e)
-        {
-
-            //MainWindowViewModel.KeyDown(sender, e);
         }
 
         void RemoteHandler_RemoteButtonPressed(object sender, RemoteButtonPressedEventArgs e)
@@ -124,19 +118,15 @@ namespace ProverbTeleprompter
             //HwndSource source = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
             //source.AddHook(new HwndSourceHook(RemoteHandler.WndProc));
 
-            //NOTE: Programmatically set the fly in distance
-            //var sb = FindResource("ToolFlyin") as Storyboard;
-            //var anim = sb.Children[0];
-            //if(anim is DoubleAnimation)
-            //{
-            //    (anim as DoubleAnimation).To = ToolsGrid.Height;
-            //}
+            MainWindowViewModel.ToggleToolsWindow();
+            MainWindowViewModel.InitializeConfig();
             
         }
 
         private void EyelineLeftTriangle_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             _isDraggingEyeline = true;
+            e.Handled = true;
         }
 
         private void Grid_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)

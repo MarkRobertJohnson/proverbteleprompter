@@ -4,9 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:Controls="clr-namespace:ProverbTeleprompter.Controls" mc:Ignorable="d"
         AllowsTransparency="True"
-       
-            WindowStyle="None" WindowState="Normal" WindowStartupLocation="Manual"
-        Title="ToolsWindow" d:DesignHeight="250" d:DesignWidth="1331" SizeToContent="Manual" Background="Transparent">
+               Height="{Binding Path=DataContext.ToolWindowHeight,ElementName=TheToolWindow,Mode=OneWay}" 
+        Width="{Binding Path=DataContext.ToolWindowWidth,ElementName=TheToolWindow,Mode=OneWay}"
+        Top="{Binding Path=DataContext.ToolWindowTop,ElementName=TheToolWindow,Mode=OneWay}" 
+        Left="{Binding Path=DataContext.ToolWindowLeft,ElementName=TheToolWindow,Mode=OneWay}"
+            WindowStyle="None" WindowState="Maximized" WindowStartupLocation="Manual"
+        x:Name="TheToolWindow"
+        Title="ToolsWindow" d:DesignHeight="250" d:DesignWidth="1331" SizeToContent="Manual"  Background="Transparent">
     <Window.Resources>
 
         <ResourceDictionary>
@@ -20,7 +24,8 @@
             <RowDefinition />
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Grid x:Name="ToolsGrid" Height="250" VerticalAlignment="Bottom" Style="{StaticResource ResourceKey=FlyInOutGrid}" Background="White" Margin="0,0,0,-42">
+        <Grid x:Name="ToolsGrid" Height="250" VerticalAlignment="Bottom" Style="{StaticResource ResourceKey=FlyInOutGrid}" 
+              Background="Transparent" Margin="0,0,0,-42">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -124,7 +129,7 @@
                         </WrapPanel>
                         <WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
                             <WrapPanel/>
-                            <Button Content="Show Talent Window" ToolTip="Display a second window for external monitors" 
+                            <Button Content="{Binding ToggleTalentWindowCaption, FallbackValue='Show Talent Window'}" ToolTip="Display a second window for external monitors" 
                                     x:Name="ToggleTalentWindowButton" Focusable="False"
         						Margin="5" 
                                     Command="{Binding ToggleTalentWindowCommand}"
