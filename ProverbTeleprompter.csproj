@@ -135,6 +135,7 @@
     <Compile Include="Bookmark.cs" />
     <Compile Include="Controls\ScrollViewerExt.cs" />
     <Compile Include="Controls\SelectorSelectedCommandBehavior.cs" />
+    <Compile Include="Controls\SettingBindingExtension.cs" />
     <Compile Include="Converters\TopMarginConverter.cs" />
     <Compile Include="ScrollViewerAssistant.cs" />
     <Compile Include="DependsUponAttribute.cs" />
@@ -160,6 +161,7 @@
     <Compile Include="RemoteButtonPressedEventArgs.cs" />
     <Compile Include="RemoteHandler.cs" />
     <Compile Include="RichTextBoxAssistant.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="TalentWindow.xaml.cs">
       <DependentUpon>TalentWindow.xaml</DependentUpon>
     </Compile>

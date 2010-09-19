@@ -10,6 +10,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -17,6 +18,11 @@ using System.Windows.Threading;
 using Microsoft.Practices.Composite.Presentation.Commands;
 using ProverbTeleprompter.HtmlConverter;
 using Tools.API.Messages.lParam;
+using Application = System.Windows.Application;
+using DataFormats = System.Windows.DataFormats;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+using RichTextBox = System.Windows.Controls.RichTextBox;
+using TextBox = System.Windows.Controls.TextBox;
 
 namespace ProverbTeleprompter
 {
@@ -197,7 +203,7 @@ namespace ProverbTeleprompter
 
         }
 
-        private bool _toolsVisible;
+        private bool _toolsVisible = true;
         public bool ToolsVisible
         {
             get { return _toolsVisible; }
@@ -396,6 +402,68 @@ namespace ProverbTeleprompter
                 Changed(() => FlipMainWindowHoriz);
             }
         }
+
+
+
+
+
+
+
+
+
+        private double _toolWindowTop;
+        public double ToolWindowTop
+        {
+            get { return _toolWindowTop; }
+            set
+            {
+                _toolWindowTop = value;
+                Changed(() => ToolWindowTop);
+
+                AppConfigHelper.SetAppSetting("ToolWindowTop", _toolWindowTop.ToString());
+            }
+        }
+
+        private double _toolWindowLeft;
+        public double ToolWindowLeft
+        {
+            get { return _toolWindowLeft; }
+            set
+            {
+                _toolWindowLeft = value;
+                Changed(() => ToolWindowLeft);
+                AppConfigHelper.SetAppSetting("ToolWindowLeft", _toolWindowLeft.ToString());
+
+            }
+        }
+
+        private double _toolWindowHeight;
+        public double ToolWindowHeight
+        {
+            get { return _toolWindowHeight; }
+            set
+            {
+                _toolWindowHeight = value;
+                Changed(() => ToolWindowHeight);
+
+                AppConfigHelper.SetAppSetting("ToolWindowHeight", _toolWindowHeight.ToString());
+            }
+        }
+
+        private double _toolWindowWidth;
+        public double ToolWindowWidth
+        {
+            get { return _toolWindowWidth; }
+            set
+            {
+                _toolWindowWidth = value;
+                Changed(() => ToolWindowWidth);
+                AppConfigHelper.SetAppSetting("ToolWindowWidth", _toolWindowWidth.ToString());
+            }
+        }
+
+
+
 
         private double _talentWindowTop;
         public double TalentWindowTop
@@ -645,24 +713,27 @@ namespace ProverbTeleprompter
             }
         }
 
-        private double _mainWindowHeight =300;
+        private double _mainWindowHeight;
         public double MainWindowHeight
         {
             get { return _mainWindowHeight; }
             set
             {
                 _mainWindowHeight = value;
+                AppConfigHelper.SetAppSetting("MainWindowHeight", MainWindowHeight.ToString());
                 Changed(()=>MainWindowHeight);
             }
         }
 
-        private double _mainWindowWidth = 300;
+        private double _mainWindowWidth;
         public double MainWindowWidth
         {
             get { return _mainWindowWidth; }
             set
             {
                 _mainWindowWidth = value;
+                AppConfigHelper.SetAppSetting("MainWindowWidth", MainWindowWidth.ToString());
+
                 Changed(()=>MainWindowWidth);
             }
         }
@@ -674,6 +745,8 @@ namespace ProverbTeleprompter
             set
             {
                 _mainWindowLeft = value;
+                AppConfigHelper.SetAppSetting("MainWindowLeft", MainWindowLeft.ToString());
+
                 Changed(()=>MainWindowLeft);
             }
         }
@@ -685,6 +758,8 @@ namespace ProverbTeleprompter
             set
             {
                 _mainWindowTop = value;
+                AppConfigHelper.SetAppSetting("MainWindowTop", MainWindowTop.ToString());
+
                 Changed(() => MainWindowTop);
             }
         }
@@ -697,6 +772,17 @@ namespace ProverbTeleprompter
             {
                 _boomarkImage = value;
                 Changed(() => BookmarkImage);
+            }
+        }
+
+        private string _toggleTalentWindowCaption = "Show Talent Window";
+        public string ToggleTalentWindowCaption
+        {
+            get { return _toggleTalentWindowCaption; }
+            set
+            {
+                _toggleTalentWindowCaption = value;
+                Changed(()=>ToggleTalentWindowCaption);
             }
         }
 
@@ -787,6 +873,40 @@ namespace ProverbTeleprompter
             if (!string.IsNullOrWhiteSpace(value))
             {
                 TalentWindowHeight = double.Parse(value);
+            }
+
+            value = ConfigurationManager.AppSettings["TalentWindowVisible"];
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                if(bool.Parse(value))
+                {
+                    ToggleTalentWindow();
+                }
+            }
+
+
+            value = ConfigurationManager.AppSettings["MainWindowLeft"];
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                MainWindowLeft = double.Parse(value);
+            }
+
+            value = ConfigurationManager.AppSettings["MainWindowTop"];
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                MainWindowTop = double.Parse(value);
+            }
+
+            value = ConfigurationManager.AppSettings["MainWindowWidth"];
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                MainWindowWidth = double.Parse(value);
+            }
+
+            value = ConfigurationManager.AppSettings["MainWindowHeight"];
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                MainWindowHeight = double.Parse(value);
             }
 
             value = ConfigurationManager.AppSettings["EyeLinePosition"];
@@ -1549,12 +1669,14 @@ namespace ProverbTeleprompter
                 _talentWindow.Show();
 
 
-          //      ToggleTalentWindowButton.Content = "Hide Talent Window";
+                ToggleTalentWindowCaption = "Hide Talent Window";
+                AppConfigHelper.SetAppSetting("TalentWindowVisible", true.ToString());
 
             }
             else
             {
                 HideTalentWindow();
+                AppConfigHelper.SetAppSetting("TalentWindowVisible", false.ToString());
             }
         }
 
@@ -1572,7 +1694,8 @@ namespace ProverbTeleprompter
             {
                 _talentWindow.Close();
             }
-          // ToggleTalentWindowButton.Content = "Show Talent Window";
+            ToggleTalentWindowCaption = "Show Talent Window";
+            
 
         }
 
@@ -1594,7 +1717,7 @@ namespace ProverbTeleprompter
         }
 
         private ToolsWindow _toolsWindow;
-        private void ToggleToolsWindow()
+        public void ToggleToolsWindow()
         {
 
             if (_toolsWindow == null)
@@ -1602,10 +1725,11 @@ namespace ProverbTeleprompter
                 _toolsWindow = new ToolsWindow();
                 _toolsWindow.DataContext = this;
                 _toolsWindow.Owner = Application.Current.MainWindow;
-                _toolsWindow.ShowActivated = false;
+               // _toolsWindow.ShowActivated = false;
                 _toolsWindow.PreviewKeyDown += KeyDown;
                 _toolsWindow.PreviewKeyUp += KeyUp;
                 _toolsWindow.Closing += new System.ComponentModel.CancelEventHandler(_toolsWindow_Closing);
+
                 _toolsWindow.SizeChanged += (sender, e) => SetToolsWindowSize(new Size(MainWindowWidth, MainWindowHeight));
                 _toolsWindow.LocationChanged += (sender, e) => SetToolsWindowLocation(new Point(MainWindowLeft, MainWindowTop));
             }
@@ -1619,6 +1743,8 @@ namespace ProverbTeleprompter
             {
 
                 _toolsWindow.Show();
+               
+                _toolsWindow.WindowState = WindowState.Maximized;
                 SetToolsWindowSize(new Size(MainWindowWidth, MainWindowHeight));
                 SetToolsWindowLocation(new Point(MainWindowLeft, MainWindowTop));
             }
@@ -1639,7 +1765,7 @@ namespace ProverbTeleprompter
          //   LocationChanged -= MainWindow_LocationChanged;
         //    SizeChanged -= MainWindow_SizeChanged;
             //  _toolsWindow.Top = Top + ActualHeight - _toolsWindow.Height;
-            _toolsWindow.Width = MainWindowWidth;
+           // _toolsWindow.Width = MainWindowWidth;
             //  _toolsWindow.Left = Left;
         //    LocationChanged += MainWindow_LocationChanged;
          //   SizeChanged += MainWindow_SizeChanged;
@@ -1652,9 +1778,9 @@ namespace ProverbTeleprompter
 
          //   LocationChanged -= MainWindow_LocationChanged;
           //  SizeChanged -= MainWindow_SizeChanged;
-            _toolsWindow.Top = MainWindowTop + MainWindowHeight - _toolsWindow.Height;
-            _toolsWindow.Width = MainWindowWidth;
-            _toolsWindow.Left = MainWindowLeft;
+           // _toolsWindow.Top = MainWindowTop + MainWindowHeight - _toolsWindow.Height;
+           // _toolsWindow.Width = MainWindowWidth;
+           // _toolsWindow.Left = MainWindowLeft;
          //   LocationChanged += MainWindow_LocationChanged;
          //   SizeChanged += MainWindow_SizeChanged;
         }
