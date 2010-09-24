@@ -66,9 +66,6 @@
         						Focusable="False" Margin="3" />
                             <CheckBox Content="Edit Inline" Height="16" x:Name="EditableCheckbox" Focusable="False" IsChecked="{Binding Editable}"
         						 Margin="2" />
-                            <Button Content="Edit Window" ToolTip="Edit the document in an editor window" Focusable="False" Height="20" Name="EditButton" 
-                                    Style="{DynamicResource ToolButtonStyle}" Width="87" 
-                                    Command="{Binding EditWindowCommand}"/>
                             <Button Content="Edit in WordPad" ToolTip="Edit the document in WordPad" Focusable="False" Height="20" Name="EditInWordpadButton" 
                                     Style="{DynamicResource ToolButtonStyle}" Width="95.104" 
                                     Command="{Binding EditInWordpadCommand}"/>
@@ -199,6 +196,8 @@
                                         <Run Text="1 thru 9 = Jump to bookmark #"/>
                                         <LineBreak />
                                         <Run Text="INSERT = Set bookmark"/>
+                                        <LineBreak />
+                                        <Run Text="F1 = Load Random Bible Book"/>
                                         <LineBreak />
                                     </Paragraph>
                                 </FlowDocument>

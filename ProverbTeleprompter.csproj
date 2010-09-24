@@ -33,10 +33,11 @@
     <SupportUrl>http://proverbteleprompter.codeplex.com</SupportUrl>
     <ErrorReportUrl>http://proverbteleprompter.codeplex.com</ErrorReportUrl>
     <ProductName>Proverb Teleprompter</ProductName>
-    <PublisherName>Mark Johnson</PublisherName>
+    <PublisherName>Proverb Teleprompter</PublisherName>
+    <SuiteName>Proverb Teleprompter Suite</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>18</ApplicationRevision>
+    <ApplicationRevision>19</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -74,10 +75,6 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Adastra.RichEditorLibrary, Version=1.0.3899.31116, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>ExternalDependencies\Adastra.RichEditorLibrary.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Expression.Drawing" />
     <Reference Include="Microsoft.Practices.Composite, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -89,10 +86,6 @@
     </Reference>
     <Reference Include="PresentationFramework.Aero" />
     <Reference Include="PresentationFramework.Royale" />
-    <Reference Include="RibbonControlsLibrary, Version=3.5.31016.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>ExternalDependencies\RibbonControlsLibrary.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Data" />
@@ -120,11 +113,6 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="XAMLConverter, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <ExecutableExtension>.exe</ExecutableExtension>
-      <HintPath>ExternalDependencies\XAMLConverter.exe</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -141,9 +129,6 @@
     <Compile Include="DependsUponAttribute.cs" />
     <Compile Include="DocumentHelpers.cs" />
     <Compile Include="DocumentUpdatedEventArgs.cs" />
-    <Compile Include="EditWindow.xaml.cs">
-      <DependentUpon>EditWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="EyelineTriangleControl.xaml.cs">
       <DependentUpon>EyelineTriangleControl.xaml</DependentUpon>
     </Compile>
@@ -170,10 +155,6 @@
     </Compile>
     <Compile Include="UIHelpers.cs" />
     <Compile Include="WebHelpers.cs" />
-    <Page Include="EditWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="EyelineTriangleControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -230,7 +211,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -266,12 +249,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ExternalDependencies\Adastra.RichEditorLibrary.dll" />
-    <None Include="ExternalDependencies\en-US\Adastra.RichEditorLibrary.resources.dll" />
-    <None Include="ExternalDependencies\RibbonControlsLibrary.dll" />
-    <None Include="ExternalDependencies\WPFControlsLibrary.dll" />
-    <None Include="ExternalDependencies\WPFControlsLibraryInterface.dll" />
-    <None Include="ExternalDependencies\XAMLConverter.exe" />
     <Resource Include="Resources\ClearBookMark.png" />
     <Resource Include="Resources\WhiteBookmark.png" />
     <Resource Include="Resources\BlackBookmark.png" />

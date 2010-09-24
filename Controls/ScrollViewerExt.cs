@@ -27,7 +27,7 @@ namespace ProverbTeleprompter.Controls
                 ExtentHeightExt = e.ExtentHeight - e.ViewportHeight;
             }
 
-            if(e.ViewportHeightChange != 0)
+           // if(e.ViewportHeightChange != 0)
             {
                 ViewportHeightExt = e.ViewportHeight;
             }

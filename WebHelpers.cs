@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Windows.Forms;
 
 namespace ProverbTeleprompter
 {
@@ -15,18 +16,27 @@ namespace ProverbTeleprompter
             var request = WebRequest.Create(url);
             request.Method = "GET";
 
-            string responseContent;
-
-            // Read the response from the server
-            using(var myResponse = request.GetResponse())
+            string responseContent ="";
+            try
             {
-                using (var read = new StreamReader(myResponse.GetResponseStream()))
+                // Read the response from the server
+                using (var myResponse = request.GetResponse())
                 {
-                    responseContent = read.ReadToEnd();
-                }
-                
+                    using (var read = new StreamReader(myResponse.GetResponseStream()))
+                    {
+                        responseContent = read.ReadToEnd();
+                    }
 
+
+                }
             }
+            catch (WebException ex)
+            {
+                MessageBox.Show("An internet connection is required to load random books of theBible","No internet connection", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                
+            }
+
 
             return responseContent;
         }

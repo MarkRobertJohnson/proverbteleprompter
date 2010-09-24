@@ -1,12 +1,13 @@
 ﻿<Window x:Class="ProverbTeleprompter.TalentWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Controls="clr-namespace:ProverbTeleprompter.Controls"
         x:Name="TheTalentWindow"
         Title="TalentWindow" 
-        Height="{Binding Path=DataContext.TalentWindowHeight,ElementName=TheTalentWindow,Mode=TwoWay}" 
-        Width="{Binding Path=DataContext.TalentWindowHeightWidth,ElementName=TheTalentWindow,Mode=TwoWay}"
-        Top="{Binding Path=DataContext.TalentWindowTop,ElementName=TheTalentWindow,Mode=TwoWay}" 
-        Left="{Binding Path=DataContext.TalentWindowLeft,ElementName=TheTalentWindow,Mode=TwoWay}"
+         Height="{Controls:SettingBinding TalentWindowHeight}"
+        Width="{Controls:SettingBinding TalentWindowWidth}"
+        Top="{Controls:SettingBinding TalentWindowTop}"
+        Left="{Controls:SettingBinding TalentWindowLeft}"
          
         xmlns:Prompter="clr-namespace:ProverbTeleprompter" WindowStyle="None" ResizeMode="CanResize">
     <Grid>
