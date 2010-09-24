@@ -34,10 +34,9 @@
     <ErrorReportUrl>http://proverbteleprompter.codeplex.com</ErrorReportUrl>
     <ProductName>Proverb Teleprompter</ProductName>
     <PublisherName>Proverb Teleprompter</PublisherName>
-    <SuiteName>Proverb Teleprompter Suite</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>19</ApplicationRevision>
+    <ApplicationRevision>21</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
