@@ -62,12 +62,12 @@
 
                 </Controls:ScrollViewerExt>
 
-                <local:EyelineTriangleControl x:Name="EyelineLeftTriangle"  
+                <local:EyelineTriangleControl x:Name="EyelineLeftTriangle" Opacity="0.7"  
                                               PreviewMouseLeftButtonDown="EyelineLeftTriangle_PreviewMouseLeftButtonDown" 
                                               HorizontalAlignment="Left" Height="70" 
                                               Margin="{Binding Path=EyelinePosition, Converter={StaticResource TopMarginConverter}}" 
                                               VerticalAlignment="Top" Width="42"/>
-                <local:EyelineTriangleControl x:Name="EyelineRightTriangle"  
+                <local:EyelineTriangleControl x:Name="EyelineRightTriangle"  Opacity="0.7"
                                               PreviewMouseLeftButtonDown="EyelineLeftTriangle_PreviewMouseLeftButtonDown" 
                                               HorizontalAlignment="Right" Height="70" 
                                               Margin="{Binding Path=EyelinePosition, Converter={StaticResource TopMarginConverter}}"

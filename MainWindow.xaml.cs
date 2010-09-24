@@ -33,8 +33,8 @@ namespace ProverbTeleprompter
 
             DataContext = MainWindowViewModel;
            // MainWindowViewModel.ToolsVisible = true;
-            
-            
+
+            MainTextBox.TextChanged += new System.Windows.Controls.TextChangedEventHandler(MainTextBox_TextChanged);
 
             PreviewKeyDown += MainWindow_PreviewKeyDown;
             PreviewKeyUp += MainWindow_PreviewKeyUp;
@@ -51,6 +51,11 @@ namespace ProverbTeleprompter
 
             PromptView = MainTextGrid;
 
+        }
+
+        void MainTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            MainWindowViewModel.IsDocumentDirty = true;
         }
 
 
@@ -104,7 +109,16 @@ namespace ProverbTeleprompter
         void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Properties.Settings.Default.Save();
-            MainWindowViewModel.Dispose();
+
+            if(MainWindowViewModel.CanShutDownApp())
+            {
+                MainWindowViewModel.Dispose();
+            }
+            else
+            {
+                e.Cancel = true;
+            }
+            
         }
 
         void RemoteHandler_RemoteButtonPressed(object sender, RemoteButtonPressedEventArgs e)
@@ -144,7 +158,7 @@ namespace ProverbTeleprompter
             }
             else if(_isDraggingEyeline && e.LeftButton == MouseButtonState.Released)
             {
-                AppConfigHelper.SetAppSetting("EyeLinePosition", MainWindowViewModel.EyelinePosition.ToString());
+                AppConfigHelper.SetUserSetting("EyeLinePosition", MainWindowViewModel.EyelinePosition);
                 _isDraggingEyeline = false;
             }
             else

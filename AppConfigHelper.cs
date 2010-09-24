@@ -12,12 +12,17 @@ namespace ProverbTeleprompter
 
         #region App.Config helpers
 
+        public static void SetUserSetting(string key, object value)
+        {
+            Properties.Settings.Default[key] = value;
+        }
 
         public static void SetAppSetting(string key, string value)
         {
             Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
 
             SetAppSetting(key, value, config);
+
         }
 
         public static void SetAppSetting(string key, string value, Configuration config)

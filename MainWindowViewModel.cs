@@ -21,6 +21,7 @@ using Tools.API.Messages.lParam;
 using Application = System.Windows.Application;
 using DataFormats = System.Windows.DataFormats;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+using MessageBox = System.Windows.MessageBox;
 using RichTextBox = System.Windows.Controls.RichTextBox;
 using TextBox = System.Windows.Controls.TextBox;
 
@@ -34,7 +35,7 @@ namespace ProverbTeleprompter
         private double _prevScrollOffset;
         private TimeSpan _eta;
         private int _ticksElapsed;
-        private EditWindow _editWindow = null;
+
         private TalentWindow _talentWindow;
         private double _speedBoostAmount = 0;
             
@@ -48,6 +49,9 @@ namespace ProverbTeleprompter
             _scrollTimer.Start();
 
             MainTextBox = mainTextBox;
+
+            RemoteHandler.RemoteButtonPressed += RemoteButtonPressed;
+
         }
 
         void _scrollTimer_Tick(object sender, EventArgs e)
@@ -76,10 +80,7 @@ namespace ProverbTeleprompter
 
                 }
 
-                var eyeLineOffset = MainScrollerViewportHeight - EyelinePosition;
-
-                PercentComplete = ((MainScrollerVerticalOffset + MainScrollerViewportHeight -
-                                                        eyeLineOffset) / MainScrollerExtentHeight) * 100;
+                PercentComplete = ((MainScrollerVerticalOffset + EyelinePosition) / (MainScrollerExtentHeight + EyelinePosition)) * 100 ;
             }
 
 
@@ -167,12 +168,18 @@ namespace ProverbTeleprompter
 
         public void LoadRandomBibleChapter()
         {
-            MainDocument = HtmlToXamlConverter.ConvertHtmlToXaml(BibleHelpers.GetRandomBibleChapterHtml());
-            MainDocument.ContentStart.InsertLineBreak();
-            MainDocument.ContentStart.InsertLineBreak();
-            MainDocument.ContentStart.InsertLineBreak();
+            var content = BibleHelpers.GetRandomBibleChapterHtml();
+            if(!string.IsNullOrWhiteSpace(content))
+            {
+                MainDocument = HtmlToXamlConverter.ConvertHtmlToXaml(content);
+                MainDocument.ContentStart.InsertLineBreak();
+                MainDocument.ContentStart.InsertLineBreak();
+                MainDocument.ContentStart.InsertLineBreak();
 
-            SetDocumentConfig();
+                SetDocumentConfig();
+
+            }
+
         }
 
         private RichTextBox _mainTextBox;
@@ -259,7 +266,7 @@ namespace ProverbTeleprompter
                 }
 
                 if (_configInitialized && value != 0)
-                    AppConfigHelper.SetAppSetting("Speed", _speed.ToString());
+                    AppConfigHelper.SetUserSetting("Speed", _speed);
 
                 Changed(() => Speed);
             }
@@ -336,7 +343,7 @@ namespace ProverbTeleprompter
 
                 _documentPath = value;
                 Changed(() => DocumentPath);
-                AppConfigHelper.SetAppSetting("DocumentPath", DocumentPath);
+                AppConfigHelper.SetUserSetting("DocumentPath", DocumentPath);
             }
         }
 
@@ -351,6 +358,18 @@ namespace ProverbTeleprompter
             }
         }
 
+        private bool _isDocumentDirty ;
+        public bool IsDocumentDirty
+        {
+            get { return _isDocumentDirty; }
+            set
+            {
+                _isDocumentDirty = value;
+                Changed(() => IsDocumentDirty);
+                Changed(() => SaveDocumentCommand);
+            }
+        }
+
         private bool _flipTalentWindowVert;
         public bool FlipTalentWindowVert
         {
@@ -359,7 +378,7 @@ namespace ProverbTeleprompter
             {
                 _flipTalentWindowVert = value;
                 TalentWindowScaleY = FlipTalentWindowVert ? -1 : 1;
-                AppConfigHelper.SetAppSetting("FlipTalentWindowVert", FlipTalentWindowVert.ToString());
+                AppConfigHelper.SetUserSetting("FlipTalentWindowVert", FlipTalentWindowVert);
                 Changed(() => FlipTalentWindowVert);
             }
         }
@@ -372,7 +391,7 @@ namespace ProverbTeleprompter
             {
                 _flipTalentWindowHoriz = value;
                 TalentWindowScaleX = FlipTalentWindowHoriz ? -1 : 1;
-                AppConfigHelper.SetAppSetting("FlipTalentWindowHoriz", FlipTalentWindowHoriz.ToString());
+                AppConfigHelper.SetUserSetting("FlipTalentWindowHoriz", FlipTalentWindowHoriz);
                 Changed(() => FlipTalentWindowHoriz);
             }
         }
@@ -385,7 +404,7 @@ namespace ProverbTeleprompter
             {
                 _flipMainWindowVert = value;
                 MainWindowScaleY = FlipMainWindowVert ? -1 : 1;
-                AppConfigHelper.SetAppSetting("FlipMainWindowVert", FlipMainWindowVert.ToString());
+                AppConfigHelper.SetUserSetting("FlipMainWindowVert", FlipMainWindowVert);
                 Changed(() => FlipMainWindowVert);
             }
         }
@@ -398,18 +417,10 @@ namespace ProverbTeleprompter
             {
                 _flipMainWindowHoriz = value;
                 MainWindowScaleX = FlipMainWindowHoriz ? -1 : 1;
-                AppConfigHelper.SetAppSetting("FlipMainWindowHoriz", FlipMainWindowHoriz.ToString());
+                AppConfigHelper.SetUserSetting("FlipMainWindowHoriz", FlipMainWindowHoriz);
                 Changed(() => FlipMainWindowHoriz);
             }
         }
-
-
-
-
-
-
-
-
 
         private double _toolWindowTop;
         public double ToolWindowTop
@@ -420,7 +431,7 @@ namespace ProverbTeleprompter
                 _toolWindowTop = value;
                 Changed(() => ToolWindowTop);
 
-                AppConfigHelper.SetAppSetting("ToolWindowTop", _toolWindowTop.ToString());
+                AppConfigHelper.SetUserSetting("ToolWindowTop", _toolWindowTop);
             }
         }
 
@@ -432,7 +443,7 @@ namespace ProverbTeleprompter
             {
                 _toolWindowLeft = value;
                 Changed(() => ToolWindowLeft);
-                AppConfigHelper.SetAppSetting("ToolWindowLeft", _toolWindowLeft.ToString());
+                AppConfigHelper.SetUserSetting("ToolWindowLeft", _toolWindowLeft);
 
             }
         }
@@ -446,7 +457,7 @@ namespace ProverbTeleprompter
                 _toolWindowHeight = value;
                 Changed(() => ToolWindowHeight);
 
-                AppConfigHelper.SetAppSetting("ToolWindowHeight", _toolWindowHeight.ToString());
+                AppConfigHelper.SetUserSetting("ToolWindowHeight", _toolWindowHeight);
             }
         }
 
@@ -458,7 +469,7 @@ namespace ProverbTeleprompter
             {
                 _toolWindowWidth = value;
                 Changed(() => ToolWindowWidth);
-                AppConfigHelper.SetAppSetting("ToolWindowWidth", _toolWindowWidth.ToString());
+                AppConfigHelper.SetUserSetting("ToolWindowWidth", _toolWindowWidth);
             }
         }
 
@@ -474,7 +485,7 @@ namespace ProverbTeleprompter
                 _talentWindowTop = value;
                 Changed(() => TalentWindowTop);
 
-                AppConfigHelper.SetAppSetting("TalentWindowTop", _talentWindowTop.ToString());
+                AppConfigHelper.SetUserSetting("TalentWindowTop", _talentWindowTop);
             }
         }
 
@@ -486,7 +497,7 @@ namespace ProverbTeleprompter
             {
                 _talentWindowLeft = value;
                 Changed(() => TalentWindowLeft);
-                AppConfigHelper.SetAppSetting("TalentWindowLeft", _talentWindowLeft.ToString());
+                AppConfigHelper.SetUserSetting("TalentWindowLeft", _talentWindowLeft);
                 
             }
         }
@@ -500,7 +511,7 @@ namespace ProverbTeleprompter
                 _talentWindowHeight = value;
                 Changed(() => TalentWindowHeight);
 
-                AppConfigHelper.SetAppSetting("TalentWindowHeight", _talentWindowHeight.ToString());
+                AppConfigHelper.SetUserSetting("TalentWindowHeight", _talentWindowHeight);
             }
         }
 
@@ -512,7 +523,7 @@ namespace ProverbTeleprompter
             {
                 _talentWindowWidth = value;
                 Changed(() => TalentWindowWidth);
-                AppConfigHelper.SetAppSetting("TalentWindowWidth", _talentWindowWidth.ToString());
+                AppConfigHelper.SetUserSetting("TalentWindowWidth", _talentWindowWidth);
             }
         }
 
@@ -678,7 +689,7 @@ namespace ProverbTeleprompter
 
                 DocumentHelpers.ChangePropertyValue(MainDocument, TextElement.FontSizeProperty, FontSize);
                 if (_configInitialized)
-                    AppConfigHelper.SetAppSetting("FontSize", FontSize.ToString());
+                    AppConfigHelper.SetUserSetting("FontSize", FontSize);
 
                 Changed(() => FontSize);
 
@@ -696,7 +707,7 @@ namespace ProverbTeleprompter
 
                 MainDocument.SetValue(Block.LineHeightProperty, LineHeight * FontSize);
                 if (_configInitialized)
-                    AppConfigHelper.SetAppSetting("LineHeight", LineHeight.ToString());
+                    AppConfigHelper.SetUserSetting("LineHeight", LineHeight);
 
                 Changed(() => LineHeight);
             }
@@ -720,7 +731,6 @@ namespace ProverbTeleprompter
             set
             {
                 _mainWindowHeight = value;
-                AppConfigHelper.SetAppSetting("MainWindowHeight", MainWindowHeight.ToString());
                 Changed(()=>MainWindowHeight);
             }
         }
@@ -732,7 +742,6 @@ namespace ProverbTeleprompter
             set
             {
                 _mainWindowWidth = value;
-                AppConfigHelper.SetAppSetting("MainWindowWidth", MainWindowWidth.ToString());
 
                 Changed(()=>MainWindowWidth);
             }
@@ -745,7 +754,6 @@ namespace ProverbTeleprompter
             set
             {
                 _mainWindowLeft = value;
-                AppConfigHelper.SetAppSetting("MainWindowLeft", MainWindowLeft.ToString());
 
                 Changed(()=>MainWindowLeft);
             }
@@ -758,7 +766,6 @@ namespace ProverbTeleprompter
             set
             {
                 _mainWindowTop = value;
-                AppConfigHelper.SetAppSetting("MainWindowTop", MainWindowTop.ToString());
 
                 Changed(() => MainWindowTop);
             }
@@ -775,7 +782,7 @@ namespace ProverbTeleprompter
             }
         }
 
-        private string _toggleTalentWindowCaption = "Show Talent Window";
+        private string _toggleTalentWindowCaption = "Show on 2nd Monitor";
         public string ToggleTalentWindowCaption
         {
             get { return _toggleTalentWindowCaption; }
@@ -793,24 +800,11 @@ namespace ProverbTeleprompter
         {
             _configInitialized = true;
 
-            var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-
-            if (!File.Exists(config.FilePath))
-            {
-                AppConfigHelper.SetAppSetting("ColorScheme",
-                    IsWhiteOnBlack == true ? "WhiteOnBlack" : "BlackOnWhite", config);
-
-            }
-
-            var speed = ConfigurationManager.AppSettings["Speed"];
-            if (speed != null)
-            {
-                Speed = Double.Parse(speed);
-                DefaultSpeed = Speed;
-            }
+            Speed = DefaultSpeed = Properties.Settings.Default.Speed;
+            
 
 
-            DocumentPath = ConfigurationManager.AppSettings["DocumentPath"];
+            DocumentPath =Properties.Settings.Default.DocumentPath;
             if (!string.IsNullOrWhiteSpace(_documentPath) && File.Exists(DocumentPath))
             {
                 LoadDocument(DocumentPath);
@@ -827,98 +821,34 @@ namespace ProverbTeleprompter
 
             SetDocumentConfig();
 
-            var value = ConfigurationManager.AppSettings["FlipTalentWindowVert"];
-            if (!string.IsNullOrWhiteSpace(value))
+            FlipTalentWindowVert = Properties.Settings.Default.FlipTalentWindowVert;
+   
+            FlipTalentWindowHoriz = Properties.Settings.Default.FlipTalentWindowHoriz;
+
+            FlipMainWindowVert = Properties.Settings.Default.FlipMainWindowVert;
+            
+            FlipMainWindowHoriz = Properties.Settings.Default.FlipMainWindowHoriz;
+            
+            TalentWindowLeft = Properties.Settings.Default.TalentWindowLeft;
+
+            TalentWindowTop = Properties.Settings.Default.TalentWindowTop;
+
+            TalentWindowWidth = Properties.Settings.Default.TalentWindowWidth;
+
+            TalentWindowHeight = Properties.Settings.Default.TalentWindowHeight;
+
+            if(Properties.Settings.Default.TalentWindowVisible)
             {
-                FlipTalentWindowVert = bool.Parse(value);
+                ToggleTalentWindow();
             }
 
-            value = ConfigurationManager.AppSettings["FlipTalentWindowHoriz"];
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                FlipTalentWindowHoriz = bool.Parse(value);
-            }
-
-            value = ConfigurationManager.AppSettings["FlipMainWindowVert"];
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                FlipMainWindowVert = bool.Parse(value);
-            }
-
-            value = ConfigurationManager.AppSettings["FlipMainWindowHoriz"];
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                FlipMainWindowHoriz = bool.Parse(value);
-            }
-
-            value = ConfigurationManager.AppSettings["TalentWindowLeft"];
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                TalentWindowLeft = double.Parse(value);
-            }
-
-            value = ConfigurationManager.AppSettings["TalentWindowTop"];
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                TalentWindowTop = double.Parse(value);
-            }
-
-            value = ConfigurationManager.AppSettings["TalentWindowWidth"];
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                TalentWindowWidth = double.Parse(value);
-            }
-
-            value = ConfigurationManager.AppSettings["TalentWindowHeight"];
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                TalentWindowHeight = double.Parse(value);
-            }
-
-            value = ConfigurationManager.AppSettings["TalentWindowVisible"];
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                if(bool.Parse(value))
-                {
-                    ToggleTalentWindow();
-                }
-            }
-
-
-            value = ConfigurationManager.AppSettings["MainWindowLeft"];
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                MainWindowLeft = double.Parse(value);
-            }
-
-            value = ConfigurationManager.AppSettings["MainWindowTop"];
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                MainWindowTop = double.Parse(value);
-            }
-
-            value = ConfigurationManager.AppSettings["MainWindowWidth"];
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                MainWindowWidth = double.Parse(value);
-            }
-
-            value = ConfigurationManager.AppSettings["MainWindowHeight"];
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                MainWindowHeight = double.Parse(value);
-            }
-
-            value = ConfigurationManager.AppSettings["EyeLinePosition"];
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                EyelinePosition = double.Parse(value);
-            }
+            EyelinePosition = Properties.Settings.Default.EyeLinePosition;
+            
         }
 
         public void SetDocumentConfig()
         {
-            var colorScheme = ConfigurationManager.AppSettings["ColorScheme"];
+            var colorScheme = Properties.Settings.Default.ColorScheme;
             if (colorScheme != null && colorScheme.ToLowerInvariant() == "whiteonblack")
             {
                 if (IsWhiteOnBlack == true)
@@ -939,19 +869,10 @@ namespace ProverbTeleprompter
 
             }
 
+            FontSize = Properties.Settings.Default.FontSize;
 
-            var fontSize = ConfigurationManager.AppSettings["FontSize"];
-            if (fontSize != null)
-            {
-                FontSize = Double.Parse(fontSize);
-            }
-
-
-            var lineHeight = ConfigurationManager.AppSettings["LineHeight"];
-            if (lineHeight != null)
-            {
-                LineHeight = Double.Parse(lineHeight);
-            }
+            LineHeight = Properties.Settings.Default.LineHeight;
+            
 
             LoadBookmarks(MainDocument);
         }
@@ -974,6 +895,11 @@ namespace ProverbTeleprompter
                 using (FileStream fStream = new FileStream(fullFilePath, FileMode.Open))
                 {
                     LoadDocument(fStream, dataFormat);
+                }
+
+                if(fullFilePath == DocumentPath)
+                {
+                    IsDocumentDirty = false;
                 }
 
                 WatchDocumentForChanges(_documentPath, Document_Changed);
@@ -1013,14 +939,21 @@ namespace ProverbTeleprompter
                 using (fStream = new FileStream(fullFilePath, FileMode.Create))
                 {
                     DocumentHelpers.SaveDocument(fStream, MainDocument, DataFormats.Rtf);
+
+
                 }
-                ;
+                if (fullFilePath == DocumentPath)
+                {
+                    IsDocumentDirty = false;
+                }
                 string xamlPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(fullFilePath),
                                        System.IO.Path.GetFileNameWithoutExtension(fullFilePath) + ".xaml");
 
                 using (fStream = new FileStream(xamlPath, FileMode.Create))
                 {
                     DocumentHelpers.SaveDocument(fStream, MainDocument, DataFormats.Xaml);
+
+                    
                 }
 
             }
@@ -1123,7 +1056,7 @@ namespace ProverbTeleprompter
 
 
             if (_configInitialized)
-                AppConfigHelper.SetAppSetting("ColorScheme", "WhiteOnBlack");
+                AppConfigHelper.SetUserSetting("ColorScheme", "WhiteOnBlack");
 
             MainDocumentCaretBrush = Brushes.White;
         }
@@ -1135,7 +1068,7 @@ namespace ProverbTeleprompter
             DocumentHelpers.ChangePropertyValue(MainDocument, TextElement.ForegroundProperty, Brushes.Black, Brushes.White);
             DocumentHelpers.ChangePropertyValue(MainDocument, TextElement.BackgroundProperty, Brushes.White, Brushes.Black);
             if (_configInitialized)
-                AppConfigHelper.SetAppSetting("ColorScheme", "BlackOnWhite");
+                AppConfigHelper.SetUserSetting("ColorScheme", "BlackOnWhite");
 
             MainDocumentCaretBrush = Brushes.Black;
         }
@@ -1143,7 +1076,7 @@ namespace ProverbTeleprompter
         private Process _wordpadProcess;
         public void EditInWordpad()
         {
-
+            KillWordPadProcess();
             //Cancelled from saving document
             if (string.IsNullOrWhiteSpace(DocumentPath))
             {
@@ -1226,7 +1159,7 @@ namespace ProverbTeleprompter
                 Bookmarks.Add(bm);
 
                 bm.Ordinal = Bookmarks.Count;
-                bm.Image = (hyperlink.Inlines.FirstInline as InlineUIContainer).Child as Image;
+                //bm.Image = (hyperlink.Inlines.FirstInline as InlineUIContainer).Child as Image;
                // bm.Image.Height = FontSizeSlider.Value;
 
             }
@@ -1265,7 +1198,8 @@ namespace ProverbTeleprompter
         {
             get {
                 return _toggleTalentWindowCommand ??
-                       (_toggleTalentWindowCommand = new RelayCommand(x => ToggleTalentWindow()));
+                       (_toggleTalentWindowCommand = new RelayCommand(
+                           x => ToggleTalentWindow()));
             }
         }
 
@@ -1371,7 +1305,7 @@ namespace ProverbTeleprompter
                         {
                             SaveDocument(DocumentPath);
                         }
-                    });
+                    }, (a) => IsDocumentDirty);
                 }
                 return _saveDocumentCommand;
             }
@@ -1409,22 +1343,6 @@ namespace ProverbTeleprompter
             }
         }
 
-        private ICommand _editWindowCommand;
-
-        public ICommand EditWindowCommand
-        {
-            get
-            {
-                if (_editWindowCommand == null)
-                {
-                    _editWindowCommand = new RelayCommand(x =>
-                    {
-                        OpenEditWindow();
-                    });
-                }
-                return _editWindowCommand;
-            }
-        }
 
         private ICommand _saveDocumentAsCommand;
 
@@ -1513,73 +1431,6 @@ namespace ProverbTeleprompter
 
         }
 
-        private void OpenEditWindow()
-        {
-            //EditWindow editWindow = new EditWindow();
-            //editWindow.Owner = this;
-            //editWindow.Show();
-
-            MemoryStream ms = new MemoryStream();
-            DocumentHelpers.SaveDocument(ms, MainDocument, DataFormats.Rtf);
-
-
-            if (_editWindow != null)
-            {
-
-                _editWindow.Dispatcher.Invoke((Action)(() =>
-                {
-                    UpdateEditWindowDocument(ms);
-                    _editWindow.Activate();
-                    _editWindow.Visibility = Visibility.Visible;
-                    _editWindow.Show();
-                }));
-
-            }
-            else
-            {
-                //So the edit window doesn't interfere with the scrolling of the prompter window
-                //Spawn the edit window on a separate thread.
-                //The down side of doing this is that we cannot set the child window's owner to the MainWindow
-                //due to thread ownership
-                Thread thread = new Thread(() =>
-                {
-                    _editWindow = new EditWindow();
-
-                    _editWindow.ShowActivated = true;
-
-                    _editWindow.DocumentUpdated += new EventHandler<DocumentUpdatedEventArgs>(_editWindow_DocumentUpdated);
-
-
-                    _editWindow.Loaded += (sender2, e2) =>
-                    {
-                        UpdateEditWindowDocument(ms);
-                    };
-
-                    _editWindow.Show();
-                    _editWindow.Closed += (sender2, e2) =>
-                     _editWindow.Dispatcher.InvokeShutdown();
-
-
-                    Dispatcher.Run();
-                });
-
-                thread.IsBackground = true;
-                thread.SetApartmentState(ApartmentState.STA);
-                thread.Start();
-
-            }
-
-        }
-
-        private void UpdateEditWindowDocument(MemoryStream ms)
-        {
-            _editWindow.RichTextEditor.RichTextBox.VerifyAccess();
-            _editWindow.RichTextEditor.LoadDocument(ms, DataFormats.Rtf);
-            ms.Dispose();
-
-            ConvertDocumentToEditableFormat(_editWindow.RichTextEditor.RichTextBox.Document);
-            _editWindow.RichTextEditor.RichTextBox.CaretBrush = Brushes.Black;
-        }
 
         void _editWindow_DocumentUpdated(object sender, DocumentUpdatedEventArgs e)
         {
@@ -1605,7 +1456,9 @@ namespace ProverbTeleprompter
 
                 img.Visibility = Visibility.Collapsed;
                 bm.Image = img;
-                hyperlink.Inlines.Add(img);
+                hyperlink.Inlines.Add(" ");
+                    
+                
             }
             
             bm.Name = string.Format("Boomark {0}", Bookmarks.Count + 1);
@@ -1653,7 +1506,8 @@ namespace ProverbTeleprompter
 
         private void ToggleTalentWindow()
         {
-            if (_talentWindow == null)
+            if (_talentWindow == null && 
+                           SystemInformation.MonitorCount > 1)
             {
                 _talentWindow = new TalentWindow();
                 _talentWindow.Owner = Application.Current.MainWindow;
@@ -1663,24 +1517,36 @@ namespace ProverbTeleprompter
                 
             //    _talentWindow.KeyDown += MainWindow_KeyDown;
               //  _talentWindow.KeyUp += MainWindow_KeyUp;
-
+                _talentWindow.Loaded += new RoutedEventHandler(_talentWindow_Loaded);
                 _talentWindow.DataContext = this;
 
                 _talentWindow.Show();
 
 
-                ToggleTalentWindowCaption = "Hide Talent Window";
-                AppConfigHelper.SetAppSetting("TalentWindowVisible", true.ToString());
+                ToggleTalentWindowCaption = "Hide on 2nd Monitor";
+                AppConfigHelper.SetUserSetting("TalentWindowVisible", true);
 
             }
             else
             {
                 HideTalentWindow();
-                AppConfigHelper.SetAppSetting("TalentWindowVisible", false.ToString());
+                AppConfigHelper.SetUserSetting("TalentWindowVisible", false);
             }
         }
 
+        void _talentWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (SystemInformation.MonitorCount <= 1) return;
+         
+            System.Drawing.Rectangle workingArea = System.Windows.Forms.Screen.AllScreens[1].WorkingArea;
+            _talentWindow.Left = workingArea.Left;
+            _talentWindow.Top = workingArea.Top;
+            _talentWindow.Width = workingArea.Width;
+            _talentWindow.Height = workingArea.Height;
+            _talentWindow.WindowState = WindowState.Maximized;
+            _talentWindow.WindowStyle = WindowStyle.None;
 
+        }
 
         void _talentWindow_Closed(object sender, EventArgs e)
         {
@@ -1694,22 +1560,52 @@ namespace ProverbTeleprompter
             {
                 _talentWindow.Close();
             }
-            ToggleTalentWindowCaption = "Show Talent Window";
+            ToggleTalentWindowCaption = "Show on 2nd monitor";
             
 
         }
 
         #endregion
 
-        public void Dispose()
+        public bool CanShutDownApp()
         {
 
+            if (IsDocumentDirty)
+            {
+                string caption = "The document has unsaved changes, would you like to save them?";
+                if (!string.IsNullOrWhiteSpace(DocumentPath))
+                {
+                    caption = string.Format("The document: {0} has unsaved changed, do you want to save them?",
+                                            DocumentPath);
+                }
+                var result = MessageBox.Show(caption, caption, MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
+                if (result == MessageBoxResult.Yes)
+                {
+                    SaveDocument(DocumentPath);
+                }
+                else if(result == MessageBoxResult.Cancel)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private void KillWordPadProcess()
+        {
             if (_wordpadProcess != null && !_wordpadProcess.HasExited)
             {
                 _wordpadProcess.CloseMainWindow();
                 _wordpadProcess.Close();
 
             }
+        }
+        public void Dispose()
+        {
+
+            KillWordPadProcess();
+
             if (_talentWindow != null)
             {
                 _talentWindow.Close();
@@ -1728,7 +1624,8 @@ namespace ProverbTeleprompter
                // _toolsWindow.ShowActivated = false;
                 _toolsWindow.PreviewKeyDown += KeyDown;
                 _toolsWindow.PreviewKeyUp += KeyUp;
-                _toolsWindow.Closing += new System.ComponentModel.CancelEventHandler(_toolsWindow_Closing);
+                _toolsWindow.Closing += _toolsWindow_Closing;
+
 
                 _toolsWindow.SizeChanged += (sender, e) => SetToolsWindowSize(new Size(MainWindowWidth, MainWindowHeight));
                 _toolsWindow.LocationChanged += (sender, e) => SetToolsWindowLocation(new Point(MainWindowLeft, MainWindowTop));
@@ -1750,6 +1647,8 @@ namespace ProverbTeleprompter
             }
 
         }
+
+
 
         void _toolsWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
