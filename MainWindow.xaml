@@ -53,9 +53,9 @@
                                           ViewportHeightExt="{Binding MainScrollerViewportHeight, Mode=TwoWay}"
                               VerticalScrollBarVisibility="Visible">
 
-                    <RichTextBox  x:Name="MainTextBox" BorderThickness="0" BorderBrush="Transparent" 
+                    <RichTextBox  x:Name="MainTextBox" BorderThickness="0" BorderBrush="Transparent" AcceptsTab="True" 
                                   CaretBrush="{Binding MainDocumentCaretBrush}" 
-        				FontSize="{Binding Value, ElementName=FontSizeSlider}"  Focusable="{Binding Editable}"
+        				FontSize="{Binding Value, ElementName=FontSizeSlider}"  Focusable="{Binding Editable, Mode=TwoWay}"
         				  local:RichTextboxAssistant.Document="{Binding MainDocument, Mode=TwoWay}">
 
                     </RichTextBox>
