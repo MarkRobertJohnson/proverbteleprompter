@@ -64,7 +64,8 @@
                             <RadioButton x:Name="WhiteOnBlackButton" GroupName="Color" Content="White on Black" 
                                          IsChecked="{Binding IsWhiteOnBlack, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
         						Focusable="False" Margin="3" />
-                            <CheckBox Content="Edit Inline" Height="16" x:Name="EditableCheckbox" Focusable="False" IsChecked="{Binding Editable}"
+                            <CheckBox Content="Edit Inline" Height="16" x:Name="EditableCheckbox" Focusable="False" 
+                                      IsChecked="{Binding Editable, Mode=TwoWay}"
         						 Margin="2" />
                             <Button Content="Edit in WordPad" ToolTip="Edit the document in WordPad" Focusable="False" Height="20" Name="EditInWordpadButton" 
                                     Style="{DynamicResource ToolButtonStyle}" Width="95.104" 

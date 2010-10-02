@@ -628,7 +628,15 @@ namespace ProverbTeleprompter
                                                           MessageBoxImage.Warning);
                 if (result == MessageBoxResult.Yes)
                 {
-                    SaveDocument(DocumentPath);
+                    if(!string.IsNullOrWhiteSpace(DocumentPath) && File.Exists(DocumentPath))
+                    {
+                        SaveDocument(DocumentPath); 
+                    }
+                    else
+                    {
+                        SaveDocumentAs(DocumentPath);
+                    }
+                    
                 }
                 else if (result == MessageBoxResult.Cancel)
                 {
@@ -722,7 +730,7 @@ namespace ProverbTeleprompter
 
         internal void KeyDown(object sender, KeyEventArgs e)
         {
-            if(Editable.GetValueOrDefault()) return;
+            if(MainTextBox.Focusable) return;
 
             e.Handled = true;
             if (e.Key == Key.Down)
@@ -810,6 +818,8 @@ namespace ProverbTeleprompter
 
         internal void KeyUp(object sender, KeyEventArgs e)
         {
+            if (MainTextBox.Focusable) return;
+
             if (e.Key == Key.Down)
             {
                 Speed = DefaultSpeed;
@@ -927,10 +937,6 @@ namespace ProverbTeleprompter
         private void HideTools()
         {
             ToolsVisible = false;
-            //   Storyboard sb = (Storyboard)this.FindResource("ToolFlyout");
-            // sb.Begin();
-
-            Editable = false;
         }
 
         private void SpeedForward()
