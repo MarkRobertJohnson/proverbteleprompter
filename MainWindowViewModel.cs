@@ -722,12 +722,14 @@ namespace ProverbTeleprompter
 
         internal void KeyDown(object sender, KeyEventArgs e)
         {
+            if(Editable.GetValueOrDefault()) return;
+
             e.Handled = true;
             if (e.Key == Key.Down)
             {
                 SpeedForward();
             }
-            else if (e.Key == Key.Up)
+            else if (e.Key == Key.Up )
             {
                 SpeedReverse();
             }
@@ -769,6 +771,16 @@ namespace ProverbTeleprompter
             {
                 PageDown();
             }
+            else if(e.Key == Key.OemPlus )
+            {
+                Speed += 0.1;
+                DefaultSpeed = Speed;
+            }
+            else if (e.Key == Key.OemMinus)
+            {
+                Speed -= 0.1;
+                DefaultSpeed = Speed;
+            }
                 //Numbers 1-9 should jump to the corresponding bookmark
             else if ((e.Key >= Key.D0 && e.Key <= Key.D9) ||
                      (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9))
@@ -788,10 +800,6 @@ namespace ProverbTeleprompter
             else if (e.Key == Key.Insert)
             {
                 InsertBookmarkAtCurrentEyelineMark();
-            }
-            else if (e.Key == Key.Space)
-            {
-                ToggleToolsWindow();
             }
             else
             {

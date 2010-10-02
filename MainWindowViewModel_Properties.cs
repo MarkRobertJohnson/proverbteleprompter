@@ -80,6 +80,7 @@ namespace ProverbTeleprompter
             set
             {
                 _editable = value;
+                Paused = Editable.GetValueOrDefault();
                 Changed(() => Editable);
             }
         }
@@ -111,9 +112,12 @@ namespace ProverbTeleprompter
             set
             {
                 _mainTextBox = value;
+            
+
                 Changed(() => MainTextBox);
             }
         }
+
 
         public bool IsWhiteOnBlack
         {
