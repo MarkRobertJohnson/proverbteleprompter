@@ -36,7 +36,7 @@
     <PublisherName>Proverb Teleprompter</PublisherName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>21</ApplicationRevision>
+    <ApplicationRevision>22</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -123,7 +123,11 @@
     <Compile Include="Controls\ScrollViewerExt.cs" />
     <Compile Include="Controls\SelectorSelectedCommandBehavior.cs" />
     <Compile Include="Controls\SettingBindingExtension.cs" />
+    <Compile Include="Converters\PixelConverter.cs" />
     <Compile Include="Converters\TopMarginConverter.cs" />
+    <Compile Include="MainWindowViewModel_Commands.cs" />
+    <Compile Include="MainWindowViewModel_Properties.cs" />
+    <Compile Include="ScreenHelpers.cs" />
     <Compile Include="ScrollViewerAssistant.cs" />
     <Compile Include="DependsUponAttribute.cs" />
     <Compile Include="DocumentHelpers.cs" />

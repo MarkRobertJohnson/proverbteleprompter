@@ -298,5 +298,29 @@ namespace ProverbTeleprompter.Properties {
                 this["TalentWindowVisible"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Normal")]
+        public global::System.Windows.WindowState MainWindowState {
+            get {
+                return ((global::System.Windows.WindowState)(this["MainWindowState"]));
+            }
+            set {
+                this["MainWindowState"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Normal")]
+        public global::System.Windows.WindowState TalentWindowState {
+            get {
+                return ((global::System.Windows.WindowState)(this["TalentWindowState"]));
+            }
+            set {
+                this["TalentWindowState"] = value;
+            }
+        }
     }
 }

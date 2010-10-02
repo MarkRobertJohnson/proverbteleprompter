@@ -19,6 +19,9 @@ namespace ProverbTeleprompter
     /// </summary>
     public partial class TalentWindow : Window
     {
+
+        public MainWindowViewModel MainWindowViewModel { get; set; }
+
         public TalentWindow()
         {
             InitializeComponent();
@@ -26,15 +29,13 @@ namespace ProverbTeleprompter
             MouseLeftButtonDown +=TalentWindow_MouseLeftButtonDown;
             MouseDoubleClick +=TalentWindow_MouseDoubleClick;
             Loaded += TalentWindow_Loaded;
-
+            
         }
 
         void TalentWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            if (SystemInformation.MonitorCount > 1)
-            {
-                WindowState = WindowState.Maximized;
-            }
+
+            MainWindowViewModel = DataContext as MainWindowViewModel;
         }
 
         void TalentWindow_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

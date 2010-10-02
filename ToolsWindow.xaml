@@ -10,7 +10,7 @@
         Left="{Binding Path=DataContext.ToolWindowLeft,ElementName=TheToolWindow,Mode=OneWay}"
             WindowStyle="None" WindowState="Maximized" WindowStartupLocation="Manual"
         x:Name="TheToolWindow"
-        Title="ToolsWindow" d:DesignHeight="250" d:DesignWidth="1331" SizeToContent="Manual"  Background="Transparent">
+        Title="ToolsWindow" d:DesignHeight="263" d:DesignWidth="1331" SizeToContent="Manual"  Background="Transparent">
     <Window.Resources>
 
         <ResourceDictionary>
@@ -25,7 +25,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid x:Name="ToolsGrid" Height="250" VerticalAlignment="Bottom" Style="{StaticResource ResourceKey=FlyInOutGrid}" 
-              Background="Transparent" Margin="0,0,0,-42">
+              Background="Transparent" Margin="0,0,0,-29" Grid.RowSpan="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -53,7 +53,7 @@
                 </Label.Effect>
             </Label>
 
-            <Border Grid.Row="2" x:Name="ToolBorder" Background="White" Margin="0,0,18,0">
+            <Border Grid.Row="2" x:Name="ToolBorder" Background="White" >
                 <ScrollViewer  Margin="5" Height="170" Focusable="False" VerticalScrollBarVisibility="Auto">
                     <WrapPanel x:Name="ToolsPanel" Orientation="Horizontal" UseLayoutRounding="False"  
         				ScrollViewer.CanContentScroll="True">
