@@ -41,6 +41,7 @@ namespace ProverbTeleprompter
             LocationChanged += MainWindow_LocationChanged;
             SizeChanged += MainWindow_SizeChanged;
             Loaded += MainWindow_Loaded;
+            MouseMove += new MouseEventHandler(MainWindow_MouseMove);
 
             MouseDoubleClick += new MouseButtonEventHandler(MainWindow_MouseDoubleClick);
             
@@ -50,6 +51,11 @@ namespace ProverbTeleprompter
             Closing += MainWindow_Closing;
 
             PromptView = MainTextGrid;
+
+        }
+
+        void MainWindow_MouseMove(object sender, MouseEventArgs e)
+        {
 
         }
 
@@ -64,6 +70,8 @@ namespace ProverbTeleprompter
         {
             if (WindowState != WindowState.Maximized)
             {
+
+
                 WindowState = WindowState.Maximized;
             }
             else
@@ -72,9 +80,12 @@ namespace ProverbTeleprompter
             }
         }
 
+  
         void MainWindow_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+  
             DragMove();
+            
         }
 
         void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -90,7 +101,7 @@ namespace ProverbTeleprompter
         private void SetToolSizeAndPos()
         {
             MainWindowViewModel.ToolWindowHeight = 250;
-            MainWindowViewModel.ToolWindowLeft = Left;
+            MainWindowViewModel.ToolWindowLeft =  Left;
             MainWindowViewModel.ToolWindowWidth = ActualWidth;
             MainWindowViewModel.ToolWindowTop = Top + ActualHeight - MainWindowViewModel.ToolWindowHeight;
         }

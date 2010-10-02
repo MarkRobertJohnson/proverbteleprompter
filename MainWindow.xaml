@@ -12,7 +12,7 @@
         Top="{Controls:SettingBinding MainWindowTop}"
         Left="{Controls:SettingBinding MainWindowLeft}"
         WindowStyle="None" 
-        WindowState="Normal" Foreground="Black" ResizeMode="CanResize"
+        WindowState="{Binding MainWindowState, Mode=TwoWay}" Foreground="Black" ResizeMode="CanResize"
         d:DesignHeight="900" d:DesignWidth="900"
         >
     <Window.Resources>
