@@ -1,0 +1,82 @@
+﻿<ResourceDictionary
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	<Style x:Key="PushPinToggleStyle" TargetType="{x:Type ToggleButton}">
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type ToggleButton}">
+					<Grid>
+						<VisualStateManager.VisualStateGroups>
+							<VisualStateGroup x:Name="CheckStates">
+								<VisualStateGroup.Transitions>
+									<VisualTransition GeneratedDuration="0" To="Unchecked">
+										<VisualTransition.GeneratedEasingFunction>
+											<CubicEase EasingMode="EaseInOut"/>
+										</VisualTransition.GeneratedEasingFunction>
+									</VisualTransition>
+									<VisualTransition From="Unchecked" GeneratedDuration="0" To="Checked">
+										<VisualTransition.GeneratedEasingFunction>
+											<CircleEase EasingMode="EaseInOut"/>
+										</VisualTransition.GeneratedEasingFunction>
+									</VisualTransition>
+								</VisualStateGroup.Transitions>
+								<VisualState x:Name="Checked"/>
+								<VisualState x:Name="Unchecked">
+									<Storyboard>
+										<DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(RotateTransform.Angle)" Storyboard.TargetName="path">
+											<EasingDoubleKeyFrame KeyTime="0" Value="90"/>
+										</DoubleAnimationUsingKeyFrames>
+									</Storyboard>
+								</VisualState>
+								<VisualState x:Name="Indeterminate"/>
+							</VisualStateGroup>
+							<VisualStateGroup x:Name="CommonStates">
+								<VisualStateGroup.Transitions>
+									<VisualTransition GeneratedDuration="0:0:0.2" To="MouseOver"/>
+									<VisualTransition From="MouseOver" GeneratedDuration="0:0:0.2"/>
+								</VisualStateGroup.Transitions>
+								<VisualState x:Name="Normal"/>
+								<VisualState x:Name="MouseOver">
+									<Storyboard>
+										<DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.ShadowDepth)" Storyboard.TargetName="path">
+											<EasingDoubleKeyFrame KeyTime="0" Value="5"/>
+										</DoubleAnimationUsingKeyFrames>
+										<DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Direction)" Storyboard.TargetName="path">
+											<EasingDoubleKeyFrame KeyTime="0" Value="310"/>
+										</DoubleAnimationUsingKeyFrames>
+										<DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)" Storyboard.TargetName="path">
+											<EasingDoubleKeyFrame KeyTime="0" Value="5"/>
+										</DoubleAnimationUsingKeyFrames>
+										<ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Color)" Storyboard.TargetName="path">
+											<EasingColorKeyFrame KeyTime="0" Value="#FFFA0101"/>
+										</ColorAnimationUsingKeyFrames>
+										<DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(RotateTransform.Angle)" Storyboard.TargetName="path">
+											<EasingDoubleKeyFrame KeyTime="0" Value="34.344"/>
+										</DoubleAnimationUsingKeyFrames>
+									</Storyboard>
+								</VisualState>
+								<VisualState x:Name="Pressed"/>
+								<VisualState x:Name="Disabled"/>
+							</VisualStateGroup>
+						</VisualStateManager.VisualStateGroups>
+						<Path x:Name="path" Data="F1 M 794.328,450.309L 800.57,462.911L 800.651,481.873L 794.297,481.879L 788.031,494.493L 806.893,494.475L 806.986,500.729L 813.308,533.286L 819.495,500.717L 819.501,494.363L 809.574,494.373L 838.364,494.345L 832.122,481.743L 825.867,481.848L 825.787,462.887L 832.152,450.372L 794.328,450.309 Z " 
+							Fill="{TemplateBinding Background}" Stretch="Uniform" RenderTransformOrigin="0.5,0.5">
+							<Path.Effect>
+								<DropShadowEffect ShadowDepth="5"/>
+							</Path.Effect>
+							<Path.RenderTransform>
+								<TransformGroup>
+									<ScaleTransform/>
+									<SkewTransform/>
+									<RotateTransform/>
+									<TranslateTransform/>
+								</TransformGroup>
+							</Path.RenderTransform>
+						</Path>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+	<!-- Resource dictionary entries should be defined here. -->
+</ResourceDictionary>

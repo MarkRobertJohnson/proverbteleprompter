@@ -322,5 +322,17 @@ namespace ProverbTeleprompter.Properties {
                 this["TalentWindowState"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ReceiveGlobalKeystrokes {
+            get {
+                return ((bool)(this["ReceiveGlobalKeystrokes"]));
+            }
+            set {
+                this["ReceiveGlobalKeystrokes"] = value;
+            }
+        }
     }
 }

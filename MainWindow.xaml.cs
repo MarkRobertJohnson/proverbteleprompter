@@ -1,8 +1,11 @@
 ﻿
 using System;
+using System.Management;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
+using ProverbTeleprompter.Helpers;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 
 namespace ProverbTeleprompter
@@ -139,14 +142,21 @@ namespace ProverbTeleprompter
 
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            
             //Setup event handler for remote control buttons (multi media buttons)
-            //HwndSource source = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
-            //source.AddHook(new HwndSourceHook(RemoteHandler.WndProc));
+            HwndSource source = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
+            SystemHandler.RegisterHidNotification(source.Handle);
+            source.AddHook(new HwndSourceHook(SystemHandler.WndProc));
+
 
             MainWindowViewModel.ToggleToolsWindow();
             MainWindowViewModel.InitializeConfig();
-            
+
+
+
         }
+
+
 
         private void EyelineLeftTriangle_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {

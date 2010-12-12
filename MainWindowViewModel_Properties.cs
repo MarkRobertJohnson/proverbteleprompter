@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+using Microsoft.Practices.Composite.Presentation.Commands;
+using ProverbTeleprompter.Helpers;
 using ProverbTeleprompter.HtmlConverter;
 
 namespace ProverbTeleprompter
@@ -585,12 +588,14 @@ namespace ProverbTeleprompter
             get { return _lineHeight; }
             set
             {
+
+
+                MainDocument.SetValue(Block.LineHeightProperty, value * FontSize);
+                if (_configInitialized)
+                    AppConfigHelper.SetUserSetting("LineHeight", value);
                 _lineHeight = value;
 
-                MainDocument.SetValue(Block.LineHeightProperty, LineHeight*FontSize);
-                if (_configInitialized)
-                    AppConfigHelper.SetUserSetting("LineHeight", LineHeight);
-
+                
                 Changed(() => LineHeight);
             }
         }
@@ -687,6 +692,50 @@ namespace ProverbTeleprompter
                 _talentWindowState = value;
                 AppConfigHelper.SetUserSetting("TalentWindowState", TalentWindowState);
                 Changed(() => TalentWindowState);
+            }
+        }
+
+        private bool _captureKeyboard = true;
+        public bool CaptureKeyboard
+        {
+            get
+            {
+                return _captureKeyboard;
+            }
+            set
+            {
+                _captureKeyboard = value;
+                Changed(() => CaptureKeyboard);
+            }
+        }
+
+        private bool _receiveGlobalKeystrokes;
+        public bool ReceiveGlobalKeystrokes
+        {
+            get
+            {
+                return _receiveGlobalKeystrokes;
+            }
+            set
+            {
+                _receiveGlobalKeystrokes = value;
+                AppConfigHelper.SetUserSetting("ReceiveGlobalKeystrokes", ReceiveGlobalKeystrokes);
+                Changed(() => ReceiveGlobalKeystrokes);
+            }
+        }
+
+        private bool _multipleMonitorsAvailable;
+        public bool MultipleMonitorsAvailable
+        {
+            get
+            {
+                return _multipleMonitorsAvailable;
+            }
+            set
+            {
+                _multipleMonitorsAvailable = value;
+                Changed(() => MultipleMonitorsAvailable);
+                (ToggleTalentWindowCommand as DelegateCommand<object>).RaiseCanExecuteChanged();
             }
         }
 
