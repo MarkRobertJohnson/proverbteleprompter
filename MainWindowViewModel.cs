@@ -16,6 +16,7 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
+using Microsoft.Win32;
 using ProverbTeleprompter.Converters;
 using ProverbTeleprompter.Helpers;
 using ProverbTeleprompter.Properties;
@@ -62,11 +63,28 @@ namespace ProverbTeleprompter
             SystemHandler.RemoteButtonPressed += RemoteButtonPressed;
             SystemHandler.DisplayAttached += new EventHandler<DisplayChangedEventArgs>(SystemHandler_DisplayAttached);
             SystemHandler.DisplayRemoved += new EventHandler<DisplayChangedEventArgs>(SystemHandler_DisplayRemoved);
-            
+
+            SystemEvents.DisplaySettingsChanged += new EventHandler(SystemEvents_DisplaySettingsChanged);
+
             KeyboardHookHelpers.CreateHook();
             KeyboardHookHelpers.KeyDown += new EventHandler<System.Windows.Forms.KeyEventArgs>(KeyboardHookHelpers_KeyDown);
             KeyboardHookHelpers.KeyPress += new EventHandler<KeyPressEventArgs>(KeyboardHookHelpers_KeyPress);
             KeyboardHookHelpers.KeyUp += new EventHandler<System.Windows.Forms.KeyEventArgs>(KeyboardHookHelpers_KeyUp);
+        }
+
+        void SystemEvents_DisplaySettingsChanged(object sender, EventArgs e)
+        {
+            var a = Screen.AllScreens.Length;
+            if(Screen.AllScreens.Length <= 1)
+            {
+                MultipleMonitorsAvailable = false;
+                HideTalentWindow();
+            }
+            else
+            {
+                MultipleMonitorsAvailable = true;
+                ShowTalentWindow();
+            }
         }
 
         void SystemHandler_DisplayRemoved(object sender, DisplayChangedEventArgs e)
