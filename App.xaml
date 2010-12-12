@@ -6,9 +6,14 @@
          
     	<ResourceDictionary>
     		<ResourceDictionary.MergedDictionaries>
-    			<ResourceDictionary Source="Styles.xaml"/>
-    			<ResourceDictionary Source="Resources/Bookmark.xaml"/>
-                <ResourceDictionary Source="Resources/Resources.xaml"/>
+                <ResourceDictionary Source="/Resources/PushPinToggleStyle.xaml"/>
+    			<ResourceDictionary Source="/Styles.xaml"/>
+    			<ResourceDictionary Source="/Resources/Bookmark.xaml"/>
+                <ResourceDictionary Source="/Resources/PlayPauseStyles.xaml"/>
+                <ResourceDictionary Source="/Resources/MiscStyles.xaml"/>
+                <ResourceDictionary Source="/Resources/Resources.xaml"/>
+                <ResourceDictionary Source="Resources/PlayPauseStyles.xaml"/>
+                
     		</ResourceDictionary.MergedDictionaries>
     	</ResourceDictionary>
          

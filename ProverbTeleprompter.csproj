@@ -18,7 +18,7 @@
     <WarningLevel>4</WarningLevel>
     <IsWebBootstrapper>true</IsWebBootstrapper>
     <Utf8Output>true</Utf8Output>
-    <ExpressionBlendVersion>4.0.20525.0</ExpressionBlendVersion>
+    <ExpressionBlendVersion>4.0.20901.0</ExpressionBlendVersion>
     <PublishUrl>Publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
@@ -36,7 +36,7 @@
     <PublisherName>Proverb Teleprompter</PublisherName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>23</ApplicationRevision>
+    <ApplicationRevision>24</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -91,6 +91,8 @@
     <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Drawing.Design" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Management.Instrumentation" />
     <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
@@ -118,23 +120,34 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="BibleHelpers.cs" />
     <Compile Include="Bookmark.cs" />
+    <Compile Include="Controls\EyelineTriangleControl.xaml.cs">
+      <DependentUpon>EyelineTriangleControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\ScrollViewerExt.cs" />
     <Compile Include="Controls\SelectorSelectedCommandBehavior.cs" />
     <Compile Include="Controls\SettingBindingExtension.cs" />
+    <Compile Include="Converters\StringToFloatConverter.cs" />
     <Compile Include="Converters\PixelConverter.cs" />
     <Compile Include="Converters\TopMarginConverter.cs" />
+    <Compile Include="DisplayChangedEventArgs.cs" />
+    <Compile Include="Helpers\AppConfigHelper.cs" />
+    <Compile Include="Helpers\BibleHelpers.cs" />
+    <Compile Include="Helpers\DisplayAvailability.cs" />
+    <Compile Include="Helpers\DocumentHelpers.cs" />
+    <Compile Include="Helpers\KeyboardHookHelpers.cs" />
+    <Compile Include="Helpers\DisplayDetails.cs" />
+    <Compile Include="Helpers\RichTextBoxAssistant.cs" />
+    <Compile Include="Helpers\ScreenHelpers.cs" />
+    <Compile Include="Helpers\ScrollViewerAssistant.cs" />
+    <Compile Include="Helpers\UIHelpers.cs" />
+    <Compile Include="Helpers\WebHelpers.cs" />
+    <Compile Include="Helpers\Win32.cs" />
+    <Compile Include="KeyEventArgsExt.cs" />
     <Compile Include="MainWindowViewModel_Commands.cs" />
     <Compile Include="MainWindowViewModel_Properties.cs" />
-    <Compile Include="ScreenHelpers.cs" />
-    <Compile Include="ScrollViewerAssistant.cs" />
     <Compile Include="DependsUponAttribute.cs" />
-    <Compile Include="DocumentHelpers.cs" />
     <Compile Include="DocumentUpdatedEventArgs.cs" />
-    <Compile Include="EyelineTriangleControl.xaml.cs">
-      <DependentUpon>EyelineTriangleControl.xaml</DependentUpon>
-    </Compile>
     <Compile Include="HtmlConverter\HtmlCssParser.cs" />
     <Compile Include="HtmlConverter\HtmlFromXamlConverter.cs" />
     <Compile Include="HtmlConverter\HtmlLexicalAnalyzer.cs" />
@@ -147,8 +160,7 @@
     <Compile Include="NotifyPropertyChangedBase.cs" />
     <Compile Include="RelayCommand.cs" />
     <Compile Include="RemoteButtonPressedEventArgs.cs" />
-    <Compile Include="RemoteHandler.cs" />
-    <Compile Include="RichTextBoxAssistant.cs" />
+    <Compile Include="SystemHandler.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="TalentWindow.xaml.cs">
       <DependentUpon>TalentWindow.xaml</DependentUpon>
@@ -156,9 +168,7 @@
     <Compile Include="ToolsWindow.xaml.cs">
       <DependentUpon>ToolsWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UIHelpers.cs" />
-    <Compile Include="WebHelpers.cs" />
-    <Page Include="EyelineTriangleControl.xaml">
+    <Page Include="Controls\EyelineTriangleControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -170,11 +180,27 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="AppConfigHelper.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Properties\DesignTimeResources.xaml" Condition="'$(DesignTime)'=='true' OR ('$(SolutionPath)'!='' AND Exists('$(SolutionPath)') AND '$(BuildingInsideVisualStudio)'!='true' AND '$(BuildingInsideExpressionBlend)'!='true')">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+      <ContainsDesignTimeResources>true</ContainsDesignTimeResources>
+    </Page>
+    <Page Include="Resources\MiscStyles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Resources\PlayPauseStyles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Resources\PushPinToggleStyle.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Resources\Bookmark.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

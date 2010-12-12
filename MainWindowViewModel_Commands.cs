@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Microsoft.Practices.Composite.Presentation.Commands;
+using ProverbTeleprompter.Helpers;
 
 namespace ProverbTeleprompter
 {
@@ -22,7 +23,7 @@ namespace ProverbTeleprompter
         private ICommand _setBookmarkCommand;
         private ICommand _setDefaultSpeedCommand;
 
-        private ICommand _toggleTalentWindowCommand;
+        private DelegateCommand<object> _toggleTalentWindowCommand;
 
         public ICommand BookmarkSelectedCommand
         {
@@ -44,11 +45,13 @@ namespace ProverbTeleprompter
 
         public ICommand ToggleTalentWindowCommand
         {
+            
             get
             {
+                
                 return _toggleTalentWindowCommand ??
-                       (_toggleTalentWindowCommand = new RelayCommand(
-                                                         x => ToggleTalentWindow()));
+                       (_toggleTalentWindowCommand = new DelegateCommand<object>(
+                                                         x => ToggleTalentWindow(), x=> MultipleMonitorsAvailable));
             }
         }
 
@@ -172,6 +175,40 @@ namespace ProverbTeleprompter
                                                                  });
                 }
                 return _editInWordpadCommand;
+            }
+        }
+
+        private ICommand _closeApplicationCommand;
+
+        public ICommand CloseApplicationCommand
+        {
+            get
+            {
+                return _closeApplicationCommand ??
+                       (_closeApplicationCommand = new RelayCommand(x =>
+                                                         {
+                                                             App.Current.MainWindow.Close();
+
+                                                         }));
+            }
+        }
+
+        private ICommand _bookmarkClickedCommand;
+        public ICommand BookmarkClickedCommand
+        {
+            get
+            {
+                if (_bookmarkClickedCommand == null)
+                {
+                    _bookmarkClickedCommand = new DelegateCommand<ContentControl>(x =>
+                    {
+                        var bookmark =
+                            x.Content as Bookmark;
+                        JumpToBookmark(bookmark);
+                       
+                    });
+                }
+                return _bookmarkClickedCommand;
             }
         }
 

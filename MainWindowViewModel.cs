@@ -5,14 +5,19 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
+using System.Management;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Forms;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Threading;
 using ProverbTeleprompter.Converters;
+using ProverbTeleprompter.Helpers;
 using ProverbTeleprompter.Properties;
 using Tools.API.Messages.lParam;
 using Application = System.Windows.Application;
@@ -53,8 +58,65 @@ namespace ProverbTeleprompter
             _scrollTimer.Start();
 
             MainTextBox = mainTextBox;
+            MultipleMonitorsAvailable = SystemInformation.MonitorCount > 1;
+            SystemHandler.RemoteButtonPressed += RemoteButtonPressed;
+            SystemHandler.DisplayAttached += new EventHandler<DisplayChangedEventArgs>(SystemHandler_DisplayAttached);
+            SystemHandler.DisplayRemoved += new EventHandler<DisplayChangedEventArgs>(SystemHandler_DisplayRemoved);
+            
+            KeyboardHookHelpers.CreateHook();
+            KeyboardHookHelpers.KeyDown += new EventHandler<System.Windows.Forms.KeyEventArgs>(KeyboardHookHelpers_KeyDown);
+            KeyboardHookHelpers.KeyPress += new EventHandler<KeyPressEventArgs>(KeyboardHookHelpers_KeyPress);
+            KeyboardHookHelpers.KeyUp += new EventHandler<System.Windows.Forms.KeyEventArgs>(KeyboardHookHelpers_KeyUp);
+        }
 
-            RemoteHandler.RemoteButtonPressed += RemoteButtonPressed;
+        void SystemHandler_DisplayRemoved(object sender, DisplayChangedEventArgs e)
+        {
+
+
+            var details = DisplayDetails.GetMonitorDetails();
+            if (details.Where(x => x.Availability == DisplayAvailability.Available).Count() > 1)
+            {
+                MultipleMonitorsAvailable = true;
+            }
+            else
+            {
+                MultipleMonitorsAvailable = false;
+                HideTalentWindow();
+            }
+        }
+
+        void SystemHandler_DisplayAttached(object sender, DisplayChangedEventArgs e)
+        {
+            var details = DisplayDetails.GetMonitorDetails();
+            if (details.Where(x => x.Availability == DisplayAvailability.Available).Count() > 1)
+            {
+                MultipleMonitorsAvailable = true;
+                if (Settings.Default.TalentWindowVisible)
+                {
+                    ShowTalentWindow();
+                }
+                
+            }
+            else
+            {
+                MultipleMonitorsAvailable = false;
+            }
+        }
+
+
+        void KeyboardHookHelpers_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
+        {
+           GlobalKeyUp(sender, e);
+        }
+
+        void KeyboardHookHelpers_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            
+        }
+
+        void KeyboardHookHelpers_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
+        {
+            GlobalKeyDown(sender, e);
         }
 
         public ObservableCollection<Bookmark> Bookmarks
@@ -186,6 +248,8 @@ namespace ProverbTeleprompter
             TalentWindowState = Settings.Default.TalentWindowState;
 
             EyelinePosition = Settings.Default.EyeLinePosition;
+
+            ReceiveGlobalKeystrokes = Settings.Default.ReceiveGlobalKeystrokes;
         }
 
         public void SetDocumentConfig()
@@ -668,9 +732,6 @@ namespace ProverbTeleprompter
                 _toolsWindow.PreviewKeyUp += KeyUp;
                 _toolsWindow.Closing += _toolsWindow_Closing;
                 _toolsWindow.Loaded += _toolsWindow_Loaded;
-
-                //   _toolsWindow.SizeChanged += (sender, e) => SetToolsWindowSize(new Size(MainWindowWidth, MainWindowHeight));
-                // _toolsWindow.LocationChanged += (sender, e) => SetToolsWindowLocation(new Point(MainWindowLeft, MainWindowTop));
             }
 
             if (_toolsWindow.Visibility == Visibility.Visible)
@@ -681,10 +742,6 @@ namespace ProverbTeleprompter
             else
             {
                 _toolsWindow.Show();
-
-
-                //       SetToolsWindowSize(new Size(MainWindowWidth, MainWindowHeight));
-                //     SetToolsWindowLocation(new Point(MainWindowLeft, MainWindowTop));
             }
         }
 
@@ -700,155 +757,175 @@ namespace ProverbTeleprompter
             ((Window) sender).Owner.Close();
         }
 
-
-        private void SetToolsWindowSize(Size size)
-        {
-            if (_toolsWindow == null) return;
-            //   LocationChanged -= MainWindow_LocationChanged;
-            //    SizeChanged -= MainWindow_SizeChanged;
-            // _toolsWindow.Top = Top + ActualHeight - _toolsWindow.Height;
-            // _toolsWindow.Width = MainWindowWidth;
-            //  _toolsWindow.Left = Left;
-            //    LocationChanged += MainWindow_LocationChanged;
-            //   SizeChanged += MainWindow_SizeChanged;
-        }
-
-        private void SetToolsWindowLocation(Point location)
-        {
-            if (_toolsWindow == null) return;
-
-            //   LocationChanged -= MainWindow_LocationChanged;
-            //  SizeChanged -= MainWindow_SizeChanged;
-            // _toolsWindow.Top = MainWindowTop + MainWindowHeight - _toolsWindow.Height;
-            // _toolsWindow.Width = MainWindowWidth;
-            // _toolsWindow.Left = MainWindowLeft;
-            //   LocationChanged += MainWindow_LocationChanged;
-            //   SizeChanged += MainWindow_SizeChanged;
-        }
-
         #region Input Handlers
+
+
+        internal void GlobalKeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
+        {
+            var key = KeyInterop.KeyFromVirtualKey(e.KeyValue);
+
+            if(!e.Alt && !e.Shift && !e.Control)
+                HandleKeyDown(key, true);
+        }
+
+        internal void GlobalKeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
+        {
+            var key = KeyInterop.KeyFromVirtualKey(e.KeyValue);
+            HandleKeyUp(key, true);
+        }
 
         internal void KeyDown(object sender, KeyEventArgs e)
         {
-            if(MainTextBox.Focusable) return;
+          
+            if (!ReceiveGlobalKeystrokes)
+            {
+                e.Handled = HandleKeyDown(e.Key, false);
+            }
+        }
 
-            e.Handled = true;
-            if (e.Key == Key.Down)
+        internal void KeyUp(object sender, KeyEventArgs e)
+        {
+            if (!ReceiveGlobalKeystrokes)
+            {
+                e.Handled = HandleKeyUp(e.Key, false);
+            }
+            
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="isGlobal"></param>
+        /// <returns>True if the key down event is handled</returns>
+        private bool HandleKeyDown(Key key, bool isGlobal)
+        {
+            if (MainTextBox.Focusable || !CaptureKeyboard || (isGlobal && !ReceiveGlobalKeystrokes)) return false;
+
+            bool handled = true;
+            if (key == Key.Down)
             {
                 SpeedForward();
             }
-            else if (e.Key == Key.Up )
+            else if (key == Key.Up)
             {
                 SpeedReverse();
             }
-            else if (e.Key == Key.Tab)
+            else if (key == Key.Tab)
             {
+                
                 ToggleTools();
+            
             }
 
                 //Slide forward / page down button To work with Logitech PowerPoint remote
-            else if (e.Key == Key.Next)
+            else if (key == Key.Next)
             {
                 //PageDown();
                 SpeedForward();
             }
-                //Slid back button / page up To work with Logitech PowerPoint remote
-            else if (e.Key == Key.Prior)
+            //Slid back button / page up To work with Logitech PowerPoint remote
+            else if (key == Key.Prior)
             {
                 //PageUp();
                 SpeedReverse();
             }
-                //F5 To work with Logitech PowerPoint remote
-            else if (e.Key == Key.F5 ||
-                     e.Key == Key.MediaStop ||
-                     e.Key == Key.MediaPlayPause ||
-                     e.Key == Key.Escape)
+            //F5 To work with Logitech PowerPoint remote
+            else if (key == Key.F5 ||
+                     key == Key.MediaStop ||
+                     key == Key.MediaPlayPause ||
+                     key == Key.Escape ||
+                     key == Key.Space)
             {
                 PauseScrolling();
             }
-                //Period To work with Logitech PowerPoint remote
-            else if (e.Key == Key.OemPeriod)
+            //Period To work with Logitech PowerPoint remote
+            else if (key == Key.OemPeriod)
             {
                 ScrollToTop();
             }
-            else if (e.Key == Key.MediaPreviousTrack)
+            else if (key == Key.MediaPreviousTrack)
             {
                 PageUp();
             }
-            else if (e.Key == Key.MediaNextTrack)
+            else if (key == Key.MediaNextTrack)
             {
                 PageDown();
             }
-            else if(e.Key == Key.OemPlus )
+            else if (key == Key.OemPlus)
             {
                 Speed += 0.1;
                 DefaultSpeed = Speed;
             }
-            else if (e.Key == Key.OemMinus)
+            else if (key == Key.OemMinus)
             {
                 Speed -= 0.1;
                 DefaultSpeed = Speed;
             }
-                //Numbers 1-9 should jump to the corresponding bookmark
-            else if ((e.Key >= Key.D0 && e.Key <= Key.D9) ||
-                     (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9))
+            //Numbers 1-9 should jump to the corresponding bookmark
+            else if ((key >= Key.D0 && key <= Key.D9) ||
+                     (key >= Key.NumPad0 && key <= Key.NumPad9))
             {
                 var converter = new KeyConverter();
-                string val = converter.ConvertToString(e.Key);
+                string val = converter.ConvertToString(key);
 
                 JumpToBookmarkByOrdinal(int.Parse(val));
 
                 //To allow text boxes to get numbers
-                e.Handled = false;
+                handled = false;
             }
-            else if (e.Key == Key.F1)
+            else if (key == Key.F1)
             {
                 LoadRandomBibleChapter();
             }
-            else if (e.Key == Key.Insert)
+            else if (key == Key.Insert)
             {
                 InsertBookmarkAtCurrentEyelineMark();
             }
             else
             {
-                e.Handled = false;
+                handled = false;
             }
+            return handled;
         }
 
-
-        internal void KeyUp(object sender, KeyEventArgs e)
+        private bool HandleKeyUp(Key key, bool isGlobal)
         {
-            if (MainTextBox.Focusable) return;
+            if (MainTextBox.Focusable || !CaptureKeyboard || (isGlobal && !ReceiveGlobalKeystrokes)) return false;
 
-            if (e.Key == Key.Down)
+            if (key == Key.Down)
             {
                 Speed = DefaultSpeed;
                 //SpeedSlider.Value -= TotalBoostAmount;
                 _speedBoostAmount = 0;
                 TotalBoostAmount = 0;
             }
-            else if (e.Key == Key.Up)
+            else if (key == Key.Up)
             {
                 Speed = DefaultSpeed;
                 // SpeedSlider.Value -= TotalBoostAmount;
                 _speedBoostAmount = 0;
                 TotalBoostAmount = 0;
             }
-            else if (e.Key == Key.Next)
+            else if (key == Key.Next)
             {
                 Speed = DefaultSpeed;
                 //SpeedSlider.Value -= TotalBoostAmount;
                 _speedBoostAmount = 0;
                 TotalBoostAmount = 0;
             }
-            else if (e.Key == Key.Prior)
+            else if (key == Key.Prior)
             {
                 //SpeedSlider.Value -= TotalBoostAmount;
                 Speed = DefaultSpeed;
                 _speedBoostAmount = 0;
                 TotalBoostAmount = 0;
             }
+
+            return false;
         }
+
+
 
         internal void RemoteButtonPressed(object sender, RemoteButtonPressedEventArgs e)
         {
@@ -991,25 +1068,37 @@ namespace ProverbTeleprompter
             else if (_talentWindow == null &&
                      SystemInformation.MonitorCount > 1)
             {
-                _talentWindow = new TalentWindow {Owner = Application.Current.MainWindow};
+                ShowTalentWindow();
+                AppConfigHelper.SetUserSetting("TalentWindowVisible", true);
+
+
+            }
+            else
+            {
+                HideTalentWindow();
+
+                AppConfigHelper.SetUserSetting("TalentWindowVisible", false);
+            }
+        }
+
+        protected void ShowTalentWindow()
+        {
+            if(_talentWindow == null)
+            {
+                _talentWindow = new TalentWindow { Owner = Application.Current.MainWindow };
                 _talentWindow.Closed += _talentWindow_Closed;
                 _talentWindow.PreviewKeyDown += KeyDown;
                 _talentWindow.PreviewKeyUp += KeyUp;
 
                 _talentWindow.Loaded += _talentWindow_Loaded;
                 _talentWindow.DataContext = this;
-
-                _talentWindow.Show();
-
-
-                ToggleTalentWindowCaption = "Hide on 2nd Monitor";
-                AppConfigHelper.SetUserSetting("TalentWindowVisible", true);
             }
-            else
-            {
-                HideTalentWindow();
-                AppConfigHelper.SetUserSetting("TalentWindowVisible", false);
-            }
+
+
+            _talentWindow.Show();
+
+            ToggleTalentWindowCaption = "Hide on 2nd Monitor";
+            
         }
 
         private void _talentWindow_Loaded(object sender, RoutedEventArgs e)
@@ -1039,6 +1128,7 @@ namespace ProverbTeleprompter
                 _talentWindow.Close();
             }
             ToggleTalentWindowCaption = "Show on 2nd monitor";
+
         }
 
         #endregion
