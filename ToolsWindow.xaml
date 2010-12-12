@@ -1,0 +1,223 @@
+﻿<Window x:Class="ProverbTeleprompter.ToolsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+ xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:Controls="clr-namespace:ProverbTeleprompter.Controls" 
+        xmlns:Converters="clr-namespace:ProverbTeleprompter.Converters" mc:Ignorable="d"
+        AllowsTransparency="True"
+               Height="{Binding Path=DataContext.ToolWindowHeight,ElementName=TheToolWindow,Mode=OneWay}" 
+        Width="{Binding Path=DataContext.ToolWindowWidth,ElementName=TheToolWindow,Mode=OneWay}"
+        Top="{Binding Path=DataContext.ToolWindowTop,ElementName=TheToolWindow,Mode=OneWay}" 
+        Left="{Binding Path=DataContext.ToolWindowLeft,ElementName=TheToolWindow,Mode=OneWay}"
+            WindowStyle="None" WindowState="Maximized" WindowStartupLocation="Manual"
+        x:Name="TheToolWindow"
+        Title="ToolsWindow" d:DesignHeight="263" d:DesignWidth="1331" SizeToContent="Manual"  Background="Transparent" ShowInTaskbar="False">
+    <Window.Resources>
+
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/Resources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid x:Name="ToolsGrid" Height="250" VerticalAlignment="Bottom" Style="{StaticResource ResourceKey=FlyInOutGrid}" 
+              Background="Transparent" Margin="0,0,0,-29" Grid.RowSpan="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="30*" />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" Width="400">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Polygon  HorizontalAlignment="Center" 
+                     VerticalAlignment="Bottom" Stretch="Fill" Height="35" Fill="#5035BC2E" Margin="1,0,1,0">
+                    <Polygon.Points>
+                        <PointCollection>
+                            <Point X="0" Y="1" />
+                            <Point X="0.1" Y="0" />
+                            <Point X="0.9" Y="0" />
+                            <Point X="1" Y="1" />
+                            <Point X="0" Y="1" />
+                        </PointCollection>
+
+                    </Polygon.Points>
+                </Polygon>
+				<ToggleButton Content="ToggleButton" HorizontalAlignment="Left" Height="22.777" 
+				Style="{DynamicResource PushPinToggleStyle}" VerticalAlignment="Top" Width="25.728" 
+				IsChecked="{Binding ToolsVisible}" Margin="36.8,8.223,0,0" ToolTip="Hide this tool window (TAB key to show)" Background="#BFFFFFFF"/>
+
+                <Label  Content="Proverb Teleprompter"  FontSize="21.333" 
+				FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Bottom" >
+                    <Label.Effect>
+                        <DropShadowEffect Color="White" BlurRadius="2" ShadowDepth="2"/>
+                    </Label.Effect>
+                </Label>
+
+                <Button Focusable="False" Content="X" Width="20" Height="20" Margin="340,13,40,6" Background="#58FF0000" FontWeight="Bold" Command="{Binding CloseApplicationCommand}" Style="{DynamicResource CloseButtonStyle}" Foreground="#B1FEFEFE" ToolTip="Close Proverb Teleprompter (ALT-F4)" />
+            </Grid>
+
+            <Border Grid.Row="2" x:Name="ToolBorder" Background="#D9FFFFFF" >
+                <ScrollViewer  Margin="10,5" Height="170" Focusable="False" VerticalScrollBarVisibility="Auto">
+                    <WrapPanel x:Name="ToolsPanel" Orientation="Horizontal" UseLayoutRounding="False"  
+                		ScrollViewer.CanContentScroll="True">
+                		<WrapPanel  Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
+                			<RadioButton x:Name="BlackOnWhiteButton" GroupName="Color" Content="Black on White" 
+                				IsChecked="{Binding IsBlackOnWhite, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                				Focusable="False" Margin="3" ToolTip="Black text on white background"/>
+                			<RadioButton x:Name="WhiteOnBlackButton" GroupName="Color" Content="White on Black" 
+                				IsChecked="{Binding IsWhiteOnBlack, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                				Focusable="False" Margin="3" ToolTip="White text on black background" />
+                			<CheckBox Content="Edit Inline" Height="16" x:Name="EditableCheckbox" Focusable="False" 
+                				IsChecked="{Binding Editable, Mode=TwoWay}"
+                				Margin="2" ToolTip="Edit the text directly in the prompter window" />
+                			<Button Content="Edit in WordPad" ToolTip="Edit the document in WordPad" Focusable="False" Height="20" x:Name="EditInWordpadButton" 
+                				Style="{DynamicResource ToolButtonStyle}" Width="95.104" 
+                				Command="{Binding EditInWordpadCommand}"/>
+                		</WrapPanel>
+                		<WrapPanel Orientation="Vertical" Style="{StaticResource ResourceKey=ToolSection}">
+                			<Label Content="Font Size"  />
+                			<Slider x:Name="FontSizeSlider" Value="{Binding FontSize, FallbackValue=24}" Maximum="192" Minimum="12" 
+                				LargeChange="12" TickPlacement="BottomRight" 
+                				TickFrequency="12" SmallChange="12" IsSnapToTickEnabled="True" 
+                				Focusable="False" RenderTransformOrigin="0.574,0.443" ToolTip="Set the font size (applied to all text)" />
+                			<TextBox  x:Name="FontSizeTextBox" Margin="13,0" HorizontalContentAlignment="Center" MouseLeftButtonDown="SpeedTextBox_MouseLeftButtonDown"
+                				Text="{Binding Value, Converter={Converters:StringToFloatConverter Max=192, Min=12}, ElementName=FontSizeSlider, Mode=TwoWay}" Focusable="False"  
+                				Background="Transparent" BorderBrush="Transparent"
+                				VerticalAlignment="Top" HorizontalAlignment="Center" Width="32" ToolTip="Click to type in the font size"  />
+                			<Path Data="M8.7566667,146.43067 L33.304834,146.43067" Fill="#FF010101" Height="3" Stretch="Fill" Width="74.149" Stroke="Black" StrokeThickness="0.5"/>
+                            
+                			<Label Content="Line Height"  />
+                			<Slider x:Name="LineHeightSlider" Value="{Binding LineHeight, FallbackValue=1}" Maximum="3" Minimum="1" 
+                				LargeChange="0.1" TickPlacement="BottomRight" 
+                				TickFrequency="0.05" IsSnapToTickEnabled="True" 
+                				Focusable="False" ToolTip="Set the text line height" />
+                			<TextBox  x:Name="LineHeightTextBox" Margin="13,0" HorizontalContentAlignment="Center" MouseLeftButtonDown="SpeedTextBox_MouseLeftButtonDown"
+                				Text="{Binding Value, Converter={Converters:StringToFloatConverter Max=3, Min=1}, ElementName=LineHeightSlider, Mode=TwoWay}" Focusable="False"  
+                				Background="Transparent" BorderBrush="Transparent"
+                				VerticalAlignment="Top" HorizontalAlignment="Center" Width="32" ToolTip="Click to type in the line height"  />
+
+                		</WrapPanel>
+                		<WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}" Width="122">
+
+                			<Label Content="Scroll Speed" d:LayoutOverrides="Height" />
+                			<Slider x:Name="SpeedSlider" ToolTip="Set the current scrolling speed"  
+                				Value="{Binding Speed, FallbackValue=1, Mode=TwoWay}" 
+                				Maximum="{Binding SpeedMax, FallbackValue=8, Mode=OneWay}" 
+                				Minimum="{Binding SpeedMin, FallbackValue=-8, Mode=OneWay}" LargeChange="1" Focusable="False"
+                				TickPlacement="BottomRight" TickFrequency="0.5" SmallChange="0.05"  
+                				VerticalAlignment="Top" HorizontalAlignment="Stretch"  Width="122" />
+                			<TextBox x:Name="SpeedTextBox" BorderBrush="Transparent" Background="Transparent" 
+                				HorizontalAlignment="Center"  HorizontalContentAlignment="Center"
+                				Text="{Binding Value, Converter={StaticResource StringToFloatConverter}, ElementName=SpeedSlider, Mode=TwoWay, StringFormat=\{0:F\}}" 
+                				Focusable="False" VerticalAlignment="Bottom" MouseLeftButtonDown="SpeedTextBox_MouseLeftButtonDown" ToolTip="Click to type in the scroll speed" />
+                			<Button Content="Set as Default" ToolTip="Makes the current scroll speed the default speed" Height="20" Focusable="False" 
+                				x:Name="SetDefaultSpeedButton" Width="87" Command="{Binding SetDefaultSpeedCommand}" Margin="2" Style="{DynamicResource ToolButtonStyle}" />
+                			<ToggleButton x:Name="PausedCheckbox" IsChecked="{Binding Paused}" Focusable="False" 
+                				Content="ToggleButton" HorizontalAlignment="Center" Height="40.282" Margin="3,19,3,3"
+                				Style="{DynamicResource PlayPauseStyle}" VerticalAlignment="Bottom" Width="44" ToolTip="Toggle Play/Pause (Space/F5/ESC)"/>
+
+                		</WrapPanel>
+                		<WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
+                			<Button Content="Load Document" Margin="5"  x:Name="LoadFileButton"  Focusable="False"
+                				Command="{Binding LoadDocumentCommand}"
+                				Style="{DynamicResource ToolButtonStyle}" />
+                			<Button Content="Save Text" x:Name="SaveButton" 
+                				Margin="5"
+                				Command="{Binding SaveDocumentCommand}"
+                				Focusable="False" Style="{DynamicResource ToolButtonStyle}" />
+                			<Button Content="Save Text As..." x:Name="SaveAsButton" Focusable="False"
+                				Margin="5" 
+                				Command="{Binding SaveDocumentAsCommand}"
+                				Style="{DynamicResource ToolButtonStyle}" RenderTransformOrigin="0.696,0.483" />
+
+                		</WrapPanel>
+                		<WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
+                			<WrapPanel/>
+                			<Button Content="{Binding ToggleTalentWindowCaption, FallbackValue=Show Talent Window}" ToolTip="Display a second window for external monitors" 
+                				x:Name="ToggleTalentWindowButton" Focusable="False"
+                				Margin="5" 
+                				Command="{Binding ToggleTalentWindowCommand}"
+                				Style="{DynamicResource ToolButtonStyle}" />
+                			<CheckBox Content="Flip Talent Window Vertically" IsChecked="{Binding FlipTalentWindowVert}"
+                				Height="16" x:Name="FlipTalentWindowVertCheckBox" Focusable="False" Margin="5,2" />
+                			<CheckBox Content="Flip Talent Window Horizontally" IsChecked="{Binding FlipTalentWindowHoriz}"
+                				Height="16" x:Name="FlipTalentWindowHorizCheckBox" Focusable="False" Margin="5,2" />
+                			<CheckBox Content="Flip Main Window Vertically" Height="16" IsChecked="{Binding FlipMainWindowVert}"
+                				x:Name="FlipMainWindowVertCheckBox" Focusable="False" Margin="5,2" />
+                			<CheckBox Content="Flip Main Window Horizontally" Height="16" IsChecked="{Binding FlipMainWindowHoriz}"
+                				x:Name="FlipMainWindowHorizCheckBox" Focusable="False" Margin="5,2" />
+                			<CheckBox Content="Receive Keystrokes even if App loses focus (Note: hotkeys typed in other apps will affect the prompter)" Height="43.62" 
+                				x:Name="checkBox1" IsChecked="{Binding ReceiveGlobalKeystrokes}" 
+                				Width="180.8"
+                				ContentTemplate="{DynamicResource WrappingTextStyle}" ToolTip="The Prompter App will get keystrokes regardless of whether or not it has focus" Margin="5,8,0,0" HorizontalAlignment="Left" FontWeight="Bold" FontSize="9.333" />
+
+
+                		</WrapPanel>
+                		<WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
+                			<Label Content="Percent Complete" HorizontalAlignment="Center" FontSize="16" FontWeight="Bold" />
+                			<TextBox x:Name="PercentComplete" 
+                				Text="{Binding PercentComplete, StringFormat=\{0:F\}%}"
+                				IsReadOnly="True" FontSize="26.667" 
+                				FontWeight="Bold" Focusable="False" Margin="5" MaxLength="7" 
+                				HorizontalContentAlignment="Center" ToolTip="The amount of the document that has been scrolled" />
+                			<Label Content="Time Left" HorizontalAlignment="Center" FontSize="16" FontWeight="Bold" />
+                			<TextBox x:Name="Eta" 
+                				Text="{Binding TimeRemaining, StringFormat=\{0\}}"
+                				ToolTip="The estimated time until the end of the document is reached (At the current speed)" IsReadOnly="True" FontSize="26.667" 
+                				FontWeight="Bold" Focusable="False" Margin="5" 
+                				HorizontalContentAlignment="Center" MaxLength="8" />
+                		</WrapPanel>
+                		<WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
+                			<Button Content="Set Bookmark" ToolTip="Set a Bookmark at the current eyeline position (INSERT key)" x:Name="AddBookmarkButton" Focusable="False"
+                				Margin="5" Style="{DynamicResource ToolButtonStyle}" RenderTransformOrigin="2.149,-0.308" 
+                				Command="{Binding SetBookmarkCommand}" />
+                			<ListBox x:Name="BookmarksListbox" ItemsSource="{Binding Bookmarks}" ToolTip="Jump to a bookmark by clicking on it (Number keys 1-9)"  
+                				Height="125.5" Width="144.8" Margin="5" IsTextSearchCaseSensitive="True" 
+                				ItemTemplate="{DynamicResource DataTemplate1}" 
+                				SelectedItem="{Binding SelectedBookmark, Mode=TwoWay}"
+                				Controls:Selected.Command="{Binding BookmarkSelectedCommand}"
+                				Focusable="False" ItemContainerStyle="{DynamicResource ListBoxItemStyle1}" ItemsPanel="{DynamicResource ItemsPanelTemplate1}" 
+                                     
+                                     />
+                		</WrapPanel>
+
+                		<WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
+                			<RichTextBox Background="Transparent" BorderBrush="Transparent" IsReadOnly="True" 
+                				Focusable="False" FontSize="8" Width="150" Height="132.08">
+                				<FlowDocument ColumnWidth="100" IsColumnWidthFlexible="False">
+                					<Paragraph><Run FontWeight="Bold" Text="Keyboard:"/><LineBreak /><Run Text="↑/PGUP = quick scroll up"/><LineBreak /><Run Text="↓/PGDN = quick scroll down"/><LineBreak /><Run Text="TAB = Toggle show/hide tools"/><LineBreak /><Run Text="+ = Speed +"/><LineBreak /><Run Text="- = Speed -"/><LineBreak /><Run Text="Spacebar/F5/ESC = Play/Pause toggle"/><LineBreak /><Run Text=". (Period) = Restart"/><LineBreak /><Run Text="1 thru 9 = Jump to bookmark #"/><LineBreak /><Run Text="INSERT = Set bookmark"/><LineBreak /><Run Text="F1 = Load Random Bible Book"/><LineBreak /></Paragraph>
+                				</FlowDocument>
+                			</RichTextBox>
+                		</WrapPanel>
+                		<WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
+                			<RichTextBox Background="Transparent" BorderBrush="Transparent" IsReadOnly="True" 
+                				Focusable="False" FontSize="8" Width="150">
+                				<FlowDocument ColumnWidth="100" IsColumnWidthFlexible="False">
+
+                					<Paragraph><Run FontWeight="Bold" Text="Media Remote Buttons:"/><LineBreak /><Run Text="↑ = quick scroll up"/><LineBreak /><Run Text="↓ = quick scroll down"/><LineBreak /><Run Text="►► (Fast Forward) = Speed +"/><LineBreak /><Run Text="◄◄ (Rewind) = Speed -"/><LineBreak /><Run Text="|| (Pause) = Play/Pause toggle"/><LineBreak /><Run Text="► (Play) = Play"/><LineBreak /><Run Text="CH+ (Channel Up) = Page up"/><LineBreak /><Run Text="CH- (Channel Down) = Page down"/><LineBreak /><Run Text="|◄ (Prev Track) = Restart"/><LineBreak /></Paragraph>
+                				</FlowDocument>
+                			</RichTextBox>
+                		</WrapPanel>
+
+                	</WrapPanel>
+
+                </ScrollViewer>
+            </Border>
+
+        </Grid>
+     
+
+    </Grid>
+    
+</Window>

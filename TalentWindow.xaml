@@ -1,0 +1,30 @@
+﻿<Window x:Class="ProverbTeleprompter.TalentWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Controls="clr-namespace:ProverbTeleprompter.Controls"
+        x:Name="TheTalentWindow"
+        Title="TalentWindow" 
+         Height="{Controls:SettingBinding TalentWindowHeight}"
+        Width="{Controls:SettingBinding TalentWindowWidth}"
+        Top="{Controls:SettingBinding TalentWindowTop}"
+        Left="{Controls:SettingBinding TalentWindowLeft}"
+         WindowState="{Binding TalentWindowState, Mode=TwoWay}" 
+        xmlns:Prompter="clr-namespace:ProverbTeleprompter" WindowStyle="None" ResizeMode="CanResize">
+    <Grid>
+        <Border  RenderTransformOrigin="0.5,0.5">
+            <Border.Background >
+                <VisualBrush Visual="{Binding Source={x:Static Prompter:MainWindow.PromptView}}">
+
+
+                </VisualBrush>
+            </Border.Background>
+            <Border.RenderTransform>
+                <TransformGroup>
+                    <RotateTransform x:Name="TalentRotate" Angle="0" CenterX="0" CenterY="0"/>
+                    <ScaleTransform x:Name="MainScale" ScaleX="{Binding TalentWindowScaleX}" 
+                                    ScaleY="{Binding TalentWindowScaleY}" CenterX="0" CenterY="0" />
+                </TransformGroup>
+            </Border.RenderTransform>
+        </Border>
+    </Grid>
+</Window>
