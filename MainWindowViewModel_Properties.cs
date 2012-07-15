@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Media;
-using Microsoft.Practices.Composite.Presentation.Commands;
+using Microsoft.Practices.Prism.Commands;
 using ProverbTeleprompter.Helpers;
 using ProverbTeleprompter.HtmlConverter;
+using RichTextBox = System.Windows.Controls.RichTextBox;
+using System.Linq;
 
 namespace ProverbTeleprompter
 {
@@ -58,7 +62,7 @@ namespace ProverbTeleprompter
         private double _talentWindowWidth;
         private string _tempDocumentPath;
         private string _timeRemaining;
-        private string _toggleTalentWindowCaption = "Show on 2nd Monitor";
+        private string _toggleTalentWindowCaption = "Show talent window";
         private double _toolWindowHeight;
         private double _toolWindowLeft;
         private double _toolWindowTop;
@@ -384,9 +388,14 @@ namespace ProverbTeleprompter
 
         public double TalentWindowTop
         {
-            get { return _talentWindowTop; }
+			get { return _talentWindowTop; }
             set
             {
+                var rect = ScreenHelpers.GetEntireDesktopArea();
+                if (value < rect.Top)
+                {
+                    value = rect.Top;
+                }
                 _talentWindowTop = value;
                 Changed(() => TalentWindowTop);
 
@@ -396,9 +405,18 @@ namespace ProverbTeleprompter
 
         public double TalentWindowLeft
         {
-            get { return _talentWindowLeft; }
+			get
+			{
+
+				return _talentWindowLeft;
+			}
             set
             {
+                var rect = ScreenHelpers.GetEntireDesktopArea();
+                if (value < rect.Left)
+                {
+                    value = rect.Left;
+                }
                 _talentWindowLeft = value;
                 Changed(() => TalentWindowLeft);
                 AppConfigHelper.SetUserSetting("TalentWindowLeft", _talentWindowLeft);
@@ -407,9 +425,22 @@ namespace ProverbTeleprompter
 
         public double TalentWindowHeight
         {
-            get { return _talentWindowHeight; }
+			get { return _talentWindowHeight; }
             set
             {
+                
+                //Ensure the height doe not exceed the bottom of the desktop
+                var rect = ScreenHelpers.GetEntireDesktopArea();
+                if ((TalentWindowTop + value) > rect.Bottom)
+                {
+                    value = (rect.Bottom - TalentWindowTop);
+                }
+                if (value < 300)
+                {
+                    value = 300;
+                }
+
+
                 _talentWindowHeight = value;
                 Changed(() => TalentWindowHeight);
 
@@ -419,9 +450,19 @@ namespace ProverbTeleprompter
 
         public double TalentWindowWidth
         {
-            get { return _talentWindowWidth; }
+			get { return _talentWindowWidth; }
             set
             {
+                var rect = ScreenHelpers.GetEntireDesktopArea();
+                if ((TalentWindowLeft + value) > rect.Right)
+                {
+                    value = (rect.Right - TalentWindowLeft);
+                }
+
+                if (value < 400)
+                {
+                    value = 400;
+                }
                 _talentWindowWidth = value;
                 Changed(() => TalentWindowWidth);
                 AppConfigHelper.SetUserSetting("TalentWindowWidth", _talentWindowWidth);
@@ -551,7 +592,7 @@ namespace ProverbTeleprompter
             get { return _talentWindowScaleX; }
             set
             {
-                _talentWindowScaleX = value;
+                _talentWindowScaleX = value ;
                 Changed(() => TalentWindowScaleX);
             }
         }
@@ -559,7 +600,7 @@ namespace ProverbTeleprompter
         [DependsUpon("FlipTalentWindowVert")]
         public double TalentWindowScaleY
         {
-            get { return _talentWindowScaleY; }
+            get { return _talentWindowScaleY ; }
             set
             {
                 _talentWindowScaleY = value;
@@ -691,6 +732,7 @@ namespace ProverbTeleprompter
             {
                 _talentWindowState = value;
                 AppConfigHelper.SetUserSetting("TalentWindowState", TalentWindowState);
+            	_fullScreenTalentWindow = value == WindowState.Maximized;
                 Changed(() => TalentWindowState);
             }
         }
@@ -735,11 +777,81 @@ namespace ProverbTeleprompter
             {
                 _multipleMonitorsAvailable = value;
                 Changed(() => MultipleMonitorsAvailable);
-                (ToggleTalentWindowCommand as DelegateCommand<object>).RaiseCanExecuteChanged();
+				if (_toggleTalentWindowCommand != null)
+					(ToggleTalentWindowCommand as DelegateCommand<object>).RaiseCanExecuteChanged();
+				if (_talentWindowsDisplaySelectedCommand != null)
+					(TalentWindowsDisplaySelectedCommand as DelegateCommand<string>).RaiseCanExecuteChanged();
             }
         }
 
-        public void LoadRandomBibleChapter()
+    	private ObservableCollection<string> _displays;
+    	public ObservableCollection<string> Displays
+    	{
+    		get { return _displays; }
+    		set
+    		{
+    			_displays = value;
+				Changed(() => Displays);
+    		}
+    	}
+
+    	private string _selectedTalentWindowDisplay;
+    	public string SelectedTalentWindowDisplay
+    	{
+    		get { return _selectedTalentWindowDisplay; }
+    		set
+    		{
+				MoveTalentWindowToDisplay(value);
+    			_selectedTalentWindowDisplay = value;
+				Changed(() => SelectedTalentWindowDisplay);
+				AppConfigHelper.SetUserSetting("SelectedTalentWindowDisplay", value);
+    		}
+    	}
+
+    	private bool _fullScreenTalentWindow;
+		[DependsUpon("TalentWindowState")]
+    	public bool FullScreenTalentWindow
+    	{
+    		get { return _fullScreenTalentWindow; }
+    		set
+    		{
+    			_fullScreenTalentWindow = value;
+				Changed(() => FullScreenTalentWindow);
+				TalentWindowState = value ? WindowState.Maximized : WindowState.Normal;
+				AppConfigHelper.SetUserSetting("FullScreenTalentWindow", value);
+    		}
+    	}
+
+    	private void MoveTalentWindowToDisplay(string displayName)
+    	{
+    		bool origFullScreen = false;
+			//If moving to a new display
+			if(SelectedTalentWindowDisplay != displayName && TalentWindowState == WindowState.Maximized)
+			{
+				TalentWindowState = WindowState.Normal;
+				origFullScreen = true;
+			}
+			var talentWindowScreen = Screen.AllScreens.SingleOrDefault(x => x.DeviceName == displayName) ?? Screen.PrimaryScreen;
+    		TalentWindowLeft = talentWindowScreen.WorkingArea.Left;
+			TalentWindowTop = talentWindowScreen.WorkingArea.Top;
+			if (FullScreenTalentWindow || origFullScreen)
+			{
+				TalentWindowState = WindowState.Maximized;
+			} else
+			{
+				TalentWindowState = WindowState.Normal;
+			}
+
+			if(string.IsNullOrWhiteSpace(displayName))
+			{
+				SelectedTalentWindowDisplay = talentWindowScreen.DeviceName;
+			}
+			
+		}
+
+
+
+    	public void LoadRandomBibleChapter()
         {
             string content = BibleHelpers.GetRandomBibleChapterHtml();
             if (!string.IsNullOrWhiteSpace(content))

@@ -32,5 +32,44 @@ namespace ProverbTeleprompter.Helpers
 
             return false;
         }
+
+        public static Rectangle GetEntireDesktopArea()
+        {
+            int left = 999999;
+            int top = 999999;
+            int right = -999999;
+            int bottom = -999999;
+            var rect = new Rectangle();
+
+            if(SystemInformation.MonitorCount <= 0) return rect;
+
+            for (int screenNum = 0; screenNum < SystemInformation.MonitorCount; ++screenNum)
+            {
+                Rectangle workingArea = Screen.AllScreens[screenNum].WorkingArea;
+
+                if (workingArea.Left < left)
+                {
+                    left = workingArea.Left;
+                }
+                if (workingArea.Top < top)
+                {
+                    top = workingArea.Top;
+                }
+                if (workingArea.Right > right)
+                {
+                    right = workingArea.Right;
+                }
+                if(workingArea.Bottom > bottom)
+                {
+                    bottom = workingArea.Bottom;
+                }
+
+            }
+
+            rect.Location = new System.Drawing.Point(left,top);
+            rect.Width = (right - left);
+            rect.Height = bottom - top;
+            return rect;
+        }
     }
 }
