@@ -1110,14 +1110,8 @@ SystemEvents_DisplaySettingsChanged
         private void ToggleTalentWindow()
         {
 			MoveTalentWindowToDisplay(SelectedTalentWindowDisplay);
-            if (SystemInformation.MonitorCount <= 1)
-            {
-                MessageBox.Show(
-                    "A second monitor was not detected.  If a second monitor is connected, try restarting the application",
-                    "Second Monitor Not Detected", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-            else if (_talentWindow == null &&
-                     SystemInformation.MonitorCount > 1)
+
+            if (_talentWindow == null )
             {
 				
                 ShowTalentWindow();
@@ -1182,7 +1176,7 @@ SystemEvents_DisplaySettingsChanged
             {
                 _talentWindow.Close();
             }
-            ToggleTalentWindowCaption = "Show on talent window";
+            ToggleTalentWindowCaption = "Show talent window";
 
         }
 

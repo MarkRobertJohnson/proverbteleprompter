@@ -6,9 +6,9 @@
         xmlns:Converters="clr-namespace:ProverbTeleprompter.Converters" mc:Ignorable="d"
         AllowsTransparency="False"
 		Background="Black"
-            WindowStyle="ToolWindow"  WindowStartupLocation="Manual"
+             WindowStartupLocation="Manual"
         x:Name="TheToolWindow"
-        Title="Proverb TelePrompter" d:DesignHeight="263" d:DesignWidth="1331" SizeToContent="WidthAndHeight"  ShowInTaskbar="True">
+        Title="Proverb TelePrompter" d:DesignHeight="263" d:DesignWidth="1331" SizeToContent="WidthAndHeight"  ShowInTaskbar="True" Icon="ProverbTeleprompterLogo.ico">
     <Window.Resources>
 
         <ResourceDictionary>
@@ -22,31 +22,29 @@
             <RowDefinition />
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Grid x:Name="ToolsGrid" MinHeight="250" VerticalAlignment="Bottom"
-              Background="Transparent" Margin="0,0,0,-29" Grid.RowSpan="2">
+        <Grid x:Name="ToolsGrid" VerticalAlignment="Stretch"
+              Background="Transparent" Margin="0,0,0,0" Grid.RowSpan="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="30*" />
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0" Width="400">
+            <Grid Grid.Row="0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
-                    <ColumnDefinition Width="Auto" />
+    
                 </Grid.ColumnDefinitions>
 
              
                 <Label  Content="Proverb Teleprompter"  FontSize="21.333" Foreground="White" 
-				FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Bottom" >
+				FontWeight="Bold" VerticalAlignment="Bottom" HorizontalAlignment="Center" >
                     <Label.Effect>
                         <DropShadowEffect Color="Gray" BlurRadius="2" ShadowDepth="2"/>
                     </Label.Effect>
                 </Label>
             </Grid>
 
-            <Border Grid.Row="2" x:Name="ToolBorder" Background="Black" >
+            <Border Grid.Row="1" x:Name="ToolBorder" Background="Black" >
                 <ScrollViewer  Margin="10,5" MinHeight="170" Focusable="False" VerticalScrollBarVisibility="Auto">
                     <WrapPanel x:Name="ToolsPanel" Orientation="Horizontal" UseLayoutRounding="False"  
                 		ScrollViewer.CanContentScroll="True">
