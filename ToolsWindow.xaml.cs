@@ -33,7 +33,7 @@ namespace ProverbTeleprompter
 
         void _timer_Tick(object sender, EventArgs e)
         {
-            Debug.WriteLine("Focued: {0}", FocusManager.GetFocusedElement(this));
+        //    Debug.WriteLine("Focued: {0}", FocusManager.GetFocusedElement(this));
         }
 
         private void SpeedTextBox_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

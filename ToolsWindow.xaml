@@ -16,7 +16,7 @@
 
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Resources/Resources.xaml"/>
+                <ResourceDictionary Source="/Resources/Resources.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
@@ -143,26 +143,32 @@
 
                 		</WrapPanel>
                 		<WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
-                			<WrapPanel/>
-                			<Button Content="{Binding ToggleTalentWindowCaption, FallbackValue=Show Talent Window}" ToolTip="Display a second window for external monitors" 
+                			<Button Content="{Binding ToggleTalentWindowCaption, FallbackValue=Show Talent Window}"
+									ToolTip="Display a second window for external monitors" 
                 				x:Name="ToggleTalentWindowButton" Focusable="False"
-                				Margin="5" 
+                				Margin="5,5,5,2" 
                 				Command="{Binding ToggleTalentWindowCommand}"
                 				Style="{DynamicResource ToolButtonStyle}" />
+							<TextBlock Text="Monitor for Talent Window:" Margin="5,0" />
+							<ComboBox Margin="5,0" Focusable="False" ItemsSource="{Binding Displays}" 
+									  IsEnabled="{Binding MultipleMonitorsAvailable}"
+									  SelectedItem="{Binding SelectedTalentWindowDisplay}"
+									  Controls:Selected.Command="{Binding TalentWindowsDisplaySelectedCommand}"/>
+							<CheckBox Content="Full screen talent Window" IsChecked="{Binding FullScreenTalentWindow}"
+                				Height="16" x:Name="FullScreen" Focusable="False" Margin="5,0" />
                 			<CheckBox Content="Flip Talent Window Vertically" IsChecked="{Binding FlipTalentWindowVert}"
-                				Height="16" x:Name="FlipTalentWindowVertCheckBox" Focusable="False" Margin="5,2" />
+                				Height="16" x:Name="FlipTalentWindowVertCheckBox" Focusable="False" Margin="5,0" />
                 			<CheckBox Content="Flip Talent Window Horizontally" IsChecked="{Binding FlipTalentWindowHoriz}"
-                				Height="16" x:Name="FlipTalentWindowHorizCheckBox" Focusable="False" Margin="5,2" />
+                				Height="16" x:Name="FlipTalentWindowHorizCheckBox" Focusable="False" Margin="5,0" BorderThickness="1,0" />
                 			<CheckBox Content="Flip Main Window Vertically" Height="16" IsChecked="{Binding FlipMainWindowVert}"
-                				x:Name="FlipMainWindowVertCheckBox" Focusable="False" Margin="5,2" />
+                				x:Name="FlipMainWindowVertCheckBox" Focusable="False" Margin="5,0" />
                 			<CheckBox Content="Flip Main Window Horizontally" Height="16" IsChecked="{Binding FlipMainWindowHoriz}"
-                				x:Name="FlipMainWindowHorizCheckBox" Focusable="False" Margin="5,2" />
-                			<CheckBox Content="Receive Keystrokes even if App loses focus (Note: hotkeys typed in other apps will affect the prompter)" Height="43.62" 
+                				x:Name="FlipMainWindowHorizCheckBox" Focusable="False" Margin="5,0" />
+                			<CheckBox Content="Receive Global Keystrokes " 
                 				x:Name="checkBox1" IsChecked="{Binding ReceiveGlobalKeystrokes}" 
                 				Width="180.8"
-                				ContentTemplate="{DynamicResource WrappingTextStyle}" ToolTip="The Prompter App will get keystrokes regardless of whether or not it has focus" Margin="5,8,0,0" HorizontalAlignment="Left" FontWeight="Bold" FontSize="9.333" />
-
-
+                				ContentTemplate="{DynamicResource WrappingTextStyle}" ToolTip="The Prompter App will get keystrokes regardless of whether or not it has focus"
+								 Margin="5,0,0,-1" HorizontalAlignment="Left" FontWeight="Bold" FontSize="12" Focusable="False" />
                 		</WrapPanel>
                 		<WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
                 			<Label Content="Percent Complete" HorizontalAlignment="Center" FontSize="16" FontWeight="Bold" />

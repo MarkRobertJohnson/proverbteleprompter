@@ -37,6 +37,8 @@ namespace ProverbTeleprompter.Helpers
         }
 
 
+
+
         #endregion
     }
 }
