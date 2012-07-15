@@ -41,6 +41,7 @@ namespace ProverbTeleprompter.Helpers
         const int DBT_DEVTYP_VOLUME = 0x00000002;  // logical volume   
 
         public const int WM_DEVICECHANGE = 0x219;
+    	public const int WM_DISPLAYCHANGE = 0x7E;
 
 
 

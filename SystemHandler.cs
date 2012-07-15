@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -34,62 +35,7 @@ namespace ProverbTeleprompter
         } 
         public static IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
-            int devType;
-            switch(msg)
-            {
-                    
-                    
-                case Win32.WM_DEVICECHANGE:                        
-                switch(wParam.ToInt32())
-                {
-                    case Win32.DBT_DEVICEARRIVAL:
-                    {
-                        devType = Marshal.ReadInt32(lParam,4);
-                        if (devType == Win32.DBT_DEVTYP_DEVICEINTERFACE)
-                        {
-                            Win32.DEV_BROADCAST_DEVICEINTERFACE vol;
-                            vol = (Win32.DEV_BROADCAST_DEVICEINTERFACE)
-                                Marshal.PtrToStructure(lParam, typeof(Win32.DEV_BROADCAST_DEVICEINTERFACE));
-                            //MessageBox.Show(Win32.GetDeviceName(vol));
-                            
-                            if(DisplayAttached != null)
-                            {
-                                DisplayAttached.Invoke(null, new DisplayChangedEventArgs
-                                {
-                                    FriendlyName = Win32.GetDeviceName(vol),
-                                    RawDisplayInfo = vol,
-                                    DisplayDetails = GetMonitorInformation(vol.dbcc_name)
-                                });
-                            }
-
-                        }
-                    }                                         
-                    break;                                
-                    case Win32.DBT_DEVICEREMOVECOMPLETE:                                        
-                        devType = Marshal.ReadInt32(lParam,4);
-                        if (devType == Win32.DBT_DEVTYP_DEVICEINTERFACE)
-                        {
-                            Win32.DEV_BROADCAST_DEVICEINTERFACE vol;
-                            vol = (Win32.DEV_BROADCAST_DEVICEINTERFACE)
-                                Marshal.PtrToStructure(lParam, typeof(Win32.DEV_BROADCAST_DEVICEINTERFACE));
-                           // MessageBox.Show(Win32.GetDeviceName(vol));   
-
-                            if (DisplayRemoved != null)
-                            {
-                                DisplayRemoved.Invoke(null, new DisplayChangedEventArgs
-                                {
-                                    FriendlyName = Win32.GetDeviceName(vol),
-                                    RawDisplayInfo = vol,
-                                    DisplayDetails = GetMonitorInformation(vol.dbcc_name)
-                                });
-                            }
-                        }
-                        break;
-                }             
-                break;
-            }
-
-            if (msg == WM_APPCOMMAND)
+	       if (msg == WM_APPCOMMAND)
             {
                 var command = Tools.API.Messages.lParam.Macros.GET_APPCOMMAND_LPARAM(lParam.ToInt32());
 

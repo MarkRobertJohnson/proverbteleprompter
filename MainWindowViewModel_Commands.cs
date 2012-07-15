@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Microsoft.Practices.Composite.Presentation.Commands;
+using Microsoft.Practices.Prism.Commands;
 using ProverbTeleprompter.Helpers;
 
 namespace ProverbTeleprompter
@@ -212,7 +212,26 @@ namespace ProverbTeleprompter
             }
         }
 
-        private void bookmarkTextBox_PreviewKeyUp(object sender, KeyEventArgs e)
+    	private ICommand _talentWindowsDisplaySelectedCommand;
+
+    	public ICommand TalentWindowsDisplaySelectedCommand
+    	{
+			get
+			{
+				if (_talentWindowsDisplaySelectedCommand != null) return _talentWindowsDisplaySelectedCommand;
+				
+				_talentWindowsDisplaySelectedCommand = new DelegateCommand<string>(x =>
+				{
+
+
+				}, y => MultipleMonitorsAvailable);
+
+				return _talentWindowsDisplaySelectedCommand;
+			}
+
+    	}
+
+    	private void bookmarkTextBox_PreviewKeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
