@@ -13,7 +13,7 @@
         Left="{Controls:SettingBinding MainWindowLeft}"
         WindowStyle="None" 
         WindowState="{Binding MainWindowState, Mode=TwoWay}" Foreground="Black" ResizeMode="CanResize"
-        d:DesignHeight="900" d:DesignWidth="900"
+        d:DesignHeight="900" d:DesignWidth="900" Icon="ProverbTeleprompterLogo.ico"
 		
         >
     <Window.Resources>

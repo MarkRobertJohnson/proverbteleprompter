@@ -9,7 +9,7 @@
         Top="{Binding TalentWindowTop, Mode=TwoWay}"
         Left="{Binding TalentWindowLeft, Mode=TwoWay}"
          WindowState="{Binding TalentWindowState, Mode=TwoWay}" 
-        xmlns:Prompter="clr-namespace:ProverbTeleprompter" WindowStyle="None" ResizeMode="CanResize"
+        xmlns:Prompter="clr-namespace:ProverbTeleprompter" WindowStyle="None" ResizeMode="CanResize" Icon="ProverbTeleprompterLogo.ico"
 		>
     <Grid>
 		

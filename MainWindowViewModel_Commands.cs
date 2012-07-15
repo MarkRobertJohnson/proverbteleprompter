@@ -51,7 +51,7 @@ namespace ProverbTeleprompter
                 
                 return _toggleTalentWindowCommand ??
                        (_toggleTalentWindowCommand = new DelegateCommand<object>(
-                                                         x => ToggleTalentWindow(), x=> MultipleMonitorsAvailable));
+                                                         x => ToggleTalentWindow()));
             }
         }
 
