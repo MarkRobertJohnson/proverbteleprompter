@@ -1,12 +1,19 @@
 ﻿
 using System;
+using System.Diagnostics;
 using System.Management;
 using System.Windows;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Threading;
+using Microsoft.Win32;
 using ProverbTeleprompter.Helpers;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+using MouseEventArgs = System.Windows.Input.MouseEventArgs;
+using MouseEventHandler = System.Windows.Input.MouseEventHandler;
 
 namespace ProverbTeleprompter
 {
@@ -22,7 +29,8 @@ namespace ProverbTeleprompter
 
         public static FrameworkElement PromptView { get; set; }
 
-        public MainWindowViewModel MainWindowViewModel { get; set; }
+
+    	public MainWindowViewModel MainWindowViewModel { get; set; }
 
         public MainWindow()
         {
@@ -44,7 +52,6 @@ namespace ProverbTeleprompter
             LocationChanged += MainWindow_LocationChanged;
             SizeChanged += MainWindow_SizeChanged;
             Loaded += MainWindow_Loaded;
-            MouseMove += new MouseEventHandler(MainWindow_MouseMove);
 
             MouseDoubleClick += new MouseButtonEventHandler(MainWindow_MouseDoubleClick);
             
@@ -53,14 +60,11 @@ namespace ProverbTeleprompter
 
             Closing += MainWindow_Closing;
 
-            PromptView = MainTextGrid;
+            PromptView = LayoutRoot;
+
 
         }
 
-        void MainWindow_MouseMove(object sender, MouseEventArgs e)
-        {
-
-        }
 
         void MainTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
@@ -132,6 +136,8 @@ namespace ProverbTeleprompter
             {
                 e.Cancel = true;
             }
+
+			
             
         }
 
@@ -142,18 +148,14 @@ namespace ProverbTeleprompter
 
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            
+         
             //Setup event handler for remote control buttons (multi media buttons)
-            HwndSource source = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
-            SystemHandler.RegisterHidNotification(source.Handle);
-            source.AddHook(new HwndSourceHook(SystemHandler.WndProc));
-
+			HwndSource source = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
+			SystemHandler.RegisterHidNotification(source.Handle);
+			source.AddHook(new HwndSourceHook(SystemHandler.WndProc));
 
             MainWindowViewModel.ToggleToolsWindow();
             MainWindowViewModel.InitializeConfig();
-
-
-
         }
 
 

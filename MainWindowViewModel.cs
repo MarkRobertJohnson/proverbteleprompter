@@ -54,72 +54,95 @@ namespace ProverbTeleprompter
 
         public MainWindowViewModel(RichTextBox mainTextBox)
         {
-            _scrollTimer = new DispatcherTimer {Interval = new TimeSpan(0, 0, 0, 0, 15), IsEnabled = true};
+            _scrollTimer = new DispatcherTimer (DispatcherPriority.Render) {Interval = new TimeSpan(0, 0, 0, 0, 15), IsEnabled = true};
             _scrollTimer.Tick += _scrollTimer_Tick;
             _scrollTimer.Start();
 
             MainTextBox = mainTextBox;
             MultipleMonitorsAvailable = SystemInformation.MonitorCount > 1;
             SystemHandler.RemoteButtonPressed += RemoteButtonPressed;
-            SystemHandler.DisplayAttached += new EventHandler<DisplayChangedEventArgs>(SystemHandler_DisplayAttached);
-            SystemHandler.DisplayRemoved += new EventHandler<DisplayChangedEventArgs>(SystemHandler_DisplayRemoved);
+
+
+			SystemEvents.DisplaySettingsChanged += SystemEvents_DisplaySettingsChanged;
 
             SystemEvents.DisplaySettingsChanged += new EventHandler(SystemEvents_DisplaySettingsChanged);
 
             KeyboardHookHelpers.CreateHook();
-            KeyboardHookHelpers.KeyDown += new EventHandler<System.Windows.Forms.KeyEventArgs>(KeyboardHookHelpers_KeyDown);
-            KeyboardHookHelpers.KeyPress += new EventHandler<KeyPressEventArgs>(KeyboardHookHelpers_KeyPress);
-            KeyboardHookHelpers.KeyUp += new EventHandler<System.Windows.Forms.KeyEventArgs>(KeyboardHookHelpers_KeyUp);
+            KeyboardHookHelpers.KeyDown += KeyboardHookHelpers_KeyDown;
+            KeyboardHookHelpers.KeyPress += KeyboardHookHelpers_KeyPress;
+            KeyboardHookHelpers.KeyUp += KeyboardHookHelpers_KeyUp;
+
+        	Displays = new ObservableCollection<string>(Screen.AllScreens.Select(x => x.DeviceName));
         }
 
-        void SystemEvents_DisplaySettingsChanged(object sender, EventArgs e)
-        {
-            var a = Screen.AllScreens.Length;
-            if(Screen.AllScreens.Length <= 1)
-            {
-                MultipleMonitorsAvailable = false;
-                HideTalentWindow();
-            }
-            else
-            {
-                MultipleMonitorsAvailable = true;
-                ShowTalentWindow();
-            }
-        }
 
-        void SystemHandler_DisplayRemoved(object sender, DisplayChangedEventArgs e)
-        {
+		void SystemEvents_DisplaySettingsChanged(object sender, EventArgs e)
+		{
+			Debug.WriteLine(@"
+#############################################
+
+SystemEvents_DisplaySettingsChanged
+
+#############################################
+");
+			ShowDisplayDiagnostics();
+
+			SetScreenState();
 
 
-            var details = DisplayDetails.GetMonitorDetails();
-            if (details.Where(x => x.Availability == DisplayAvailability.Available).Count() > 1)
-            {
-                MultipleMonitorsAvailable = true;
-            }
-            else
-            {
-                MultipleMonitorsAvailable = false;
-                HideTalentWindow();
-            }
-        }
+		}
 
-        void SystemHandler_DisplayAttached(object sender, DisplayChangedEventArgs e)
-        {
-            var details = DisplayDetails.GetMonitorDetails();
-            if (details.Where(x => x.Availability == DisplayAvailability.Available).Count() > 1)
-            {
-                MultipleMonitorsAvailable = true;
-                if (Settings.Default.TalentWindowVisible)
-                {
-                    ShowTalentWindow();
-                }
-                
-            }
-            else
-            {
-                MultipleMonitorsAvailable = false;
-            }
-        }
+		private void SetScreenState()
+		{
+			Displays = new ObservableCollection<string>(Screen.AllScreens.Select(x => x.DeviceName));
+			MultipleMonitorsAvailable = Screen.AllScreens.Count() > 1;
+
+			if (!MultipleMonitorsAvailable && Displays.Count == 1)
+			{
+				SelectedTalentWindowDisplay = Displays[0];
+			}
+
+			if (Displays.Count > 1)
+			{
+				SelectedTalentWindowDisplay = Displays[1];
+			}
+
+			MoveTalentWindowToDisplay(SelectedTalentWindowDisplay);
+		}
+
+		private void ShowDisplayDiagnostics()
+		{
+			var details = DisplayDetails.GetMonitorDetails();
+			#region Diagnostics
+			Debug.WriteLine("****************** GetWorkingArea: {0}", Screen.GetWorkingArea(new System.Drawing.Point(0, 0)));
+			Debug.WriteLine("****************** GetBounds: {0}", Screen.GetBounds(new System.Drawing.Point(0, 0)));
+			Debug.WriteLine("****************** Primary Screen: {0}", Screen.PrimaryScreen.DeviceName, 0);
+			Debug.WriteLine("****************** EntireDesktop Res: {0}", ScreenHelpers.GetEntireDesktopArea(), 0);
+			foreach (var displayDetails in details)
+			{
+				Debug.WriteLine("DETAILS:");
+				Debug.WriteLine("\t\tAvailability: {0}", displayDetails.Availability);
+				Debug.WriteLine("\t\tModel: {0}", displayDetails.Model, 0);
+				Debug.WriteLine("\t\tMonitorID: {0}", displayDetails.MonitorID, 0);
+				Debug.WriteLine("\t\tPixelHeight: {0}", displayDetails.PixelHeight, 0);
+				Debug.WriteLine("\t\tPixelWidth: {0}", displayDetails.PixelWidth);
+				Debug.WriteLine("\t\tPnPID: {0}", displayDetails.PnPID, 0);
+				Debug.WriteLine("\t\tSerialNumber: {0}", displayDetails.SerialNumber, 0);
+			}
+			Debug.WriteLine("********* SCREENS *********");
+			var screens = Screen.AllScreens;
+			foreach (var screen in screens)
+			{
+				Debug.WriteLine("SCREEN:");
+				Debug.WriteLine("\t\tBitsPerPixel: {0}", screen.BitsPerPixel, 0);
+				Debug.WriteLine("\t\tBounds: {0}", screen.Bounds, 0);
+				Debug.WriteLine("\t\tDeviceName: {0}", screen.DeviceName, 0);
+				Debug.WriteLine("\t\tPrimary: {0}", screen.Primary, 0);
+				Debug.WriteLine("\t\tWorkingArea: {0}", screen.WorkingArea, 0);
+
+			}
+			#endregion
+		}
 
 
         void KeyboardHookHelpers_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
@@ -152,7 +175,7 @@ namespace ProverbTeleprompter
         public void Dispose()
         {
             KillWordPadProcess();
-
+			SystemEvents.DisplaySettingsChanged -= SystemEvents_DisplaySettingsChanged;
             if (_talentWindow != null)
             {
                 _talentWindow.Close();
@@ -256,6 +279,14 @@ namespace ProverbTeleprompter
 
             TalentWindowHeight = Settings.Default.TalentWindowHeight;
 
+
+			FullScreenTalentWindow = Settings.Default.TalentWindowState != WindowState.Normal;
+
+			SelectedTalentWindowDisplay = Settings.Default.SelectedTalentWindowDisplay;
+
+			TalentWindowState = Settings.Default.TalentWindowState;
+
+			EyelinePosition = Settings.Default.EyeLinePosition;
             if (Settings.Default.TalentWindowVisible)
             {
                 ToggleTalentWindow();
@@ -263,11 +294,10 @@ namespace ProverbTeleprompter
 
             MainWindowState = Settings.Default.MainWindowState;
 
-            TalentWindowState = Settings.Default.TalentWindowState;
 
-            EyelinePosition = Settings.Default.EyeLinePosition;
 
             ReceiveGlobalKeystrokes = Settings.Default.ReceiveGlobalKeystrokes;
+
         }
 
         public void SetDocumentConfig()
@@ -744,7 +774,9 @@ namespace ProverbTeleprompter
             {
                 _toolsWindow = new ToolsWindow();
                 _toolsWindow.DataContext = this;
+	
                 _toolsWindow.Owner = Application.Current.MainWindow;
+            	_toolsWindow.Topmost = true;
                 // _toolsWindow.ShowActivated = false;
                 _toolsWindow.PreviewKeyDown += KeyDown;
                 _toolsWindow.PreviewKeyUp += KeyUp;
@@ -1077,6 +1109,7 @@ namespace ProverbTeleprompter
 
         private void ToggleTalentWindow()
         {
+			MoveTalentWindowToDisplay(SelectedTalentWindowDisplay);
             if (SystemInformation.MonitorCount <= 1)
             {
                 MessageBox.Show(
@@ -1086,6 +1119,7 @@ namespace ProverbTeleprompter
             else if (_talentWindow == null &&
                      SystemInformation.MonitorCount > 1)
             {
+				
                 ShowTalentWindow();
                 AppConfigHelper.SetUserSetting("TalentWindowVisible", true);
 
@@ -1097,13 +1131,15 @@ namespace ProverbTeleprompter
 
                 AppConfigHelper.SetUserSetting("TalentWindowVisible", false);
             }
+        	
         }
 
         protected void ShowTalentWindow()
         {
             if(_talentWindow == null)
             {
-                _talentWindow = new TalentWindow { Owner = Application.Current.MainWindow };
+                _talentWindow = new TalentWindow { Owner = Application.Current.MainWindow, Topmost = false};
+            	
                 _talentWindow.Closed += _talentWindow_Closed;
                 _talentWindow.PreviewKeyDown += KeyDown;
                 _talentWindow.PreviewKeyUp += KeyUp;
@@ -1115,7 +1151,7 @@ namespace ProverbTeleprompter
 
             _talentWindow.Show();
 
-            ToggleTalentWindowCaption = "Hide on 2nd Monitor";
+            ToggleTalentWindowCaption = "Hide talent window";
             
         }
 
@@ -1127,10 +1163,11 @@ namespace ProverbTeleprompter
                 return;
             }
 
+			MoveTalentWindowToDisplay(SelectedTalentWindowDisplay);
             Rectangle workingArea = Screen.AllScreens[1].WorkingArea;
 
-            _talentWindow.Left = PixelConverter.ToUnits(workingArea.Left);
-            _talentWindow.Top = PixelConverter.ToUnits(workingArea.Top);
+           // _talentWindow.Left = PixelConverter.ToUnits(workingArea.Left);
+           // _talentWindow.Top = PixelConverter.ToUnits(workingArea.Top);
         }
 
         private void _talentWindow_Closed(object sender, EventArgs e)
@@ -1145,7 +1182,7 @@ namespace ProverbTeleprompter
             {
                 _talentWindow.Close();
             }
-            ToggleTalentWindowCaption = "Show on 2nd monitor";
+            ToggleTalentWindowCaption = "Show on talent window";
 
         }
 

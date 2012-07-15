@@ -4,27 +4,40 @@
         xmlns:Controls="clr-namespace:ProverbTeleprompter.Controls"
         x:Name="TheTalentWindow"
         Title="TalentWindow" 
-         Height="{Controls:SettingBinding TalentWindowHeight}"
-        Width="{Controls:SettingBinding TalentWindowWidth}"
-        Top="{Controls:SettingBinding TalentWindowTop}"
-        Left="{Controls:SettingBinding TalentWindowLeft}"
+         Height="{Binding TalentWindowHeight, Mode=TwoWay}"
+        Width="{Binding TalentWindowWidth, Mode=TwoWay}"
+        Top="{Binding TalentWindowTop, Mode=TwoWay}"
+        Left="{Binding TalentWindowLeft, Mode=TwoWay}"
          WindowState="{Binding TalentWindowState, Mode=TwoWay}" 
-        xmlns:Prompter="clr-namespace:ProverbTeleprompter" WindowStyle="None" ResizeMode="CanResize">
+        xmlns:Prompter="clr-namespace:ProverbTeleprompter" WindowStyle="None" ResizeMode="CanResize"
+		>
     <Grid>
-        <Border  RenderTransformOrigin="0.5,0.5">
-            <Border.Background >
-                <VisualBrush Visual="{Binding Source={x:Static Prompter:MainWindow.PromptView}}">
+		
+		<!--<Viewbox IsHitTestVisible="False" RenderOptions.BitmapScalingMode="LowQuality" RenderSize="1,1" 
+				 TextOptions.TextRenderingMode="Aliased" TextOptions.TextFormattingMode="Display">-->
+			
+			<Border  RenderTransformOrigin="0.5,0.5" >
+				<Border.Background >
+					<VisualBrush Visual="{Binding Source={x:Static Prompter:MainWindow.PromptView}}" >
+						<VisualBrush.Transform>
+							<ScaleTransform ScaleX="1" ScaleY="1" />
 
+						</VisualBrush.Transform>
+					</VisualBrush>
+				</Border.Background>
 
-                </VisualBrush>
-            </Border.Background>
-            <Border.RenderTransform>
-                <TransformGroup>
-                    <RotateTransform x:Name="TalentRotate" Angle="0" CenterX="0" CenterY="0"/>
-                    <ScaleTransform x:Name="MainScale" ScaleX="{Binding TalentWindowScaleX}" 
+				<Border.RenderTransform>
+					<TransformGroup>
+						<RotateTransform x:Name="TalentRotate" Angle="0" CenterX="0" CenterY="0"/>
+						<ScaleTransform x:Name="MainScale" ScaleX="{Binding TalentWindowScaleX}" 
                                     ScaleY="{Binding TalentWindowScaleY}" CenterX="0" CenterY="0" />
-                </TransformGroup>
-            </Border.RenderTransform>
-        </Border>
+					</TransformGroup>
+				</Border.RenderTransform>
+				
+
+			</Border>
+			
+		<!--</Viewbox>-->
+
     </Grid>
 </Window>

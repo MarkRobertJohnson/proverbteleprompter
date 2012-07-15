@@ -14,6 +14,7 @@
         WindowStyle="None" 
         WindowState="{Binding MainWindowState, Mode=TwoWay}" Foreground="Black" ResizeMode="CanResize"
         d:DesignHeight="900" d:DesignWidth="900"
+		
         >
     <Window.Resources>
 
