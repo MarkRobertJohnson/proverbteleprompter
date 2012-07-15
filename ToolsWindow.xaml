@@ -4,14 +4,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:Controls="clr-namespace:ProverbTeleprompter.Controls" 
         xmlns:Converters="clr-namespace:ProverbTeleprompter.Converters" mc:Ignorable="d"
-        AllowsTransparency="True"
-               Height="{Binding Path=DataContext.ToolWindowHeight,ElementName=TheToolWindow,Mode=OneWay}" 
-        Width="{Binding Path=DataContext.ToolWindowWidth,ElementName=TheToolWindow,Mode=OneWay}"
-        Top="{Binding Path=DataContext.ToolWindowTop,ElementName=TheToolWindow,Mode=OneWay}" 
-        Left="{Binding Path=DataContext.ToolWindowLeft,ElementName=TheToolWindow,Mode=OneWay}"
-            WindowStyle="None" WindowState="Maximized" WindowStartupLocation="Manual"
+        AllowsTransparency="False"
+		Background="Black"
+            WindowStyle="ToolWindow"  WindowStartupLocation="Manual"
         x:Name="TheToolWindow"
-        Title="ToolsWindow" d:DesignHeight="263" d:DesignWidth="1331" SizeToContent="Manual"  Background="Transparent" ShowInTaskbar="False">
+        Title="Proverb TelePrompter" d:DesignHeight="263" d:DesignWidth="1331" SizeToContent="WidthAndHeight"  ShowInTaskbar="True">
     <Window.Resources>
 
         <ResourceDictionary>
@@ -25,7 +22,7 @@
             <RowDefinition />
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Grid x:Name="ToolsGrid" Height="250" VerticalAlignment="Bottom" Style="{StaticResource ResourceKey=FlyInOutGrid}" 
+        <Grid x:Name="ToolsGrid" MinHeight="250" VerticalAlignment="Bottom"
               Background="Transparent" Margin="0,0,0,-29" Grid.RowSpan="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -40,35 +37,17 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <Polygon  HorizontalAlignment="Center" 
-                     VerticalAlignment="Bottom" Stretch="Fill" Height="35" Fill="#5035BC2E" Margin="1,0,1,0">
-                    <Polygon.Points>
-                        <PointCollection>
-                            <Point X="0" Y="1" />
-                            <Point X="0.1" Y="0" />
-                            <Point X="0.9" Y="0" />
-                            <Point X="1" Y="1" />
-                            <Point X="0" Y="1" />
-                        </PointCollection>
-
-                    </Polygon.Points>
-                </Polygon>
-				<ToggleButton Content="ToggleButton" HorizontalAlignment="Left" Height="22.777" 
-				Style="{DynamicResource PushPinToggleStyle}" VerticalAlignment="Top" Width="25.728" 
-				IsChecked="{Binding ToolsVisible}" Margin="36.8,8.223,0,0" ToolTip="Hide this tool window (TAB key to show)" Background="#BFFFFFFF"/>
-
-                <Label  Content="Proverb Teleprompter"  FontSize="21.333" 
+             
+                <Label  Content="Proverb Teleprompter"  FontSize="21.333" Foreground="White" 
 				FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Bottom" >
                     <Label.Effect>
-                        <DropShadowEffect Color="White" BlurRadius="2" ShadowDepth="2"/>
+                        <DropShadowEffect Color="Gray" BlurRadius="2" ShadowDepth="2"/>
                     </Label.Effect>
                 </Label>
-
-                <Button Focusable="False" Content="X" Width="20" Height="20" Margin="340,13,40,6" Background="#58FF0000" FontWeight="Bold" Command="{Binding CloseApplicationCommand}" Style="{DynamicResource CloseButtonStyle}" Foreground="#B1FEFEFE" ToolTip="Close Proverb Teleprompter (ALT-F4)" />
             </Grid>
 
-            <Border Grid.Row="2" x:Name="ToolBorder" Background="#D9FFFFFF" >
-                <ScrollViewer  Margin="10,5" Height="170" Focusable="False" VerticalScrollBarVisibility="Auto">
+            <Border Grid.Row="2" x:Name="ToolBorder" Background="Black" >
+                <ScrollViewer  Margin="10,5" MinHeight="170" Focusable="False" VerticalScrollBarVisibility="Auto">
                     <WrapPanel x:Name="ToolsPanel" Orientation="Horizontal" UseLayoutRounding="False"  
                 		ScrollViewer.CanContentScroll="True">
                 		<WrapPanel  Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">

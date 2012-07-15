@@ -797,7 +797,7 @@ SystemEvents_DisplaySettingsChanged
 
         private void _toolsWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            _toolsWindow.WindowState = WindowState.Maximized;
+           // _toolsWindow.WindowState = WindowState.Maximized;
         }
 
 
