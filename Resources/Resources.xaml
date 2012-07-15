@@ -11,7 +11,7 @@
 
 	<Style x:Key="ToolSection" TargetType="{x:Type WrapPanel}">
 		<Setter Property="Margin" Value="2" />
-		<Setter Property="Background" Value="#5035BC2E" />
+		<Setter Property="Background" Value="#FF75B671" />
 		<Setter Property="VerticalAlignment" Value="Stretch" />
 
 	</Style>

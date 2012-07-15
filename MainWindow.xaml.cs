@@ -62,7 +62,7 @@ namespace ProverbTeleprompter
 
             PromptView = LayoutRoot;
 
-
+        	
         }
 
 
@@ -97,17 +97,17 @@ namespace ProverbTeleprompter
 
         void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            SetToolSizeAndPos();
+		//SetToolSizeAndPos();
         }
 
         void MainWindow_LocationChanged(object sender, EventArgs e)
         {
-            SetToolSizeAndPos();
+       //     SetToolSizeAndPos();
         }
 
         private void SetToolSizeAndPos()
         {
-            MainWindowViewModel.ToolWindowHeight = 250;
+            MainWindowViewModel.ToolWindowHeight = 280;
             MainWindowViewModel.ToolWindowLeft =  Left;
             MainWindowViewModel.ToolWindowWidth = ActualWidth;
             MainWindowViewModel.ToolWindowTop = Top + ActualHeight - MainWindowViewModel.ToolWindowHeight;
