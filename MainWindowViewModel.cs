@@ -797,7 +797,9 @@ SystemEvents_DisplaySettingsChanged
 
         private void _toolsWindow_Loaded(object sender, RoutedEventArgs e)
         {
-           // _toolsWindow.WindowState = WindowState.Maximized;
+        	var area = Screen.PrimaryScreen.WorkingArea;
+        	_toolsWindow.Top = area.Height - _toolsWindow.Height;
+        	_toolsWindow.Left = area.Width/2 - _toolsWindow.Width/2;
         }
 
 
