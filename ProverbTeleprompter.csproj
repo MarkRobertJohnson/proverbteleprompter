@@ -25,20 +25,20 @@
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
-    <UpdateMode>Background</UpdateMode>
+    <UpdateMode>Foreground</UpdateMode>
     <UpdateInterval>7</UpdateInterval>
     <UpdateIntervalUnits>Days</UpdateIntervalUnits>
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <InstallUrl>http://proverbteleprompter.codeplex.com/releases/clickonce/</InstallUrl>
+    <InstallUrl>https://proverbteleprompter.codeplex.com/releases/clickonce/</InstallUrl>
     <SupportUrl>http://proverbteleprompter.codeplex.com</SupportUrl>
     <ErrorReportUrl>http://proverbteleprompter.codeplex.com</ErrorReportUrl>
     <ProductName>Proverb Teleprompter</ProductName>
     <PublisherName>Proverb Teleprompter</PublisherName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>30</ApplicationRevision>
+    <ApplicationRevision>33</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
