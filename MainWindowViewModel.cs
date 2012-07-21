@@ -1057,6 +1057,10 @@ SystemEvents_DisplaySettingsChanged
         private void ShowTools()
         {
             ToolsVisible = true;
+			if(_toolsWindow != null)
+			{
+				_toolsWindow.WindowState = WindowState.Normal;
+			}
             //Storyboard sb = (Storyboard)this.FindResource("ToolFlyin");
             //sb.Begin();
         }
@@ -1064,6 +1068,10 @@ SystemEvents_DisplaySettingsChanged
         private void HideTools()
         {
             ToolsVisible = false;
+			if (_toolsWindow != null)
+			{
+				_toolsWindow.WindowState = WindowState.Minimized;
+			}
         }
 
         private void SpeedForward()
