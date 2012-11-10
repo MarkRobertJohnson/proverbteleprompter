@@ -358,5 +358,77 @@ namespace ProverbTeleprompter.Properties {
                 this["FullScreenTalentWindow"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("9765")]
+        public int ControllerPort {
+            get {
+                return ((int)(this["ControllerPort"]));
+            }
+            set {
+                this["ControllerPort"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int OuterLeftRightMarginValue {
+            get {
+                return ((int)(this["OuterLeftRightMarginValue"]));
+            }
+            set {
+                this["OuterLeftRightMarginValue"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int TextMarginValue {
+            get {
+                return ((int)(this["TextMarginValue"]));
+            }
+            set {
+                this["TextMarginValue"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("70")]
+        public int EyelineHeight {
+            get {
+                return ((int)(this["EyelineHeight"]));
+            }
+            set {
+                this["EyelineHeight"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("50")]
+        public int EyelineWidth {
+            get {
+                return ((int)(this["EyelineWidth"]));
+            }
+            set {
+                this["EyelineWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool StartWebController {
+            get {
+                return ((bool)(this["StartWebController"]));
+            }
+            set {
+                this["StartWebController"] = value;
+            }
+        }
     }
 }

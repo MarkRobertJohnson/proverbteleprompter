@@ -102,6 +102,18 @@ namespace ProverbTeleprompter
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+    	private string _tooltipText;
+		[DependsUpon("Position")]
+    	public string TooltipText
+    	{
+			get { return _tooltipText; }
+    		set
+    		{
+				_tooltipText = value;
+				Changed(() => TooltipText);
+    		}
+    	}
+
+    	public event PropertyChangedEventHandler PropertyChanged;
     }
 }

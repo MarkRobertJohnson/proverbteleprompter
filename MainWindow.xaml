@@ -32,7 +32,7 @@
         	<ColumnDefinition />
         	<ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <Border RenderTransformOrigin="0.5,0.5">
+		<Border RenderTransformOrigin="0.5,0.5" Background="{Binding BackgroundColor}">
            
             <Border.RenderTransform>
                 <TransformGroup>
@@ -41,8 +41,10 @@
                                     ScaleY="{Binding MainWindowScaleY}" CenterX="0" CenterY="0" />
                 </TransformGroup>
             </Border.RenderTransform>
-           
-        	<Grid x:Name="MainTextGrid" PreviewMouseMove="Grid_PreviewMouseMove"  >
+
+			<Grid x:Name="MainTextGrid" PreviewMouseMove="Grid_PreviewMouseMove" 
+				  
+				  Margin="{Binding OuterLeftRightMargin}">
                 <Grid.RowDefinitions>
                     <RowDefinition />
                     <RowDefinition Height="Auto"/>
@@ -52,12 +54,16 @@
                                           VerticalOffsetExt="{Binding MainScrollerVerticalOffset, Mode=TwoWay}"
                               Focusable="False" ExtentHeightExt="{Binding MainScrollerExtentHeight, Mode=TwoWay}" 
                                           ViewportHeightExt="{Binding MainScrollerViewportHeight, Mode=TwoWay}"
-                              VerticalScrollBarVisibility="Visible">
+                              VerticalScrollBarVisibility="Visible"
+										   Background="{Binding BackgroundColor}"
+										  >
 
                     <RichTextBox  x:Name="MainTextBox" BorderThickness="0" BorderBrush="Transparent" AcceptsTab="True" 
-                                  CaretBrush="{Binding MainDocumentCaretBrush}" 
+                                  CaretBrush="{Binding MainDocumentCaretBrush}"  Background="{Binding BackgroundColor}"
         				FontSize="{Binding Value, ElementName=FontSizeSlider}"  Focusable="{Binding Editable, Mode=TwoWay}"
-        				  Helpers:RichTextboxAssistant.Document="{Binding MainDocument, Mode=TwoWay}">
+        				  Helpers:RichTextboxAssistant.Document="{Binding MainDocument, Mode=TwoWay}"
+								  Margin="{Binding TextMargin}"
+								  >
 
                     </RichTextBox>
 
@@ -65,14 +71,14 @@
 
                 <Controls:EyelineTriangleControl x:Name="EyelineLeftTriangle" Opacity="0.7"  
                                               PreviewMouseLeftButtonDown="EyelineLeftTriangle_PreviewMouseLeftButtonDown" 
-                                              HorizontalAlignment="Left" Height="70" 
-                                              Margin="{Binding Path=EyelinePosition, Converter={StaticResource TopMarginConverter}}" 
-                                              VerticalAlignment="Top" Width="42"/>
+                                              HorizontalAlignment="Left" Height="{Binding EyelineHeight}" 
+                                              Margin="{Binding LeftEyelineMargin}" 
+                                              VerticalAlignment="Top" Width="{Binding EyelineWidth}"/>
                 <Controls:EyelineTriangleControl x:Name="EyelineRightTriangle"  Opacity="0.7"
                                               PreviewMouseLeftButtonDown="EyelineLeftTriangle_PreviewMouseLeftButtonDown" 
-                                              HorizontalAlignment="Right" Height="70" 
-                                              Margin="{Binding Path=EyelinePosition, Converter={StaticResource TopMarginConverter}}"
-                                              VerticalAlignment="Top" Width="42.002" RenderTransformOrigin="0.5,0.5">
+                                              HorizontalAlignment="Right" Height="{Binding EyelineHeight}" 
+                                              Margin="{Binding RightEyelineMargin}"
+                                              VerticalAlignment="Top" Width="{Binding EyelineWidth}" RenderTransformOrigin="0.5,0.5">
                     <Controls:EyelineTriangleControl.RenderTransform>
                         <ScaleTransform ScaleX="-1" />
                     </Controls:EyelineTriangleControl.RenderTransform>

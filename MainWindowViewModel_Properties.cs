@@ -30,9 +30,9 @@ namespace ProverbTeleprompter
         private bool _flipTalentWindowHoriz;
         private bool _flipTalentWindowVert;
         private double _fontSize;
-        private bool _isBlackOnWhite = true;
+        private bool _isBlackOnWhite;
         private bool _isDocumentDirty;
-        private bool _isWhiteOnBlack;
+        private bool _isWhiteOnBlack = true;
         private double _lineHeight;
         private FlowDocument _mainDocument;
         private Brush _mainDocumentCaretBrush;
@@ -175,6 +175,28 @@ namespace ProverbTeleprompter
             }
         }
 
+		[DependsUpon("Speed")]
+		public double SpeedSliderValue
+		{
+			get
+			{
+				return Speed;
+			}
+
+			set
+			{
+				//If the speed changed from 0 and it is paused, un-pause it
+				if (value != 0 && Paused)
+				{
+					Paused = false;
+				}
+				Speed = value;
+
+				DefaultSpeed = Speed;
+				Changed(() => SpeedSliderValue);
+			}
+		}
+
         [DependsUpon("SpeedMax")]
         [DependsUpon("SpeedMin")]
         public double Speed
@@ -182,6 +204,7 @@ namespace ProverbTeleprompter
             get { return _speed; }
             set
             {
+		
                 _speed = value;
                 if (_speed < SpeedMin)
                 {
@@ -536,7 +559,7 @@ namespace ProverbTeleprompter
             set
             {
                 if (value < 0) value = 0;
-                if (value > MainScrollerExtentHeight) value = MainScrollerExtentHeight;
+                if (value > MainScrollerExtentHeight ) value = MainScrollerExtentHeight;
 
                 _mainScrollerVerticalOffset = value;
 
@@ -820,6 +843,135 @@ namespace ProverbTeleprompter
 				TalentWindowState = value ? WindowState.Maximized : WindowState.Normal;
 				AppConfigHelper.SetUserSetting("FullScreenTalentWindow", value);
     		}
+    	}
+
+    	private Thickness _outerLeftRightMargin;
+		[DependsUpon("OuterLeftRightMarginValue")]
+    	public Thickness OuterLeftRightMargin
+    	{
+    		get
+    		{
+				return new Thickness(OuterLeftRightMarginValue, 0, OuterLeftRightMarginValue, 0);
+    		}
+    		set
+    		{
+    			_outerLeftRightMargin = value;
+				Changed(()=>OuterLeftRightMargin);
+    		}
+    	}
+
+    	private int _outerLeftRightMarginValue;
+    	public int OuterLeftRightMarginValue
+    	{
+    		get { return _outerLeftRightMarginValue; }
+    		set
+    		{
+    			_outerLeftRightMarginValue = value;
+				Changed(()=>OuterLeftRightMarginValue);
+				AppConfigHelper.SetUserSetting("OuterLeftRightMarginValue", value);
+    		}
+    	}
+
+		private Thickness _textMargin;
+		[DependsUpon("TextMarginValue")]
+		public Thickness TextMargin
+		{
+			get
+			{
+				return new Thickness(TextMarginValue, 0, TextMarginValue, 0);
+			}
+			set
+			{
+				_textMargin = value;
+				Changed(() => TextMargin);
+			}
+		}
+
+    	private int _textMarginValue;
+    	public int TextMarginValue
+    	{
+    		get
+    		{
+    			return _textMarginValue;
+    		}
+    		set
+    		{
+    			_textMarginValue = value;
+				Changed(()=>TextMarginValue);
+				AppConfigHelper.SetUserSetting("TextMarginValue", value);
+    		}
+    	}
+
+    	private Thickness _leftEyelineMargin;
+		[DependsUpon("EyelinePosition")]
+    	public Thickness LeftEyelineMargin
+    	{
+    		get
+    		{
+    			return new Thickness(0, EyelinePosition, 0,0);
+    		}
+			set { _leftEyelineMargin = value; }
+    	}
+
+    	private Thickness _rightEyelineMargin;
+		[DependsUpon("EyelinePosition")]
+    	public Thickness RightEyelineMargin
+    	{
+    		get
+    		{
+    			return new Thickness(0,EyelinePosition,16,0);
+    		}
+    		set
+    		{
+    			_rightEyelineMargin = value;
+    		}
+    	}
+
+    	private int _eyelineHeight = 50;
+    	public int EyelineHeight
+    	{
+    		get { return _eyelineHeight; }
+    		set
+    		{
+    			_eyelineHeight = value;
+				Changed(()=>EyelineHeight);
+				AppConfigHelper.SetUserSetting("EyelineHeight", value);
+    		}
+    	}
+
+    	private int _eyelineWidth = 60;
+    	public int EyelineWidth
+    	{
+    		get { return _eyelineWidth; }
+    		set
+    		{
+    			_eyelineWidth = value;
+				Changed(()=>EyelineWidth);
+				AppConfigHelper.SetUserSetting("EyelineWidth", value);
+    		}
+    	}
+
+
+
+    	private SolidColorBrush _backgroundColor;
+		[DependsUpon("IsBlackOnWhite")]
+		[DependsUpon("IsWhiteOnBlack")]
+    	public SolidColorBrush BackgroundColor
+    	{
+    		get
+    		{
+				if(IsBlackOnWhite)
+				{
+					return new SolidColorBrush(Colors.White);
+				}
+    			return new SolidColorBrush(Colors.Black);
+    		}
+    		set
+    		{
+				
+    			_backgroundColor = value;
+    			Changed(()=>BackgroundColor);
+			}
     	}
 
     	private void MoveTalentWindowToDisplay(string displayName)

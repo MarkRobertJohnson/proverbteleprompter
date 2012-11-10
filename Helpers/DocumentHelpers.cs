@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Documents;
 
 namespace ProverbTeleprompter.Helpers
@@ -132,23 +133,16 @@ namespace ProverbTeleprompter.Helpers
         /// </summary>
         /// <param name="position"></param>
         /// <returns></returns>
-        public static int GetLineNumberFromSelection(TextPointer position)
+        public static int GetLineNumberFromPosition(RichTextBox rtb, TextPointer position)
         {
             if (position == null)
             {
                 return 0;
             }
 
-            int lineNumber = 0;
-            int linesMoved;
-            do
-            {
-                position = position.GetLineStartPosition(-1, out linesMoved);
-                lineNumber++;
-            }
-            while (position != null && linesMoved != 0);
-
-            return lineNumber;
+			int lineMoved;
+			position.GetLineStartPosition(-int.MaxValue, out lineMoved);
+			return -lineMoved;
         }
 
 
