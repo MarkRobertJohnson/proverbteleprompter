@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.Management;
+using System.Threading;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -11,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Microsoft.Win32;
 using ProverbTeleprompter.Helpers;
+using ProverbTeleprompter.WebController;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using MouseEventHandler = System.Windows.Input.MouseEventHandler;
@@ -22,10 +24,10 @@ namespace ProverbTeleprompter
     /// </summary>
     public partial class MainWindow
     {
-        
+    	public static MainWindow SharedMainWindow;
 
         private bool _isDraggingEyeline;
-
+		public SynchronizationContext SyncContext { get; set; }
 
         public static FrameworkElement PromptView { get; set; }
 
@@ -34,11 +36,11 @@ namespace ProverbTeleprompter
 
         public MainWindow()
         {
-            
+        	SyncContext = SynchronizationContext.Current;
             InitializeComponent();
             MainWindowViewModel = new MainWindowViewModel(MainTextBox)
                                       {
-                                          BookmarkImage = Resources["ClearBookmarkImage"] as ImageSource
+										  BookmarkImage = Resources["WhiteBookmarkImage"] as ImageSource
                                       };
 
 
@@ -62,7 +64,13 @@ namespace ProverbTeleprompter
 
             PromptView = LayoutRoot;
 
-        	
+        	SharedMainWindow = this;
+			if(Properties.Settings.Default.StartWebController)
+			{
+				Hosting.Start();
+			}
+			
+
         }
 
 

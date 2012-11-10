@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using Microsoft.Practices.Prism.Commands;
 using ProverbTeleprompter.Helpers;
@@ -55,18 +57,6 @@ namespace ProverbTeleprompter
             }
         }
 
-        public ICommand SetDefaultSpeedCommand
-        {
-            get
-            {
-                if (_setDefaultSpeedCommand == null)
-                {
-                    _setDefaultSpeedCommand = new RelayCommand(x => { DefaultSpeed = Speed; });
-                }
-                return _setDefaultSpeedCommand;
-            }
-        }
-
         public ICommand DeleteBookmarkCommand
         {
             get
@@ -75,10 +65,15 @@ namespace ProverbTeleprompter
                 {
                     _deleteBookmarkCommand = new DelegateCommand<ContentControl>(x =>
                                                                                      {
+																						 
                                                                                          var bookmark =
                                                                                              x.Content as Bookmark;
-                                                                                         bookmark.Hyperlink.Inlines.
-                                                                                             Clear();
+                                                                                         bookmark.Hyperlink.Inlines.Clear();
+
+																						 MainTextBox.Selection.Select(bookmark.Hyperlink.ElementStart, bookmark.Hyperlink.ElementEnd);
+
+																						 MainTextBox.Selection.Text = "";
+																						 
                                                                                          Bookmarks.Remove(bookmark);
                                                                                      });
                 }
@@ -235,9 +230,15 @@ namespace ProverbTeleprompter
         {
             if (e.Key == Key.Enter)
             {
-                var box = (sender as TextBox);
-                box.Focusable = false;
-                box.IsEnabled = false;
+				var box = (sender as TextBox);
+				box.Focusable = false;
+				box.IsEnabled = false;
+            	Dispatcher.BeginInvoke((Action) (() =>
+            	    {
+						box.IsEnabled = true;
+            	}));
+    		
+
             }
         }
 

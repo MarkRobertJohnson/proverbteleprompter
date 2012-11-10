@@ -8,7 +8,7 @@
 		Background="Black"
              WindowStartupLocation="Manual"
         x:Name="TheToolWindow"
-        Title="Proverb TelePrompter" d:DesignHeight="263" d:DesignWidth="1331" SizeToContent="WidthAndHeight"  ShowInTaskbar="True" Icon="ProverbTeleprompterLogo.ico">
+        Title="Proverb TelePrompter" Height="250"  d:DesignHeight="263" d:DesignWidth="1331" SizeToContent="Width"  ShowInTaskbar="True" Icon="ProverbTeleprompterLogo.ico">
     <Window.Resources>
 
         <ResourceDictionary>
@@ -89,7 +89,7 @@
 
                 			<Label Content="Scroll Speed" d:LayoutOverrides="Height" />
                 			<Slider x:Name="SpeedSlider" ToolTip="Set the current scrolling speed"  
-                				Value="{Binding Speed, FallbackValue=1, Mode=TwoWay}" 
+                				Value="{Binding SpeedSliderValue, FallbackValue=1, Mode=TwoWay}" 
                 				Maximum="{Binding SpeedMax, FallbackValue=8, Mode=OneWay}" 
                 				Minimum="{Binding SpeedMin, FallbackValue=-8, Mode=OneWay}" LargeChange="1" Focusable="False"
                 				TickPlacement="BottomRight" TickFrequency="0.5" SmallChange="0.05"  
@@ -98,9 +98,7 @@
                 				HorizontalAlignment="Center"  HorizontalContentAlignment="Center"
                 				Text="{Binding Value, Converter={StaticResource StringToFloatConverter}, ElementName=SpeedSlider, Mode=TwoWay, StringFormat=\{0:F\}}" 
                 				Focusable="False" VerticalAlignment="Bottom" MouseLeftButtonDown="SpeedTextBox_MouseLeftButtonDown" ToolTip="Click to type in the scroll speed" />
-                			<Button Content="Set as Default" ToolTip="Makes the current scroll speed the default speed" Height="20" Focusable="False" 
-                				x:Name="SetDefaultSpeedButton" Width="87" Command="{Binding SetDefaultSpeedCommand}" Margin="2" Style="{DynamicResource ToolButtonStyle}" />
-                			<ToggleButton x:Name="PausedCheckbox" IsChecked="{Binding Paused}" Focusable="False" 
+                			                			<ToggleButton x:Name="PausedCheckbox" IsChecked="{Binding Paused}" Focusable="False" 
                 				Content="ToggleButton" HorizontalAlignment="Center" Height="40.282" Margin="3,19,3,3"
                 				Style="{DynamicResource PlayPauseStyle}" VerticalAlignment="Bottom" Width="44" ToolTip="Toggle Play/Pause (Space/F5/ESC)"/>
 
@@ -161,18 +159,61 @@
                 				FontWeight="Bold" Focusable="False" Margin="5" 
                 				HorizontalContentAlignment="Center" MaxLength="8" />
                 		</WrapPanel>
-                		<WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
+
+						<WrapPanel Orientation="Vertical" Style="{StaticResource ResourceKey=ToolSection}">
+							<Label Content="Outer Margin"  />
+							<Slider x:Name="OuterLeftRightMarginSlider" Value="{Binding OuterLeftRightMarginValue, FallbackValue=24}" Maximum="300" Minimum="0" 
+                				LargeChange="25" TickPlacement="BottomRight" 
+                				TickFrequency="25" SmallChange="1" IsSnapToTickEnabled="False" 
+                				Focusable="False" RenderTransformOrigin="0.574,0.443" ToolTip="Left and Right Outer Margin" />
+							<TextBox  x:Name="OuterLeftRightMarginTextBox" Margin="13,0" HorizontalContentAlignment="Center" MouseLeftButtonDown="SpeedTextBox_MouseLeftButtonDown"
+                				Text="{Binding Value, Converter={Converters:StringToFloatConverter Max=300, Min=0}, ElementName=OuterLeftRightMarginSlider, Mode=TwoWay}" Focusable="False"  
+                				Background="Transparent" BorderBrush="Transparent"
+                				VerticalAlignment="Top" HorizontalAlignment="Center" Width="32" ToolTip="Click to type in the outer margin size"  />
+							<Path Data="M8.7566667,146.43067 L33.304834,146.43067" Fill="#FF010101" Height="3" Stretch="Fill" Width="74.149" Stroke="Black" StrokeThickness="0.5"/>
+
+							<Label Content="Text Margin"  />
+							<Slider x:Name="TextMarginSlider" Value="{Binding TextMarginValue, FallbackValue=24}" Maximum="300" Minimum="0" 
+                				LargeChange="25" TickPlacement="BottomRight" 
+                				TickFrequency="25" SmallChange="1" IsSnapToTickEnabled="False" 
+                				Focusable="False" RenderTransformOrigin="0.574,0.443" ToolTip="Text Margin" />
+							<TextBox  x:Name="TextMarginTextBox" Margin="13,0" HorizontalContentAlignment="Center" MouseLeftButtonDown="SpeedTextBox_MouseLeftButtonDown"
+                				Text="{Binding Value, Converter={Converters:StringToFloatConverter Max=300, Min=0}, ElementName=TextMarginSlider, Mode=TwoWay}" Focusable="False"  
+                				Background="Transparent" BorderBrush="Transparent"
+                				VerticalAlignment="Top" HorizontalAlignment="Center" Width="32" ToolTip="Click to type in the text margin"  />
+
+						</WrapPanel>
+
+						<WrapPanel Orientation="Vertical" Style="{StaticResource ResourceKey=ToolSection}">
+							<Label Content="Eye Line Height"  />
+							<Slider x:Name="EyelineHeightSlider" Value="{Binding EyelineHeight, FallbackValue=70}" Maximum="300" Minimum="0" 
+                				LargeChange="25" TickPlacement="BottomRight" 
+                				TickFrequency="25" SmallChange="1" IsSnapToTickEnabled="False" 
+                				Focusable="False" RenderTransformOrigin="0.574,0.443" ToolTip="Height of the yellow eyeline marks" />
+							
+							<Label Content="Eye Line Width"  />
+							<Slider x:Name="EyelineWidthSlider" Value="{Binding EyelineWidth, FallbackValue=50}" Maximum="300" Minimum="0" 
+                				LargeChange="25" TickPlacement="BottomRight" 
+                				TickFrequency="25" SmallChange="1" IsSnapToTickEnabled="False" 
+                				Focusable="False" RenderTransformOrigin="0.574,0.443" ToolTip="Width of the yellow eyeline marks" />
+
+						</WrapPanel>
+
+						<WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">
                 			<Button Content="Set Bookmark" ToolTip="Set a Bookmark at the current eyeline position (INSERT key)" x:Name="AddBookmarkButton" Focusable="False"
                 				Margin="5" Style="{DynamicResource ToolButtonStyle}" RenderTransformOrigin="2.149,-0.308" 
                 				Command="{Binding SetBookmarkCommand}" />
                 			<ListBox x:Name="BookmarksListbox" ItemsSource="{Binding Bookmarks}" ToolTip="Jump to a bookmark by clicking on it (Number keys 1-9)"  
                 				Height="125.5" Width="144.8" Margin="5" IsTextSearchCaseSensitive="True" 
                 				ItemTemplate="{DynamicResource DataTemplate1}" 
-                				SelectedItem="{Binding SelectedBookmark, Mode=TwoWay}"
-                				Controls:Selected.Command="{Binding BookmarkSelectedCommand}"
+                				
+                				
                 				Focusable="False" ItemContainerStyle="{DynamicResource ListBoxItemStyle1}" ItemsPanel="{DynamicResource ItemsPanelTemplate1}" 
                                      
                                      />
+							<!--
+							SelectedItem="{Binding SelectedBookmark, Mode=TwoWay}"
+							Controls:Selected.Command="{Binding BookmarkSelectedCommand}"-->
                 		</WrapPanel>
 
                 		<WrapPanel Orientation="Vertical"  Style="{StaticResource ResourceKey=ToolSection}">

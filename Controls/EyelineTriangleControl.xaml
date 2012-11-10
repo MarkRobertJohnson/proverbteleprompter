@@ -6,7 +6,7 @@
 	mc:Ignorable="d"
 	x:Class="ProverbTeleprompter.Controls.EyelineTriangleControl"
 	x:Name="UserControl"
-	d:DesignWidth="42" d:DesignHeight="54.4">
+	d:DesignWidth="42" d:DesignHeight="42">
 
 	<Grid x:Name="LayoutRoot">
 		<Polygon Stretch="Fill" Fill="#FFF2F205" Stroke="Transparent"

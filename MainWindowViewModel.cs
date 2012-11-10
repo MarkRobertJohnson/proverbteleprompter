@@ -73,7 +73,123 @@ namespace ProverbTeleprompter
             KeyboardHookHelpers.KeyUp += KeyboardHookHelpers_KeyUp;
 
         	Displays = new ObservableCollection<string>(Screen.AllScreens.Select(x => x.DeviceName));
+
+			MainTextBox.SizeChanged += new SizeChangedEventHandler(MainTextBox_SizeChanged);
+			MainTextBox.TextChanged += new System.Windows.Controls.TextChangedEventHandler(MainTextBox_TextChanged);
+
+		
         }
+
+		void MainTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+		{
+			StartCalcBookmarks();
+		}
+
+		DispatcherTimer _calcBookmarksTimer = new DispatcherTimer();
+		void MainTextBox_SizeChanged(object sender, SizeChangedEventArgs e)
+		{
+			StartCalcBookmarks(5);
+		}
+
+		private void StartCalcBookmarks(int delay = 1)
+		{
+			_calcBookmarksTimer.Stop();
+			_calcBookmarksTimer.Interval = new TimeSpan(0, 0, 0, delay);
+			_calcBookmarksTimer.Tick -= calcBookmarksTimer_Tick;
+			_calcBookmarksTimer.Tick += calcBookmarksTimer_Tick;
+			_calcBookmarksTimer.Start();
+		}
+
+		void calcBookmarksTimer_Tick(object sender, EventArgs e)
+		{
+			_calcBookmarksTimer.Stop();
+			UpdateBookmarks();
+		}
+
+		private void UpdateBookmarks()
+		{
+			LoadBookmarks(MainDocument);
+			//Bookmarks = new ObservableCollection<Bookmark>(CalculateAllBookMarkInfo());
+		}
+
+		private IEnumerable<Bookmark> CalculateAllBookMarkInfo()
+		{
+			Debug.WriteLine("Calc all bookmark info");
+			return Bookmarks.Select(bookmark => CalculateBookMarkInfo(bookmark)).Where(bm => bm != null);
+		}
+
+    	/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="bm"></param>
+		/// <param name="bookmarkOffset"></param>
+		/// <returns>The updated bookmark, null if the hyperlink no longer exists in the document</returns>
+		private Bookmark CalculateBookMarkInfo(Bookmark bm, double? bookmarkOffset = null)
+		{
+			if(!bookmarkOffset.HasValue)
+			{
+				var rect = bm.Hyperlink.ContentStart.GetCharacterRect(LogicalDirection.Forward);
+
+				if(rect.IsEmpty)
+				{
+					return null;
+				}
+				bookmarkOffset = rect.Top;
+			}
+
+
+			TextPointer pos = MainTextBox.GetPositionFromPoint(new Point(0, bookmarkOffset.GetValueOrDefault()), true);
+			TextPointer endPos = MainTextBox.GetPositionFromPoint(new Point(MainTextBox.ActualWidth, bookmarkOffset.GetValueOrDefault()), true);
+
+
+			if (pos == null)
+			{
+				Trace.Fail("Could not get text start position for bookmark");
+				return null;
+			}
+
+			if (endPos == null)
+			{
+				Trace.Fail("Could not get text end position for bookmark");
+				return null;
+			}
+
+			int num = DocumentHelpers.GetLineNumberFromPosition(_mainTextBox, pos);
+
+			if (bm.Hyperlink == null)
+			{
+				var hyperlink = new Hyperlink(pos, pos);
+				bm.Hyperlink = hyperlink;
+				if (BookmarkImage != null)
+				{
+					var img = new Image();
+					img.Source = BookmarkImage;
+
+					img.Visibility = Visibility.Collapsed;
+					bm.Image = img;
+					hyperlink.Inlines.Add(" ");
+				}
+			}
+
+    		var textRange = new TextRange(pos, endPos);
+			string toolTipText = textRange.Text;
+
+			bm.Line = num;
+			bm.TopOffset = bookmarkOffset.GetValueOrDefault();
+			if (string.IsNullOrWhiteSpace(toolTipText))
+			{
+				toolTipText = "<<Blank line>>";
+			}
+
+			bm.TooltipText = string.Format("{0} (Line: {1})", toolTipText, num);
+			bm.Name = bm.TooltipText;
+
+			bm.Hyperlink.NavigateUri = new Uri(String.Format("http://bookmark/{0}", bm.Name));
+
+			bm.Position = pos;
+
+			return bm;
+		}
 
 
 		void SystemEvents_DisplaySettingsChanged(object sender, EventArgs e)
@@ -187,20 +303,24 @@ SystemEvents_DisplaySettingsChanged
         private void _scrollTimer_Tick(object sender, EventArgs e)
         {
             _ticksElapsed++;
-            if (!Paused)
-            {
-                MainScrollerVerticalOffset = MainScrollerVerticalOffset + Speed;
-            }
-            else
-            {
-                MainScrollerVerticalOffset = MainScrollerVerticalOffset +
-                                             TotalBoostAmount;
-            }
+
+			if (!Paused && Speed.CompareTo(0) != 0)
+			{
+				MainScrollerVerticalOffset = MainScrollerVerticalOffset + Speed;
+			}
+			else if(TotalBoostAmount.CompareTo(0) != 0)
+			{
+				MainScrollerVerticalOffset = MainScrollerVerticalOffset +
+												TotalBoostAmount;
+			}
+
+			
 
 
             //Only update calculations every 10 timer ticks (100 ms)
             if (_ticksElapsed%10 == 0)
             {
+
                 //Calculate pixels per second (velocity)
                 if (DateTime.Now - _prevTime > TimeSpan.FromSeconds(1))
                 {
@@ -328,6 +448,12 @@ SystemEvents_DisplaySettingsChanged
 
 
             LoadBookmarks(MainDocument);
+
+        	TextMarginValue = Settings.Default.TextMarginValue;
+        	OuterLeftRightMarginValue = Settings.Default.OuterLeftRightMarginValue;
+
+        	EyelineHeight = Settings.Default.EyelineHeight;
+        	EyelineWidth = Settings.Default.EyelineWidth;
         }
 
         public void LoadDocument(string fullFilePath)
@@ -574,10 +700,12 @@ SystemEvents_DisplaySettingsChanged
         {
             if (hyperlink.NavigateUri.IsAbsoluteUri && hyperlink.NavigateUri.Host.StartsWith("bookmark"))
             {
+            	
                 var bm = new Bookmark();
+				bm.Name = Uri.UnescapeDataString(hyperlink.NavigateUri.Segments[1]);
+				bm.Hyperlink = hyperlink;
+				CalculateBookMarkInfo(bm);
 
-                bm.Name = Uri.UnescapeDataString(hyperlink.NavigateUri.Segments[1]);
-                bm.Hyperlink = hyperlink;
 
 
                 Bookmarks.Add(bm);
@@ -663,54 +791,28 @@ SystemEvents_DisplaySettingsChanged
         }
 
 
-        private void _editWindow_DocumentUpdated(object sender, DocumentUpdatedEventArgs e)
-        {
-            Dispatcher.Invoke((Action) (() => LoadDocument(e.DocumentData, e.DataFormat)));
-        }
-
         private void InsertBookmarkAtCurrentEyelineMark()
         {
-            double bookmarkOffset = MainScrollerVerticalOffset + EyelinePosition;
+            double bookmarkOffset = MainScrollerVerticalOffset + EyelinePosition + (EyelineHeight / 2);
 
-            TextPointer pos = MainTextBox.GetPositionFromPoint(new Point(0, bookmarkOffset), true);
-
-
-            int num = DocumentHelpers.GetLineNumberFromSelection(pos);
-
-            var hyperlink = new Hyperlink(pos, pos);
-
-            var bm = new Bookmark();
-            if (BookmarkImage != null)
-            {
-                var img = new Image();
-                img.Source = BookmarkImage;
-
-                img.Visibility = Visibility.Collapsed;
-                bm.Image = img;
-                hyperlink.Inlines.Add(" ");
-            }
-
-            bm.Name = string.Format("Boomark {0}", Bookmarks.Count + 1);
-            bm.Line = num;
-            bm.TopOffset = bookmarkOffset;
-
-
-            hyperlink.NavigateUri = new Uri(String.Format("http://bookmark/{0}", bm.Name));
-
-            bm.Hyperlink = hyperlink;
-            bm.Position = pos;
-
+			var bm = new Bookmark();
+			CalculateBookMarkInfo(bm, bookmarkOffset);
+			bm.Ordinal = Bookmarks.Count;
             Bookmarks.Add(bm);
-            bm.Ordinal = Bookmarks.Count;
+            
         }
 
         private void JumpToBookmark(Bookmark bookmark)
         {
             if (bookmark == null) return;
-            bookmark.Hyperlink.BringIntoView();
+        	var rect = bookmark.Hyperlink.ContentStart.GetCharacterRect(LogicalDirection.Forward);
+
+        	MainScrollerVerticalOffset = rect.Top - EyelinePosition;
+			_mainTextBox.CaretPosition = bookmark.Hyperlink.ContentStart;
 
             SelectedBookmark = bookmark;
         }
+
 
         private void JumpToBookmarkByOrdinal(int ordinal)
         {
@@ -797,10 +899,70 @@ SystemEvents_DisplaySettingsChanged
 
         private void _toolsWindow_Loaded(object sender, RoutedEventArgs e)
         {
-        	var area = Screen.PrimaryScreen.WorkingArea;
-        	_toolsWindow.Top = area.Height - _toolsWindow.Height;
-        	_toolsWindow.Left = area.Width/2 - _toolsWindow.Width/2;
+           	var area = Screen.PrimaryScreen.WorkingArea;
+        	var winHeight = ConvertFromDIPixelsToPixels(_toolsWindow.ActualHeight);
+        	var winWidth = ConvertFromDIPixelsToPixels(_toolsWindow.Width);
+        	var winTop = area.Height - winHeight;
+			_toolsWindow.Top = ConvertPixelsToDIPixels(area.Height - winHeight);
+        	var leftPixels = area.Width/2.0 - winWidth/2.0;
+
+			//Check if right edge will be off screen
+			if(leftPixels + winWidth > area.Width)
+			{
+				_toolsWindow.SizeToContent = SizeToContent.Manual;
+				//resize and re-center
+				winWidth = area.Width;
+				leftPixels = 0;
+				_toolsWindow.Width = ConvertPixelsToDIPixels(winWidth);
+				_toolsWindow.Height = ConvertPixelsToDIPixels(winHeight);
+
+			}
+        	_toolsWindow.Left = ConvertPixelsToDIPixels(leftPixels);
+
+
         }
+
+
+		[DllImport("User32.dll")]
+		private static extern IntPtr GetDC(HandleRef hWnd);
+		[DllImport("User32.dll")]
+		private static extern int ReleaseDC(HandleRef hWnd, HandleRef hDC);
+		[DllImport("GDI32.dll")]
+		private static extern int GetDeviceCaps(HandleRef hDC, int nIndex);
+		private static int _dpi = 0;
+
+
+		public static int Dpi
+		{
+			get
+			{
+				if (_dpi == 0)
+				{
+					var desktopHwnd = new HandleRef(null, IntPtr.Zero);
+					var desktopDC = new HandleRef(null, GetDC(desktopHwnd));
+					try
+					{
+						_dpi = GetDeviceCaps(desktopDC, 88/*LOGPIXELSX*/);	
+					}
+					finally
+					{
+						ReleaseDC(desktopHwnd, desktopDC);
+					}
+
+				}
+				return _dpi;
+			}
+		}
+
+		public static double ConvertPixelsToDIPixels(double pixels)
+		{
+			return (double)pixels * 96 / Dpi;
+		}
+
+		public static double ConvertFromDIPixelsToPixels(double pixels)
+		{
+			return (double)pixels / 96 * Dpi;
+		}
 
 
         private static void _toolsWindow_Closing(object sender, CancelEventArgs e)
@@ -850,7 +1012,7 @@ SystemEvents_DisplaySettingsChanged
         /// <param name="key"></param>
         /// <param name="isGlobal"></param>
         /// <returns>True if the key down event is handled</returns>
-        private bool HandleKeyDown(Key key, bool isGlobal)
+        public bool HandleKeyDown(Key key, bool isGlobal)
         {
             if (MainTextBox.Focusable || !CaptureKeyboard || (isGlobal && !ReceiveGlobalKeystrokes)) return false;
 
@@ -906,13 +1068,11 @@ SystemEvents_DisplaySettingsChanged
             }
             else if (key == Key.OemPlus)
             {
-                Speed += 0.1;
-                DefaultSpeed = Speed;
+                SpeedSliderValue += 0.1;
             }
             else if (key == Key.OemMinus)
             {
-                Speed -= 0.1;
-                DefaultSpeed = Speed;
+                SpeedSliderValue -= 0.1;
             }
             //Numbers 1-9 should jump to the corresponding bookmark
             else if ((key >= Key.D0 && key <= Key.D9) ||
@@ -941,7 +1101,7 @@ SystemEvents_DisplaySettingsChanged
             return handled;
         }
 
-        private bool HandleKeyUp(Key key, bool isGlobal)
+        public bool HandleKeyUp(Key key, bool isGlobal)
         {
             if (MainTextBox.Focusable || !CaptureKeyboard || (isGlobal && !ReceiveGlobalKeystrokes)) return false;
 
@@ -955,6 +1115,7 @@ SystemEvents_DisplaySettingsChanged
             else if (key == Key.Up)
             {
                 Speed = DefaultSpeed;
+
                 // SpeedSlider.Value -= TotalBoostAmount;
                 _speedBoostAmount = 0;
                 TotalBoostAmount = 0;
@@ -973,6 +1134,14 @@ SystemEvents_DisplaySettingsChanged
                 _speedBoostAmount = 0;
                 TotalBoostAmount = 0;
             }
+
+			if (key == Key.Up || key == Key.Down || key == Key.Next || key == Key.Prior)
+			{
+				if (Paused)
+				{
+					Speed = 0;
+				}
+			}
 
             return false;
         }

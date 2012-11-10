@@ -1,0 +1,193 @@
+﻿<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=9" />
+		<meta name="viewport" content="width=device-width, user-scalable=no" />
+		<base href=""/>
+		<title>Proverb Teleprompter Remote Control</title>
+		<script language="javascript" type="text/javascript" src="Scripts/jquery-1.6.4.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="Content/jquery.mobile-1.1.1.min.css"/>
+		<link rel="stylesheet" type="text/css" href="Content/jquery.mobile.structure-1.1.1.min.css"/>
+		<link rel="stylesheet" type="text/css" href="Content/jquery.mobile.theme-1.1.1.min.css"/>
+		
+		<script language="javascript" type="text/javascript" src="Scripts/jquery.mobile-1.1.1.min.js"></script>
+
+	</head>
+	<body>
+		<script type="text/javascript">
+			window.addEventListener('mousedown', function (evt) {
+				$("#log").append("Window MouseDown<br/>");
+			});
+			window.addEventListener('mouseup', function (evt) {
+				$("#log").append("Window MouseUp<br/>");
+			});
+
+			window.addEventListener('mousemove', function (evt) {
+				$("#log").append("Window MouseMove<br/>");
+			});
+			$("#homePage").live('pageinit', function () {
+
+				// do something here...
+				$("#log").append("pageinit");
+				$('divDown').live('vmousedown', function () { $("#log").append("VMouseDown<br/>"); });
+				$('btnDown').live('vmousedown', function () { $("#log").append("VMouseDown<br/>"); });
+
+				if ($("#divDown").vmousedown) {
+					$("#divDown").vmousedown(function () { $("#log").append("VMouseDown<br/>"); });
+				}
+
+			});
+		</script>
+		
+		<div id="homePage" data-role="page">
+			<script type="text/javascript" language="javascript">
+				var intervalIds = [];
+				function ScrollDownFasterStart() {
+					intervalIds[intervalIds.length] = setInterval("ScrollDownFaster()", 300);
+
+				}
+
+				function ScrollUpFasterStart() {
+					intervalIds[intervalIds.length] = setInterval("ScrollUpFaster()", 300);
+
+				}
+
+				function ScrollDownFaster() {
+					var r = new Date().getTime(); // unique random number to workaround IE cache issue
+
+					$.get('/pt/api/ScrollDownFaster/2?r=' + r, function (data) {
+
+					})
+						.success(function () { })
+						.error(function () { })
+						.complete(function () { });
+				}
+
+				function ScrollUpFaster() {
+					var r = new Date().getTime(); // unique random number to workaround IE cache issue
+
+					$.get('/pt/api/ScrollUpFaster/2?r=' + r, function (data) {
+
+					})
+						.success(function () { })
+						.error(function () { })
+						.complete(function () { });
+				}
+
+				function ScrollDownFasterComplete() {
+					var r = new Date().getTime(); // unique random number to workaround IE cache issue
+
+					$.get('/pt/api/ScrollDownFasterComplete/2?r=' + r, function (data) {
+
+					})
+						.success(function () { })
+						.error(function () { })
+						.complete(function () { });
+
+
+				}
+
+				function ScrollUpFasterComplete() {
+					var r = new Date().getTime(); // unique random number to workaround IE cache issue
+
+					$.get('/pt/api/ScrollUpFasterComplete/2?r=' + r, function (data) {
+
+					})
+						.success(function () { })
+						.error(function () { })
+						.complete(function () { });
+
+
+				}
+
+				function ScrollDownFaster_MouseUp() {
+					for (var i = 0; i < intervalIds.length; i++) {
+						clearInterval(intervalIds[i]);
+					}
+
+					intervalIds = [];
+
+					ScrollDownFasterComplete();
+					$("log").append("ScrollDownFaster_MouseUp");
+				}
+
+				function ScrollUpFaster_MouseUp() {
+					for (var i = 0; i < intervalIds.length; i++) {
+						clearInterval(intervalIds[i]);
+					}
+
+					intervalIds = [];
+
+					ScrollUpFasterComplete();
+					$("log").append("ScrollUpFaster_MouseUp");
+				}
+
+				function MouseOver() {
+					$("#log").append("MouseOver<br/>");
+				}
+				function MouseMove() {
+					$("#log").append("MouseMove<br/>");
+				}
+				function KeyDown() {
+					$("#log").append("KeyDown<br/>");
+				}
+				function Focus() {
+					$("#log").append("Focus<br/>");
+				}
+				function Blur() {
+					$("#log").append("Blur<br/>");
+				}
+
+				function MouseOut() {
+					$("#log").append("MouseOut<br/>");
+				}
+
+
+				$('#aboutPage').live('pageinit', function (event) {
+					alert('This page was just enhanced by jQuery Mobile!');
+				});
+
+
+			</script>
+			<button id="btnDown" value="Down" type="button" title="Down" 
+
+			        onmouseover="MouseOver()" 
+			        onmousemove="MouseMove()"
+			        onkeydown="KeyDown()"
+			        onfocus="Focus()"
+				 
+			        onblur="Blur()"
+			        onmouseout="MouseOut()"
+				
+			        onmouseup="ScrollDownFasterStart();ScrollUpFaster_MouseUp();"  >FF</button>
+			<button id="btnNormal" value="Down" type="button" title="Down" 
+
+			        onmouseover="MouseOver()" 
+			        onmousemove="MouseMove()"
+			        onkeydown="KeyDown()"
+			        onfocus="Focus()"
+				 
+			        onblur="Blur()"
+			        onmouseout="MouseOut()"
+				
+			        onmouseup="ScrollDownFaster_MouseUp();ScrollUpFaster_MouseUp();"  >Normal Speed</button>
+					
+			<button id="btnUp" value="Up" type="button" title="Up" 
+			
+		        onmouseover="MouseOver()" 
+		        onmousemove="MouseMove()"
+		        onkeydown="KeyDown()"
+		        onfocus="Focus()"
+				 
+		        onblur="Blur()"
+		        onmouseout="MouseOut()"
+				
+		        onmouseup="ScrollUpFasterStart();ScrollDownFaster_MouseUp();"  >Rewind</button>
+			
+			<button type="button" value="Clear"  title="Clear" onclick="$('#log').empty()">Clear log</button>
+			<div id="log"></div>
+
+		</div>
+
+	</body>
+</html>
