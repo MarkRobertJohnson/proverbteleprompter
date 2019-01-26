@@ -762,6 +762,12 @@ SystemEvents_DisplaySettingsChanged
             {
                 dlg.FileName = Path.GetFileName(documentPath);
                 dlg.InitialDirectory = Path.GetDirectoryName(documentPath);
+		// If path not available (eg. network, or pedrive missing)
+                if (!Directory.Exists (dlg.InitialDirectory ))
+                {
+                    dlg.InitialDirectory =  Environment.GetFolderPath (Environment.SpecialFolder.MyDocuments) ;
+                }
+
                 dlg.Multiselect = false;
                 dlg.Title = "Load document for Proverb Teleprompter...";
             }
