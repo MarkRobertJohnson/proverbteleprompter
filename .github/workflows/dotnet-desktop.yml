@@ -79,7 +79,7 @@ jobs:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "latest"
         prerelease: false
-        title: "ProverbTeleprompter ${{ matrix.configuration }} ${{ steps.tagName.outputs.tag }}"
+        title: "ProverbTeleprompter"
         files: |
           bin/${{ matrix.configuration }}/*.zip
       if: ${{ startsWith(github.ref, 'refs/tags/v') }}
