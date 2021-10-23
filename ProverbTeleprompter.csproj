@@ -31,15 +31,16 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <InstallUrl>http://proverbteleprompter.codeplex.com/releases/clickonce/</InstallUrl>
-    <SupportUrl>http://proverbteleprompter.codeplex.com</SupportUrl>
-    <ErrorReportUrl>http://proverbteleprompter.codeplex.com</ErrorReportUrl>
+    <InstallUrl>https://github.com/MarkRobertJohnson/proverbteleprompter/releases/tag/latest/</InstallUrl>
+    <SupportUrl>https://github.com/MarkRobertJohnson/proverbteleprompter</SupportUrl>
+    <ErrorReportUrl>https://github.com/MarkRobertJohnson/proverbteleprompter</ErrorReportUrl>
     <ProductName>Proverb Teleprompter</ProductName>
     <PublisherName>Proverb Teleprompter</PublisherName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
+    <TrustUrlParameters>true</TrustUrlParameters>
     <ApplicationRevision>35</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <ApplicationVersion>1.0.11.35</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -318,9 +319,9 @@
     <None Include="ExternalDependencies\Tools.Win.dll" />
   </ItemGroup>
   <ItemGroup>
-    <BootstrapperPackage Include=".NETFramework,Version=v4.0">
+    <BootstrapperPackage Include=".NETFramework,Version=v4.8">
       <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4 %28x86 and x64%29</ProductName>
+      <ProductName>Microsoft .NET Framework 4.8 %28x86 and x64%29</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
