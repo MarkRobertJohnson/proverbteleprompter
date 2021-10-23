@@ -71,4 +71,4 @@ jobs:
         title: "ProverbTeleprompter ${{ matrix.configuration }} Build"
         files: |
           bin/$env:Configuration/*.*
-      if: ${{ startsWith(github.ref, 'refs/tags/v' }}
+      if: ${{ startsWith(github.ref, 'refs/tags/v') }}
