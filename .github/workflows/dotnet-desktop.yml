@@ -80,5 +80,5 @@ jobs:
         title: "ProverbTeleprompter ${{ matrix.configuration }} ${{ steps.tagName.outputs.tag }}"
         files: |
           bin/${{ matrix.configuration }}/*.zip
-          bin/${{ matrix.configuration }}/app.publish/**/*.*
+          bin/${{ matrix.configuration }}/app.publish/**
       if: ${{ startsWith(github.ref, 'refs/tags/v') }}
