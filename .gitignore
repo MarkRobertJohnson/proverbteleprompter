@@ -1,0 +1,10 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/UnitTests/obj/Debug
+/UnitTests/bin/Debug
+/packages
+/obj/x86/Debug
+/bin/Debug
+/.vs/ProverbTeleprompter
