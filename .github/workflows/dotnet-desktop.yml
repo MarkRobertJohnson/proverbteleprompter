@@ -70,5 +70,5 @@ jobs:
         prerelease: true
         title: "ProverbTeleprompter ${{ matrix.configuration }} Build"
         files: |
-          bin/$env:Configuration/*.*
+          bin/${{ matrix.configuration }}/*.*
       if: ${{ startsWith(github.ref, 'refs/tags/v') }}
