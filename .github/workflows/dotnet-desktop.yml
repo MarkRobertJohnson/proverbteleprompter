@@ -31,6 +31,9 @@ jobs:
 
     - uses: olegtarasov/get-tag@v2.1
       id: tagName
+   
+    - uses: olegtarasov/get-tag@v2.1
+      id: version
       with:
         tagRegex: "v(.*)"  # Optional. Returns specified group text as tag name. Full tag string is returned if regex is not defined.
         tagRegexGroup: 1 # Optional. Default is 1.    # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
@@ -45,10 +48,19 @@ jobs:
       run: nuget restore $env:Solution_Name
       
     - name: Build Solution
-      run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration
+      run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration /target:publish /p:ApplicationVersion=${{ steps.version.outputs.tag }} /p:PublishUrl=Publish/
       env:
         Configuration: ${{ matrix.configuration }}
-
+        
+    - name: Chocolatey Action
+      # You may pin to the exact commit or the version.
+      # uses: crazy-max/ghaction-chocolatey@87d06bbbd2cfb1835f1820042d356aef4875fb5f
+      uses: crazy-max/ghaction-chocolatey@v1.6.0
+      with:
+        # Arguments to pass to Chocolatey
+        args: pack 
+      if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+      
     - name: Zip Release
       # You may pin to the exact commit or the version.
       # uses: TheDoctor0/zip-release@4fb9e4ff72847dd3d1c111cf63834e353ed7cb3d
@@ -58,6 +70,7 @@ jobs:
         filename: ProverbTeleprompter.zip 
         # Base path for archive files
         directory: bin/${{ matrix.configuration }}
+      if: ${{ startsWith(github.ref, 'refs/tags/v') }}
  
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
@@ -67,4 +80,5 @@ jobs:
         title: "ProverbTeleprompter ${{ matrix.configuration }} ${{ steps.tagName.outputs.tag }}"
         files: |
           bin/${{ matrix.configuration }}/*.zip
+          bin/${{ matrix.configuration }}/app.publish/**/*.*
       if: ${{ startsWith(github.ref, 'refs/tags/v') }}
