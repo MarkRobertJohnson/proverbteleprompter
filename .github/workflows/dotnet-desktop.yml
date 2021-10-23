@@ -48,7 +48,7 @@ jobs:
       run: nuget restore $env:Solution_Name
       
     - name: Build Solution
-      run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration /target:publish /p:ApplicationVersion=${{ steps.version.outputs.tag }} /p:PublishUrl=Publish/
+      run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration /target:publish /p:ApplicationVersion=${{ steps.version.outputs.tag }}.0 /p:PublishUrl=Publish/
       env:
         Configuration: ${{ matrix.configuration }}
         
