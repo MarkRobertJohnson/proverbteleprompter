@@ -62,13 +62,23 @@ jobs:
       run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration
       env:
         Configuration: ${{ matrix.configuration }}
-        
+
+    - name: Zip Release
+      # You may pin to the exact commit or the version.
+      # uses: TheDoctor0/zip-release@4fb9e4ff72847dd3d1c111cf63834e353ed7cb3d
+      uses: TheDoctor0/zip-release@0.6.0
+      with:
+        # Filename for archive
+        filename: ProverbTeleprompter_${{ matrix.configuration }}_${{ github.event.release.tag_name }}.zip 
+        # Base path for archive files
+        path: bin/${{ matrix.configuration }}
+
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "latest"
         prerelease: true
-        title: "ProverbTeleprompter ${{ matrix.configuration }} Build"
+        title: "ProverbTeleprompter ${{ matrix.configuration }} ${{ github.event.release.tag_name }}"
         files: |
-          bin/${{ matrix.configuration }}/*.*
+          bin/${{ matrix.configuration }}/*.zip
       if: ${{ startsWith(github.ref, 'refs/tags/v') }}
